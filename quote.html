@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Get a Quote | Security Warrior</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --purple:       #5B2D8E;
+      --purple-mid:   #7B3FB5;
+      --purple-light: #A96EDF;
+      --purple-pale:  #EDE4F8;
+      --white:        #FFFFFF;
+      --off-white:    #F7F4FC;
+      --gray:         #6B6B7B;
+      --dark:         #12091E;
+      --accent:       #C084FC;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--off-white);
+      color: var(--dark);
+      min-height: 100vh;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 5vw;
+      height: 68px;
+      background: rgba(18,9,30,0.96);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(161,110,223,0.18);
+    }
+    .nav-logo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.7rem;
+      color: var(--white);
+      letter-spacing: 2px;
+      text-decoration: none;
+    }
+    .nav-logo span { color: var(--accent); }
+    .nav-back {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: color .2s;
+    }
+    .nav-back:hover { color: var(--accent); }
+
+    /* ── PAGE LAYOUT ── */
+    .page-wrapper {
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 3.5rem 5vw 5rem;
+    }
+
+    /* ── HEADER ── */
+    .page-header { margin-bottom: 2.5rem; }
+    .page-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.68rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--purple-mid);
+      margin-bottom: .8rem;
+      display: block;
+    }
+    .page-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(2.4rem, 6vw, 3.6rem);
+      line-height: 1.05;
+      color: var(--dark);
+      margin-bottom: .8rem;
+    }
+    .page-title span { color: var(--accent); }
+    .page-desc {
+      font-size: 1rem;
+      color: var(--gray);
+      line-height: 1.7;
+    }
+
+    /* ── SERVICE BADGE ── */
+    .service-badge {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      background: var(--purple-pale);
+      border: 1px solid rgba(91,45,142,0.2);
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 2rem;
+    }
+    .service-badge.visible { display: flex; }
+    .service-badge-label {
+      font-size: 0.72rem;
+      font-family: 'Space Mono', monospace;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--gray);
+    }
+    .service-badge-value {
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: var(--purple);
+    }
+
+    /* ── FORM CARD ── */
+    .form-card {
+      background: var(--white);
+      border-radius: 16px;
+      padding: 2.5rem;
+      box-shadow: 0 4px 32px rgba(91,45,142,0.08);
+      display: flex;
+      flex-direction: column;
+      gap: 1.4rem;
+    }
+
+    .form-section-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.15rem;
+      letter-spacing: 1px;
+      color: var(--dark);
+      padding-bottom: .6rem;
+      border-bottom: 1px solid rgba(91,45,142,0.1);
+      margin-bottom: .2rem;
+    }
+
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group label {
+      font-size: 0.75rem;
+      font-family: 'Space Mono', monospace;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--gray);
+    }
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      background: var(--off-white);
+      border: 1px solid rgba(91,45,142,0.15);
+      border-radius: 8px;
+      padding: 12px 14px;
+      color: var(--dark);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.92rem;
+      outline: none;
+      transition: border-color .2s, box-shadow .2s;
+      -webkit-appearance: none;
+    }
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+      border-color: var(--purple-light);
+      box-shadow: 0 0 0 3px rgba(169,110,223,0.12);
+    }
+    .form-group input.error,
+    .form-group textarea.error,
+    .form-group select.error {
+      border-color: #f87171;
+      box-shadow: 0 0 0 3px rgba(248,113,113,0.1);
+    }
+    .form-group textarea { resize: vertical; min-height: 130px; }
+    .form-group select option { background: var(--white); }
+    .field-error {
+      font-size: 0.72rem;
+      color: #dc2626;
+      font-family: 'Space Mono', monospace;
+      display: none;
+    }
+    .field-error.visible { display: block; }
+
+    /* ── MULTI-SERVICE ── */
+    .service-list { display: flex; flex-direction: column; gap: .6rem; }
+    .service-row {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+    }
+    .service-row select {
+      flex: 1;
+      background: var(--off-white);
+      border: 1px solid rgba(91,45,142,0.15);
+      border-radius: 8px;
+      padding: 12px 14px;
+      color: var(--dark);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.92rem;
+      outline: none;
+      transition: border-color .2s, box-shadow .2s;
+      -webkit-appearance: none;
+    }
+    .service-row select:focus {
+      border-color: var(--purple-light);
+      box-shadow: 0 0 0 3px rgba(169,110,223,0.12);
+    }
+    .service-row select.error {
+      border-color: #f87171;
+      box-shadow: 0 0 0 3px rgba(248,113,113,0.1);
+    }
+    .btn-remove-service {
+      width: 36px;
+      height: 36px;
+      flex-shrink: 0;
+      background: none;
+      border: 1px solid rgba(91,45,142,0.2);
+      border-radius: 8px;
+      color: var(--gray);
+      font-size: 1.1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background .2s, color .2s, border-color .2s;
+    }
+    .btn-remove-service:hover { background: #fef2f2; color: #dc2626; border-color: #fca5a5; }
+    .btn-remove-service:disabled { opacity: 0.3; cursor: not-allowed; }
+    .btn-add-service {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: .4rem;
+      background: none;
+      border: 1px dashed rgba(91,45,142,0.3);
+      border-radius: 8px;
+      padding: 9px 16px;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--purple-mid);
+      cursor: pointer;
+      transition: background .2s, border-color .2s;
+    }
+    .btn-add-service:hover { background: var(--purple-pale); border-color: var(--purple-mid); }
+
+    /* ── FILE UPLOAD ── */
+    .file-drop {
+      border: 2px dashed rgba(91,45,142,0.25);
+      border-radius: 10px;
+      padding: 2rem 1.5rem;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color .2s, background .2s;
+      background: var(--off-white);
+      position: relative;
+    }
+    .file-drop:hover,
+    .file-drop.dragover {
+      border-color: var(--purple-mid);
+      background: var(--purple-pale);
+    }
+    .file-drop input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+    .file-drop-icon {
+      font-size: 2rem;
+      margin-bottom: .6rem;
+      display: block;
+    }
+    .file-drop-text {
+      font-size: 0.9rem;
+      color: var(--gray);
+      line-height: 1.5;
+    }
+    .file-drop-text strong {
+      color: var(--purple-mid);
+    }
+    .file-drop-hint {
+      font-size: 0.72rem;
+      font-family: 'Space Mono', monospace;
+      color: rgba(107,107,123,0.6);
+      margin-top: .4rem;
+    }
+    .file-list {
+      display: flex;
+      flex-direction: column;
+      gap: .5rem;
+      margin-top: .8rem;
+    }
+    .file-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--purple-pale);
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 0.82rem;
+      color: var(--dark);
+    }
+    .file-item-name {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      overflow: hidden;
+    }
+    .file-item-name span {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .file-remove {
+      background: none;
+      border: none;
+      color: var(--gray);
+      cursor: pointer;
+      font-size: 1rem;
+      line-height: 1;
+      padding: 0 2px;
+      flex-shrink: 0;
+      transition: color .2s;
+    }
+    .file-remove:hover { color: #dc2626; }
+
+    /* ── SUBMIT ── */
+    .form-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-top: .4rem;
+    }
+    .form-note {
+      font-size: 0.78rem;
+      color: var(--gray);
+      font-family: 'Space Mono', monospace;
+    }
+    .btn-submit {
+      background: linear-gradient(135deg, var(--purple), var(--purple-light));
+      color: var(--white);
+      padding: 14px 32px;
+      border: none;
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity .2s, transform .15s;
+    }
+    .btn-submit:hover { opacity: 0.88; transform: translateY(-2px); }
+    .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    /* ── SUCCESS STATE ── */
+    .success-card {
+      display: none;
+      text-align: center;
+      background: var(--white);
+      border-radius: 16px;
+      padding: 4rem 2.5rem;
+      box-shadow: 0 4px 32px rgba(91,45,142,0.08);
+    }
+    .success-card.visible { display: block; }
+    .success-icon {
+      font-size: 3.5rem;
+      margin-bottom: 1.2rem;
+      display: block;
+    }
+    .success-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 2.2rem;
+      color: var(--dark);
+      margin-bottom: .6rem;
+    }
+    .success-desc {
+      font-size: 1rem;
+      color: var(--gray);
+      line-height: 1.7;
+      max-width: 420px;
+      margin: 0 auto 2rem;
+    }
+    .btn-back {
+      display: inline-block;
+      padding: 12px 28px;
+      background: var(--purple-mid);
+      color: var(--white);
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: background .2s;
+    }
+    .btn-back:hover { background: var(--purple-light); }
+
+    @media (max-width: 600px) {
+      .form-row { grid-template-columns: 1fr; }
+      .form-card { padding: 1.5rem; }
+      .form-footer { flex-direction: column-reverse; align-items: stretch; }
+      .btn-submit { text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="index.html">Security <span>Warrior</span></a>
+  <a class="nav-back" href="index.html">&#8592; Back to Home</a>
+</nav>
+
+<div class="page-wrapper">
+
+  <div class="page-header">
+    <span class="page-label">Free Estimate</span>
+    <h1 class="page-title">Request a <span>Quote</span></h1>
+    <p class="page-desc">Fill out the form below and we'll get back to you within 24 hours with a detailed estimate — no obligation, no pressure.</p>
+  </div>
+
+  <!-- Service pre-fill badge -->
+  <div class="service-badge" id="serviceBadge">
+    <span class="service-badge-label">Selected Service:</span>
+    <span class="service-badge-value" id="serviceBadgeValue"></span>
+  </div>
+
+  <!-- FORM -->
+  <div class="form-card" id="formCard">
+
+    <div class="form-section-title">Contact Information</div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="fname">First Name *</label>
+        <input type="text" id="fname" placeholder="John"/>
+        <span class="field-error" id="fname-error">Please enter your first name.</span>
+      </div>
+      <div class="form-group">
+        <label for="lname">Last Name *</label>
+        <input type="text" id="lname" placeholder="Doe"/>
+        <span class="field-error" id="lname-error">Please enter your last name.</span>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="email">Email Address *</label>
+        <input type="email" id="email" placeholder="john@example.com"/>
+        <span class="field-error" id="email-error">Please enter a valid email.</span>
+      </div>
+      <div class="form-group">
+        <label for="phone">Phone Number</label>
+        <input type="tel" id="phone" placeholder="(555) 000-0000"/>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="address">Property Address</label>
+      <input type="text" id="address" placeholder="123 Main St, City, State"/>
+    </div>
+
+    <div class="form-section-title" style="margin-top:.4rem;">Job Details</div>
+
+    <div class="form-group">
+      <label>Services Needed *</label>
+      <div class="service-list" id="serviceList"></div>
+      <button type="button" class="btn-add-service" id="addServiceBtn" onclick="addServiceRow()">
+        + Add Another Service
+      </button>
+      <span class="field-error" id="service-error">Please select at least one service.</span>
+    </div>
+
+    <div class="form-group">
+      <label for="description">Job Description *</label>
+      <textarea id="description" placeholder="Describe the work you need done — include details like property type, number of floors, existing systems, timeline, or anything else that helps us give you an accurate quote."></textarea>
+      <span class="field-error" id="description-error">Please describe the job.</span>
+    </div>
+
+    <div class="form-group">
+      <label>Supporting Files <span style="text-transform:none;letter-spacing:0;font-family:'DM Sans',sans-serif;font-size:0.8rem;">(optional)</span></label>
+      <div class="file-drop" id="fileDrop">
+        <input type="file" id="fileInput" multiple accept="image/*,.pdf,.doc,.docx,.png,.jpg,.jpeg"/>
+        <span class="file-drop-icon">&#128206;</span>
+        <div class="file-drop-text"><strong>Click to upload</strong> or drag &amp; drop files here</div>
+        <div class="file-drop-hint">Images, PDFs, or documents &mdash; up to 10 MB each</div>
+      </div>
+      <div class="file-list" id="fileList"></div>
+    </div>
+
+    <div class="form-footer">
+      <span class="form-note">* Required fields</span>
+      <button class="btn-submit" id="submitBtn" onclick="handleSubmit()">Submit Quote Request &#8594;</button>
+    </div>
+
+  </div>
+
+  <!-- SUCCESS -->
+  <div class="success-card" id="successCard">
+    <span class="success-icon">&#10003;</span>
+    <div class="success-title">Quote Request Sent!</div>
+    <p class="success-desc">Thanks! We've received your request and will follow up within 24 hours with a detailed estimate.</p>
+    <a href="index.html" class="btn-back">Back to Home</a>
+  </div>
+
+</div>
+
+<script>
+  const SERVICE_OPTIONS = [
+    'Device Installation',
+    'Maintenance & Repair',
+    'Security Consulting',
+    'CCTV & Surveillance',
+    'Access Control',
+    'Alarm Systems',
+    'Other'
+  ];
+
+  function buildSelectHTML() {
+    const opts = SERVICE_OPTIONS.map(s =>
+      `<option value="${s}">${s}</option>`
+    ).join('');
+    return `<option value="">Select a service...</option>${opts}`;
+  }
+
+  function addServiceRow(preselect = '') {
+    const list = document.getElementById('serviceList');
+    const row  = document.createElement('div');
+    row.className = 'service-row';
+    row.innerHTML = `
+      <select onchange="clearServiceError()">${buildSelectHTML()}</select>
+      <button type="button" class="btn-remove-service" onclick="removeServiceRow(this)" title="Remove service">&times;</button>
+    `;
+    list.appendChild(row);
+
+    // Pre-select if value provided
+    if (preselect) {
+      const sel = row.querySelector('select');
+      for (const opt of sel.options) {
+        if (opt.value === preselect) { opt.selected = true; break; }
+      }
+    }
+
+    updateRemoveButtons();
+  }
+
+  function removeServiceRow(btn) {
+    btn.closest('.service-row').remove();
+    updateRemoveButtons();
+    clearServiceError();
+  }
+
+  function updateRemoveButtons() {
+    const rows = document.querySelectorAll('.service-row');
+    rows.forEach(r => {
+      r.querySelector('.btn-remove-service').disabled = rows.length === 1;
+    });
+  }
+
+  function clearServiceError() {
+    document.getElementById('service-error').classList.remove('visible');
+  }
+
+  // ── Pre-fill service from URL param ──
+  const params  = new URLSearchParams(window.location.search);
+  const service = params.get('service');
+
+  // Always start with one row (pre-filled if param present)
+  addServiceRow(service || '');
+
+  if (service) {
+    const badge = document.getElementById('serviceBadge');
+    document.getElementById('serviceBadgeValue').textContent = service;
+    badge.classList.add('visible');
+  }
+
+  // ── File upload handling ──
+  const fileDrop  = document.getElementById('fileDrop');
+  const fileInput = document.getElementById('fileInput');
+  const fileList  = document.getElementById('fileList');
+  let selectedFiles = [];
+
+  fileDrop.addEventListener('dragover', e => { e.preventDefault(); fileDrop.classList.add('dragover'); });
+  fileDrop.addEventListener('dragleave', () => fileDrop.classList.remove('dragover'));
+  fileDrop.addEventListener('drop', e => {
+    e.preventDefault();
+    fileDrop.classList.remove('dragover');
+    addFiles(Array.from(e.dataTransfer.files));
+  });
+  fileInput.addEventListener('change', () => {
+    addFiles(Array.from(fileInput.files));
+    fileInput.value = '';
+  });
+
+  function addFiles(newFiles) {
+    newFiles.forEach(f => {
+      if (!selectedFiles.find(x => x.name === f.name && x.size === f.size)) {
+        selectedFiles.push(f);
+      }
+    });
+    renderFileList();
+  }
+
+  function removeFile(index) {
+    selectedFiles.splice(index, 1);
+    renderFileList();
+  }
+
+  function renderFileList() {
+    fileList.innerHTML = '';
+    selectedFiles.forEach((f, i) => {
+      const item = document.createElement('div');
+      item.className = 'file-item';
+      const sizeKB = f.size < 1024 * 1024
+        ? (f.size / 1024).toFixed(0) + ' KB'
+        : (f.size / 1024 / 1024).toFixed(1) + ' MB';
+      item.innerHTML = `
+        <div class="file-item-name">
+          <span>&#128196;</span>
+          <span title="${f.name}">${f.name}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
+          <span style="font-size:0.75rem;color:var(--gray);">${sizeKB}</span>
+          <button class="file-remove" onclick="removeFile(${i})" title="Remove">&times;</button>
+        </div>`;
+      fileList.appendChild(item);
+    });
+  }
+
+  // ── Validation helpers ──
+  function setError(inputId, errorId, show) {
+    const el  = document.getElementById(inputId);
+    const err = document.getElementById(errorId);
+    el.classList.toggle('error', show);
+    err.classList.toggle('visible', show);
+    return !show;
+  }
+
+  ['fname','lname','email','description'].forEach(id => {
+    const el = document.getElementById(id);
+    el.addEventListener('input', () => {
+      el.classList.remove('error');
+      const errEl = document.getElementById(id + '-error');
+      if (errEl) errEl.classList.remove('visible');
+    });
+  });
+
+  // ── Submit ──
+  function handleSubmit() {
+    const fname       = document.getElementById('fname').value.trim();
+    const lname       = document.getElementById('lname').value.trim();
+    const email       = document.getElementById('email').value.trim();
+    const description = document.getElementById('description').value.trim();
+    const emailRe     = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    // Validate service rows — every added row must have a selection
+    const serviceSelects = document.querySelectorAll('.service-row select');
+    let serviceValid = true;
+    serviceSelects.forEach(sel => {
+      if (!sel.value) {
+        sel.classList.add('error');
+        serviceValid = false;
+      } else {
+        sel.classList.remove('error');
+      }
+    });
+    if (!serviceValid) {
+      document.getElementById('service-error').classList.add('visible');
+    } else {
+      document.getElementById('service-error').classList.remove('visible');
+    }
+
+    let valid = serviceValid;
+    valid = setError('fname',       'fname-error',       !fname)               && valid;
+    valid = setError('lname',       'lname-error',       !lname)               && valid;
+    valid = setError('email',       'email-error',       !emailRe.test(email)) && valid;
+    valid = setError('description', 'description-error', !description)         && valid;
+
+    if (!valid) {
+      // scroll to first error
+      document.querySelector('.error')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.textContent = 'Sending…';
+
+    // Simulate submission delay
+    setTimeout(() => {
+      document.getElementById('formCard').style.display = 'none';
+      document.getElementById('serviceBadge').style.display = 'none';
+      document.querySelector('.page-header').style.display = 'none';
+      document.getElementById('successCard').classList.add('visible');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 900);
+  }
+</script>
+</body>
+</html>
