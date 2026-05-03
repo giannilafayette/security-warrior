@@ -579,11 +579,98 @@
     }
     .btn-back:hover { background: var(--purple-light); }
 
+    /* ── GATE SUBSECTION ── */
+    .gate-subsection {
+      display: none;
+      background: var(--purple-pale);
+      border: 1px solid rgba(91,45,142,0.2);
+      border-radius: 10px;
+      padding: 1.2rem 1.4rem;
+      margin-top: .6rem;
+    }
+    .gate-subsection.visible { display: block; }
+    .gate-subsection-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.68rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--purple-mid);
+      margin-bottom: .8rem;
+      display: block;
+    }
+    .gate-type-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: .6rem;
+    }
+    .gate-type-option {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--white);
+      border: 1px solid rgba(91,45,142,0.15);
+      border-radius: 8px;
+      padding: 10px 12px;
+      cursor: pointer;
+      transition: border-color .2s, box-shadow .2s;
+      font-size: 0.88rem;
+      color: var(--dark);
+    }
+    .gate-type-option:hover { border-color: var(--purple-mid); }
+    .gate-type-option input[type="checkbox"] { accent-color: var(--purple-mid); width: 16px; height: 16px; flex-shrink: 0; cursor: pointer; }
+    .gate-type-option.checked { border-color: var(--purple-mid); box-shadow: 0 0 0 2px rgba(123,63,181,0.12); }
+
+    /* ── GATE INFO SECTION ── */
+    .gate-info-section {
+      margin-top: 2.5rem;
+      display: none;
+    }
+    .gate-info-section.visible { display: block; }
+    .gate-info-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.6rem;
+      color: var(--dark);
+      letter-spacing: 1px;
+      margin-bottom: .4rem;
+    }
+    .gate-info-desc {
+      font-size: 0.9rem;
+      color: var(--gray);
+      margin-bottom: 1.5rem;
+      line-height: 1.6;
+    }
+    .gate-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1rem;
+    }
+    .gate-card {
+      background: var(--white);
+      border: 1px solid rgba(91,45,142,0.12);
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 16px rgba(91,45,142,0.07);
+      transition: transform .2s, box-shadow .2s;
+    }
+    .gate-card:hover { transform: translateY(-3px); box-shadow: 0 8px 28px rgba(91,45,142,0.12); }
+    .gate-card-icon { font-size: 1.8rem; margin-bottom: .7rem; display: block; }
+    .gate-card-name {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.15rem;
+      letter-spacing: 1px;
+      color: var(--purple-mid);
+      margin-bottom: .5rem;
+    }
+    .gate-card-desc { font-size: 0.85rem; color: var(--gray); line-height: 1.65; }
+
     @media (max-width: 600px) {
       .form-row { grid-template-columns: 1fr; }
       .form-card { padding: 1.5rem; }
       .form-footer { flex-direction: column-reverse; align-items: stretch; }
       .btn-submit { text-align: center; }
+      .gate-type-grid { grid-template-columns: 1fr; }
+      .announce-desktop { display: none; }
+      .announce-mobile { display: inline !important; }
     }
   </style>
 </head>
@@ -591,7 +678,8 @@
 
 <!-- ANNOUNCEMENT BAR -->
 <div class="announce-bar">
-  Professional security solutions for homes &amp; businesses &mdash; Call <a href="tel:5550000000">(555) 000-0000</a>
+  <span class="announce-desktop">Professional security solutions for homes &amp; businesses &mdash; Call <a href="tel:5550000000">(555) 000-0000</a></span>
+  <span class="announce-mobile" style="display:none;">Call us: <a href="tel:5550000000">(555) 000-0000</a></span>
 </div>
 
 <!-- NAV -->
@@ -757,6 +845,19 @@
         + Add Another Service
       </button>
       <span class="field-error" id="service-error">Please select at least one service.</span>
+
+      <!-- Gate subsection -->
+      <div class="gate-subsection" id="gateSubsection">
+        <span class="gate-subsection-label">Gate Service Type — Select all that apply</span>
+        <div class="gate-type-grid">
+          <label class="gate-type-option"><input type="checkbox" value="Gate Opener Repair & Installation"> Gate Opener Repair &amp; Installation</label>
+          <label class="gate-type-option"><input type="checkbox" value="New Custom Gates"> New Custom Gates</label>
+          <label class="gate-type-option"><input type="checkbox" value="Emergency Gate Repair"> Emergency Gate Repair</label>
+          <label class="gate-type-option"><input type="checkbox" value="Access Control Integration"> Access Control Integration</label>
+          <label class="gate-type-option"><input type="checkbox" value="Fence Installation & Repair"> Fence Installation &amp; Repair</label>
+          <label class="gate-type-option"><input type="checkbox" value="Welding & Fabrication"> Welding &amp; Fabrication</label>
+        </div>
+      </div>
     </div>
 
     <div class="form-group">
@@ -781,6 +882,44 @@
       <button class="btn-submit" id="submitBtn" onclick="handleSubmit()">Submit Quote Request &#8594;</button>
     </div>
 
+  </div>
+
+  <!-- GATE INFO CARDS -->
+  <div class="gate-info-section" id="gateInfoSection">
+    <div class="gate-info-title">Gate Services We Offer</div>
+    <p class="gate-info-desc">Not sure which service you need? Here's a quick overview of each option to help you choose.</p>
+    <div class="gate-cards-grid">
+      <div class="gate-card">
+        <span class="gate-card-icon">⚙️</span>
+        <div class="gate-card-name">Gate Opener Repair &amp; Installation</div>
+        <p class="gate-card-desc">We repair and install gate motors, openers, and automated systems for residential and commercial properties. We work with leading brands including LiftMaster and Viking.</p>
+      </div>
+      <div class="gate-card">
+        <span class="gate-card-icon">🚪</span>
+        <div class="gate-card-name">New Custom Gates</div>
+        <p class="gate-card-desc">Custom-designed and fabricated gates in aluminum, steel, or wrought iron — built to your spec and professionally installed. Swing, slide, or pedestrian styles available.</p>
+      </div>
+      <div class="gate-card">
+        <span class="gate-card-icon">🚨</span>
+        <div class="gate-card-name">Emergency Gate Repair</div>
+        <p class="gate-card-desc">24/7 emergency response for motor failures, broken chains, sensor faults, and any gate system breakdown. Fast on-site service to get you back up and running.</p>
+      </div>
+      <div class="gate-card">
+        <span class="gate-card-icon">🔐</span>
+        <div class="gate-card-name">Access Control Integration</div>
+        <p class="gate-card-desc">Integrate your gate with keypads, card readers, RFID access, intercoms, magnetic locks, and smart controls for full entry management.</p>
+      </div>
+      <div class="gate-card">
+        <span class="gate-card-icon">🏗️</span>
+        <div class="gate-card-name">Fence Installation &amp; Repair</div>
+        <p class="gate-card-desc">Installation and repair of aluminum, vinyl, wood, chain link, and composite fencing for residential and commercial properties of any size.</p>
+      </div>
+      <div class="gate-card">
+        <span class="gate-card-icon">🔧</span>
+        <div class="gate-card-name">Welding &amp; Fabrication</div>
+        <p class="gate-card-desc">Professional TIG and MIG welding with custom fabrication of gates, railings, fences, and structural components — available on-site or in-shop.</p>
+      </div>
+    </div>
   </div>
 
   <!-- SUCCESS -->
@@ -867,6 +1006,23 @@
     document.getElementById('service-error').classList.remove('visible');
   }
 
+  function checkGateSubsection() {
+    const selects = document.querySelectorAll('.service-row select');
+    const hasGate = Array.from(selects).some(s => s.value === 'Security Gate Installation');
+    document.getElementById('gateSubsection').classList.toggle('visible', hasGate);
+    document.getElementById('gateInfoSection').classList.toggle('visible', hasGate);
+  }
+
+  // style checkbox options on check
+  document.addEventListener('change', e => {
+    if (e.target.closest('.gate-type-option')) {
+      e.target.closest('.gate-type-option').classList.toggle('checked', e.target.checked);
+    }
+    if (e.target.closest('.service-row select')) {
+      checkGateSubsection();
+    }
+  });
+
   // ── Pre-fill service from URL param ──
   const params  = new URLSearchParams(window.location.search);
   const service = params.get('service');
@@ -878,6 +1034,7 @@
     const badge = document.getElementById('serviceBadge');
     document.getElementById('serviceBadgeValue').textContent = service;
     badge.classList.add('visible');
+    checkGateSubsection();
   }
 
   // ── File upload handling ──

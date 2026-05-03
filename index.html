@@ -717,6 +717,10 @@
     .reveal.visible { opacity: 1; transform: none; }
 
     /* ── RESPONSIVE ── */
+    @media (max-width: 600px) {
+      .announce-desktop { display: none; }
+      .announce-mobile { display: inline !important; }
+    }
     @media (max-width: 900px) {
       .footer-main { grid-template-columns: 1fr 1fr; gap: 2rem; }
     }
@@ -743,7 +747,8 @@
 
 <!-- ANNOUNCEMENT BAR -->
 <div class="announce-bar">
-  Professional security solutions for homes &amp; businesses &mdash; Call <a href="tel:5550000000">(555) 000-0000</a>
+  <span class="announce-desktop">Professional security solutions for homes &amp; businesses &mdash; Call <a href="tel:5550000000">(555) 000-0000</a></span>
+  <span class="announce-mobile" style="display:none;">Call us: <a href="tel:5550000000">(555) 000-0000</a></span>
 </div>
 
 <!-- NAV -->
