@@ -28,17 +28,36 @@
       overflow-x: hidden;
     }
 
+    /* ── ANNOUNCEMENT BAR ── */
+    .announce-bar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 1001;
+      height: 35px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--dark);
+      border-bottom: 1px solid rgba(192,132,252,0.15);
+      font-family: 'Space Mono', monospace;
+      font-size: 0.68rem;
+      letter-spacing: 1.5px;
+      color: var(--accent);
+      text-transform: uppercase;
+    }
+    .announce-bar a { color: var(--accent); text-decoration: none; }
+
     /* ── NAV ── */
     nav {
       position: fixed;
-      top: 0; left: 0; right: 0;
+      top: 35px; left: 0; right: 0;
       z-index: 1000;
       display: flex;
       align-items: center;
       justify-content: space-between;
       padding: 0 5vw;
       height: 68px;
-      background: rgba(18,9,30,0.92);
+      background: rgba(18,9,30,0.97);
       backdrop-filter: blur(12px);
       border-bottom: 1px solid rgba(161,110,223,0.18);
     }
@@ -48,14 +67,23 @@
       color: var(--white);
       letter-spacing: 2px;
       text-decoration: none;
+      flex-shrink: 0;
     }
     .nav-logo span { color: var(--accent); }
     .nav-links {
       display: flex;
-      gap: 2.2rem;
+      gap: 0;
       list-style: none;
+      align-items: center;
+      height: 68px;
     }
-    .nav-links a {
+    .nav-links > li {
+      position: relative;
+      height: 100%;
+      display: flex;
+      align-items: center;
+    }
+    .nav-links > li > a {
       font-family: 'Space Mono', monospace;
       font-size: 0.72rem;
       text-transform: uppercase;
@@ -63,34 +91,105 @@
       color: rgba(255,255,255,0.7);
       text-decoration: none;
       transition: color .2s;
-      position: relative;
-      padding-bottom: 4px;
+      padding: 0 1.1rem;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      white-space: nowrap;
     }
-    .nav-links a::after {
-      content: '';
+    .nav-links > li > a:hover { color: var(--accent); }
+    .nav-links > li.has-dropdown > a::after {
+      content: ' ▾';
+      font-size: 0.6rem;
+      opacity: 0.6;
+      margin-left: 3px;
+    }
+
+    /* Dropdown panel */
+    .dropdown {
       position: absolute;
-      bottom: 0; left: 0; right: 0;
-      height: 2px;
-      background: var(--accent);
-      transform: scaleX(0);
-      transform-origin: left;
-      transition: transform .25s ease;
+      top: 100%;
+      left: 0;
+      background: rgba(18,9,30,0.97);
+      border-bottom: 3px solid var(--accent);
+      min-width: 240px;
+      padding: 1.2rem 0 1rem;
+      opacity: 0;
+      transform: translateY(-6px);
+      pointer-events: none;
+      transition: opacity .22s ease, transform .22s ease;
+      z-index: 999;
     }
-    .nav-links a:hover,
-    .nav-links a.active { color: var(--accent); }
-    .nav-links a.active::after { transform: scaleX(1); }
+    .nav-links > li.has-dropdown:hover .dropdown {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+    .dropdown-links {
+      list-style: none;
+      padding: 0 0 .8rem;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      margin-bottom: .8rem;
+    }
+    .dropdown-links li a {
+      display: block;
+      padding: 7px 1.4rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.88rem;
+      color: rgba(255,255,255,0.7);
+      text-decoration: none;
+      transition: color .15s, background .15s;
+    }
+    .dropdown-links li a:hover {
+      color: var(--accent);
+      background: rgba(192,132,252,0.06);
+    }
+    .dropdown-cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: .6rem;
+      padding: 0 1rem;
+    }
+    .dropdown-card {
+      background: var(--purple-pale);
+      border: 1px solid rgba(91,45,142,0.25);
+      border-radius: 8px;
+      padding: 1rem;
+      text-decoration: none;
+      transition: border-color .2s, background .2s;
+      display: block;
+    }
+    .dropdown-card:hover { border-color: var(--purple-mid); background: #e0d4f5; }
+    .dropdown-card-icon { font-size: 1.4rem; margin-bottom: .5rem; display: block; }
+    .dropdown-card-name {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1rem;
+      color: var(--dark);
+      letter-spacing: 1px;
+      display: block;
+      margin-bottom: .2rem;
+    }
+    .dropdown-card-desc { font-size: 0.78rem; color: var(--gray); line-height: 1.5; }
+    .dropdown-wide { min-width: 560px; left: -60px; }
+
     .nav-cta {
       background: var(--purple-mid);
       color: var(--white) !important;
-      padding: 8px 20px;
+      padding: 9px 20px;
       border-radius: 4px;
-      font-size: 0.72rem !important;
-      transition: background .2s !important;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      text-decoration: none;
+      transition: background .2s;
+      white-space: nowrap;
+      margin-left: .8rem;
+      flex-shrink: 0;
     }
-    .nav-cta::after { display: none !important; }
     .nav-cta:hover { background: var(--purple-light) !important; }
 
-    /* hamburger */
+    /* Hamburger */
     .hamburger {
       display: none;
       flex-direction: column;
@@ -111,26 +210,79 @@
     .hamburger.open span:nth-child(2) { opacity: 0; }
     .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
+    /* Mobile menu */
     .mobile-menu {
       display: none;
       position: fixed;
-      top: 68px; left: 0; right: 0;
+      top: 103px; left: 0; right: 0;
       background: rgba(18,9,30,0.97);
       z-index: 999;
-      padding: 2rem 5vw;
+      padding: 1rem 5vw 1.5rem;
       flex-direction: column;
-      gap: 1.5rem;
+      max-height: calc(100vh - 103px);
+      overflow-y: auto;
     }
     .mobile-menu.open { display: flex; }
-    .mobile-menu a {
+    .mobile-section { border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .mobile-section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: .95rem 0;
       font-family: 'Space Mono', monospace;
-      font-size: 0.85rem;
+      font-size: 0.75rem;
       letter-spacing: 1.5px;
       text-transform: uppercase;
-      color: rgba(255,255,255,0.8);
-      text-decoration: none;
+      color: rgba(255,255,255,0.85);
+      cursor: pointer;
+      background: none;
+      border: none;
+      width: 100%;
+      text-align: left;
     }
-    .mobile-menu a:hover { color: var(--accent); }
+    .mobile-section-header:hover { color: var(--accent); }
+    .mobile-chevron { transition: transform .25s; font-style: normal; font-size: 0.7rem; }
+    .mobile-section.open .mobile-chevron { transform: rotate(180deg); }
+    .mobile-section-body { display: none; flex-direction: column; padding-bottom: .8rem; }
+    .mobile-section.open .mobile-section-body { display: flex; }
+    .mobile-section-body a {
+      padding: 7px 0 7px 1rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      color: rgba(255,255,255,0.6);
+      text-decoration: none;
+      border-left: 2px solid transparent;
+      transition: color .15s, border-color .15s;
+    }
+    .mobile-section-body a:hover { color: var(--accent); border-color: var(--accent); }
+    .mobile-plain-link {
+      padding: .95rem 0;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.75rem;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.85);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      display: block;
+    }
+    .mobile-plain-link:hover { color: var(--accent); }
+    .mobile-cta {
+      margin-top: 1.2rem;
+      background: var(--purple-mid);
+      color: var(--white);
+      padding: 12px 20px;
+      border-radius: 5px;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.75rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      text-decoration: none;
+      text-align: center;
+      display: block;
+      transition: background .2s;
+    }
+    .mobile-cta:hover { background: var(--purple-light); }
 
     /* ── HERO ── */
     #home {
@@ -141,7 +293,7 @@
       align-items: center;
       justify-content: center;
       text-align: center;
-      padding: 100px 5vw 60px;
+      padding: 160px 5vw 60px;
       position: relative;
       overflow: hidden;
     }
@@ -157,8 +309,7 @@
     #home::after {
       content: '';
       position: absolute;
-      width: 700px;
-      height: 700px;
+      width: 700px; height: 700px;
       background: radial-gradient(circle, rgba(123,63,181,0.35) 0%, transparent 70%);
       top: 50%; left: 50%;
       transform: translate(-50%,-50%);
@@ -175,8 +326,7 @@
       padding: 6px 18px;
       border-radius: 100px;
       margin-bottom: 1.8rem;
-      position: relative;
-      z-index: 1;
+      position: relative; z-index: 1;
       animation: fadeUp .6s ease both;
     }
     .hero-title {
@@ -185,8 +335,7 @@
       line-height: 0.95;
       color: var(--white);
       letter-spacing: 2px;
-      position: relative;
-      z-index: 1;
+      position: relative; z-index: 1;
       animation: fadeUp .7s .1s ease both;
     }
     .hero-title span { color: var(--accent); display: block; }
@@ -196,17 +345,12 @@
       max-width: 520px;
       line-height: 1.7;
       margin: 1.8rem auto 2.8rem;
-      position: relative;
-      z-index: 1;
+      position: relative; z-index: 1;
       animation: fadeUp .7s .2s ease both;
     }
     .hero-btns {
-      display: flex;
-      gap: 1rem;
-      flex-wrap: wrap;
-      justify-content: center;
-      position: relative;
-      z-index: 1;
+      display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center;
+      position: relative; z-index: 1;
       animation: fadeUp .7s .3s ease both;
     }
     .btn-primary {
@@ -230,24 +374,18 @@
       transition: border-color .2s, color .2s, transform .15s;
     }
     .btn-outline:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-2px); }
-
     .hero-stats {
-      display: flex;
-      gap: 3rem;
-      margin-top: 5rem;
-      position: relative;
-      z-index: 1;
+      display: flex; gap: 3rem; margin-top: 5rem;
+      position: relative; z-index: 1;
       animation: fadeUp .7s .4s ease both;
-      flex-wrap: wrap;
-      justify-content: center;
+      flex-wrap: wrap; justify-content: center;
     }
     .stat { text-align: center; }
     .stat-num {
       font-family: 'Bebas Neue', sans-serif;
       font-size: 2.6rem;
       color: var(--accent);
-      display: block;
-      line-height: 1;
+      display: block; line-height: 1;
     }
     .stat-label {
       font-size: 0.75rem;
@@ -257,7 +395,50 @@
       font-family: 'Space Mono', monospace;
     }
 
-    /* ── SECTIONS ── */
+    /* ── HOW IT WORKS ── */
+    #how-it-works { background: var(--white); padding: 90px 5vw; text-align: center; }
+    #how-it-works .section-label { display: block; }
+    #how-it-works .section-desc { margin: 0 auto 3rem; }
+    .how-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .how-card {
+      background: var(--white);
+      border: 1px solid rgba(91,45,142,0.12);
+      border-radius: 14px;
+      padding: 2.2rem 2rem;
+      text-align: center;
+      box-shadow: 0 4px 20px rgba(91,45,142,0.08);
+      transition: transform .2s, box-shadow .2s;
+    }
+    .how-card:hover { transform: translateY(-4px); box-shadow: 0 12px 36px rgba(91,45,142,0.13); }
+    .how-card-icon { font-size: 2.4rem; margin-bottom: 1rem; display: block; }
+    .how-card-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.35rem;
+      letter-spacing: 1px;
+      color: var(--purple-mid);
+      margin-bottom: .7rem;
+    }
+    .how-card-desc { font-size: 0.92rem; color: var(--gray); line-height: 1.7; margin-bottom: 1.2rem; }
+    .how-card-link {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--purple-mid);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(123,63,181,0.3);
+      padding-bottom: 2px;
+      transition: color .2s, border-color .2s;
+    }
+    .how-card-link:hover { color: var(--purple-light); border-color: var(--purple-light); }
+
+    /* ── SHARED SECTION STYLES ── */
     section { padding: 90px 5vw; }
     .section-label {
       font-family: 'Space Mono', monospace;
@@ -291,22 +472,12 @@
       max-width: 1100px;
       margin: 3rem auto 0;
     }
-    .about-visual {
-      position: relative;
-      height: 380px;
-    }
-    .about-card {
-      position: absolute;
-      border-radius: 12px;
-      overflow: hidden;
-    }
+    .about-visual { position: relative; height: 380px; }
+    .about-card { position: absolute; border-radius: 12px; overflow: hidden; }
     .about-card-main {
-      width: 100%;
-      height: 320px;
+      width: 100%; height: 320px;
       background: linear-gradient(135deg, var(--purple) 0%, var(--purple-light) 100%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: flex; align-items: center; justify-content: center;
       top: 0; left: 0;
     }
     .shield-icon { width: 110px; height: 110px; }
@@ -319,39 +490,13 @@
     }
     .about-tag-num {
       font-family: 'Bebas Neue', sans-serif;
-      font-size: 2.2rem;
-      color: var(--purple);
-      display: block;
-      line-height: 1;
+      font-size: 2.2rem; color: var(--purple);
+      display: block; line-height: 1;
     }
-    .about-tag-text {
-      font-size: 0.78rem;
-      color: var(--gray);
-      font-family: 'Space Mono', monospace;
-    }
-    .values-list {
-      list-style: none;
-      margin-top: 2rem;
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-    }
-    .values-list li {
-      display: flex;
-      align-items: flex-start;
-      gap: 14px;
-      font-size: 0.97rem;
-      color: var(--gray);
-      line-height: 1.6;
-    }
-    .value-dot {
-      width: 8px;
-      height: 8px;
-      background: var(--purple-mid);
-      border-radius: 50%;
-      flex-shrink: 0;
-      margin-top: 6px;
-    }
+    .about-tag-text { font-size: 0.78rem; color: var(--gray); font-family: 'Space Mono', monospace; }
+    .values-list { list-style: none; margin-top: 2rem; display: flex; flex-direction: column; gap: 1rem; }
+    .values-list li { display: flex; align-items: flex-start; gap: 14px; font-size: 0.97rem; color: var(--gray); line-height: 1.6; }
+    .value-dot { width: 8px; height: 8px; background: var(--purple-mid); border-radius: 50%; flex-shrink: 0; margin-top: 6px; }
 
     /* ── SERVICES ── */
     #services { background: var(--white); }
@@ -364,323 +509,203 @@
       max-width: 1100px;
     }
     .service-card {
-      background: var(--off-white);
-      border: 1px solid rgba(91,45,142,0.09);
+      background: var(--white);
+      border: 1px solid rgba(91,45,142,0.12);
       border-radius: 12px;
       padding: 2rem;
       transition: transform .2s, box-shadow .2s, border-color .2s;
-      position: relative;
-      overflow: hidden;
+      position: relative; overflow: hidden;
+      display: flex; flex-direction: column;
+      box-shadow: 0 4px 20px rgba(91,45,142,0.08);
     }
     .service-card::before {
       content: '';
       position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 3px;
+      top: 0; left: 0; right: 0; height: 3px;
       background: linear-gradient(90deg, var(--purple), var(--accent));
-      transform: scaleX(0);
-      transform-origin: left;
+      transform: scaleX(0); transform-origin: left;
       transition: transform .3s ease;
     }
     .service-card:hover::before { transform: scaleX(1); }
-    .service-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 16px 40px rgba(91,45,142,0.12);
-      border-color: rgba(91,45,142,0.2);
-    }
+    .service-card:hover { transform: translateY(-4px); box-shadow: 0 16px 40px rgba(91,45,142,0.14); border-color: rgba(91,45,142,0.22); }
     .service-icon {
-      width: 48px;
-      height: 48px;
+      width: 48px; height: 48px;
       background: var(--purple-pale);
       border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 1.2rem;
-      font-size: 1.4rem;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 1.2rem; font-size: 1.4rem;
     }
-    .service-title {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 1.35rem;
-      letter-spacing: 1px;
-      color: var(--dark);
-      margin-bottom: .6rem;
-    }
-    .service-desc {
-      font-size: 0.9rem;
-      color: var(--gray);
-      line-height: 1.7;
-      flex: 1;
-    }
-    .service-card {
-      display: flex;
-      flex-direction: column;
-    }
+    .service-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.35rem; letter-spacing: 1px; color: var(--dark); margin-bottom: .6rem; }
+    .service-desc { font-size: 0.9rem; color: var(--gray); line-height: 1.7; flex: 1; }
     .btn-quote {
-      display: inline-block;
-      margin-top: 1.4rem;
-      padding: 9px 18px;
-      font-size: 0.78rem;
-      font-family: 'Space Mono', monospace;
-      letter-spacing: 1px;
-      text-transform: uppercase;
+      display: inline-block; margin-top: 1.4rem; padding: 9px 18px;
+      font-size: 0.78rem; font-family: 'Space Mono', monospace;
+      letter-spacing: 1px; text-transform: uppercase;
       color: var(--purple-mid);
       border: 1px solid rgba(91,45,142,0.3);
-      border-radius: 5px;
-      text-decoration: none;
+      border-radius: 5px; text-decoration: none;
       transition: background .2s, color .2s, border-color .2s;
       align-self: flex-start;
     }
-    .btn-quote:hover {
-      background: var(--purple-mid);
-      color: var(--white);
-      border-color: var(--purple-mid);
-    }
+    .btn-quote:hover { background: var(--purple-mid); color: var(--white); border-color: var(--purple-mid); }
 
     /* ── TESTIMONIALS ── */
     #testimonials { background: var(--off-white); }
     #testimonials .section-title { text-align: center; }
     #testimonials .section-label { text-align: center; display: block; }
     #testimonials .section-desc { text-align: center; margin: 0 auto 3rem; }
-
     .testimonials-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
       gap: 1.5rem;
-      max-width: 1100px;
-      margin: 0 auto;
+      max-width: 1100px; margin: 0 auto;
     }
     .testimonial-card {
       background: var(--white);
       border: 1px solid rgba(91,45,142,0.09);
-      border-radius: 12px;
-      padding: 2rem;
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
+      border-radius: 12px; padding: 2rem;
+      display: flex; flex-direction: column; gap: 1rem;
+      box-shadow: 0 4px 20px rgba(91,45,142,0.07);
     }
-    .testimonial-stars {
-      color: var(--accent);
-      font-size: 1rem;
-      letter-spacing: 2px;
-    }
-    .testimonial-quote {
-      font-size: 0.95rem;
-      color: var(--gray);
-      line-height: 1.7;
-      flex: 1;
-    }
-    .testimonial-author {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-top: .5rem;
-    }
+    .testimonial-stars { color: var(--accent); font-size: 1rem; letter-spacing: 2px; }
+    .testimonial-quote { font-size: 0.95rem; color: var(--gray); line-height: 1.7; flex: 1; }
+    .testimonial-author { display: flex; align-items: center; gap: 12px; margin-top: .5rem; }
     .testimonial-avatar {
-      width: 42px;
-      height: 42px;
-      border-radius: 50%;
+      width: 42px; height: 42px; border-radius: 50%;
       background: linear-gradient(135deg, var(--purple), var(--accent));
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 1.1rem;
-      color: var(--white);
-      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem; color: var(--white); flex-shrink: 0;
     }
-    .testimonial-name {
-      font-weight: 600;
-      font-size: 0.9rem;
-      color: var(--dark);
-    }
-    .testimonial-role {
-      font-size: 0.78rem;
-      color: var(--gray);
-      font-family: 'Space Mono', monospace;
-    }
+    .testimonial-name { font-weight: 600; font-size: 0.9rem; color: var(--dark); }
+    .testimonial-role { font-size: 0.78rem; color: var(--gray); font-family: 'Space Mono', monospace; }
 
-    /* ── CONTACT ── */
-    #contact {
-      background: var(--dark);
-      position: relative;
-      overflow: hidden;
-    }
-    #contact::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background-image:
-        linear-gradient(rgba(161,110,223,0.05) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(161,110,223,0.05) 1px, transparent 1px);
-      background-size: 48px 48px;
-    }
-    #contact .section-title { color: var(--white); }
-    #contact .section-desc { color: rgba(255,255,255,0.45); }
-    #contact .section-label { color: var(--accent); }
+    /* ── CONTACT (light) ── */
+    #contact { background: var(--off-white); }
+    #contact .section-title { color: var(--dark); }
+    #contact .section-desc { color: var(--gray); }
+    #contact .section-label { color: var(--purple-mid); }
     .contact-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 4rem;
-      max-width: 1100px;
-      margin: 3rem auto 0;
-      position: relative;
-      z-index: 1;
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 4rem; max-width: 1100px; margin: 3rem auto 0;
     }
     .contact-info { display: flex; flex-direction: column; gap: 1.5rem; }
     .contact-item { display: flex; align-items: flex-start; gap: 16px; }
     .contact-item-icon {
-      width: 42px;
-      height: 42px;
-      background: rgba(192,132,252,0.12);
-      border: 1px solid rgba(192,132,252,0.2);
+      width: 42px; height: 42px;
+      background: var(--purple-pale);
+      border: 1px solid rgba(91,45,142,0.2);
       border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.1rem;
-      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
     }
-    .contact-item-text strong {
-      display: block;
-      color: var(--white);
-      font-size: 0.85rem;
-      margin-bottom: 2px;
-    }
-    .contact-item-text span {
-      color: rgba(255,255,255,0.45);
-      font-size: 0.85rem;
-    }
-    .contact-item-text a {
-      color: rgba(255,255,255,0.45);
-      font-size: 0.85rem;
-      text-decoration: none;
-    }
-    .contact-item-text a:hover { color: var(--accent); }
-
+    .contact-item-text strong { display: block; color: var(--dark); font-size: 0.85rem; margin-bottom: 2px; }
+    .contact-item-text span { color: var(--gray); font-size: 0.85rem; }
+    .contact-item-text a { color: var(--gray); font-size: 0.85rem; text-decoration: none; }
+    .contact-item-text a:hover { color: var(--purple-mid); }
     .contact-form { display: flex; flex-direction: column; gap: 1rem; }
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
     .form-group { display: flex; flex-direction: column; gap: 6px; }
     .form-group label {
-      font-size: 0.75rem;
-      color: rgba(255,255,255,0.5);
+      font-size: 0.75rem; color: var(--gray);
       font-family: 'Space Mono', monospace;
-      letter-spacing: 1px;
-      text-transform: uppercase;
+      letter-spacing: 1px; text-transform: uppercase;
     }
     .form-group input,
     .form-group textarea,
     .form-group select {
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 6px;
-      padding: 12px 14px;
-      color: var(--white);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 0.92rem;
+      background: var(--white);
+      border: 1px solid rgba(91,45,142,0.15);
+      border-radius: 6px; padding: 12px 14px;
+      color: var(--dark);
+      font-family: 'DM Sans', sans-serif; font-size: 0.92rem;
       outline: none;
-      transition: border-color .2s;
+      transition: border-color .2s, box-shadow .2s;
       -webkit-appearance: none;
     }
     .form-group input::placeholder,
-    .form-group textarea::placeholder { color: rgba(255,255,255,0.25); }
+    .form-group textarea::placeholder { color: rgba(107,107,123,0.5); }
     .form-group input:focus,
     .form-group textarea:focus,
-    .form-group select:focus { border-color: var(--purple-light); }
+    .form-group select:focus { border-color: var(--purple-light); box-shadow: 0 0 0 3px rgba(169,110,223,0.1); }
     .form-group input.error,
     .form-group textarea.error,
     .form-group select.error { border-color: #f87171; }
     .form-group textarea { resize: vertical; min-height: 110px; }
-    .form-group select option { background: var(--dark); }
-    .field-error {
-      font-size: 0.72rem;
-      color: #f87171;
-      font-family: 'Space Mono', monospace;
-      display: none;
-    }
+    .form-group select option { background: var(--white); }
+    .field-error { font-size: 0.72rem; color: #dc2626; font-family: 'Space Mono', monospace; display: none; }
     .field-error.visible { display: block; }
-
     .btn-submit {
       background: linear-gradient(135deg, var(--purple), var(--purple-light));
-      color: var(--white);
-      padding: 14px 28px;
-      border: none;
-      border-radius: 6px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 0.95rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: opacity .2s, transform .15s;
-      margin-top: .5rem;
+      color: var(--white); padding: 14px 28px;
+      border: none; border-radius: 6px;
+      font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 600;
+      cursor: pointer; transition: opacity .2s, transform .15s; margin-top: .5rem;
     }
     .btn-submit:hover { opacity: 0.88; transform: translateY(-2px); }
     .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-
     .form-success {
       display: none;
-      background: rgba(91,45,142,0.2);
-      border: 1px solid var(--purple-light);
-      border-radius: 8px;
-      padding: 16px 20px;
-      color: var(--accent);
-      font-size: 0.9rem;
-      text-align: center;
-      margin-top: .5rem;
+      background: var(--purple-pale);
+      border: 1px solid rgba(91,45,142,0.25);
+      border-radius: 8px; padding: 16px 20px;
+      color: var(--purple); font-size: 0.9rem;
+      text-align: center; margin-top: .5rem;
     }
     .form-success.visible { display: block; }
 
     /* ── FOOTER ── */
-    footer {
-      background: #0c0616;
-      padding: 2.5rem 5vw;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 1rem;
-      border-top: 1px solid rgba(161,110,223,0.12);
+    footer { background: #0c0616; border-top: 1px solid rgba(161,110,223,0.12); }
+    .footer-main {
+      display: grid;
+      grid-template-columns: 1.4fr repeat(4, 1fr);
+      gap: 3rem;
+      max-width: 1200px; margin: 0 auto;
+      padding: 4rem 5vw 3rem;
     }
     .footer-logo {
       font-family: 'Bebas Neue', sans-serif;
-      font-size: 1.3rem;
-      color: var(--white);
-      letter-spacing: 2px;
+      font-size: 1.5rem; color: var(--white);
+      letter-spacing: 2px; display: block; margin-bottom: 1rem;
     }
     .footer-logo span { color: var(--accent); }
-    .footer-copy {
-      font-size: 0.78rem;
-      color: rgba(255,255,255,0.3);
+    .footer-tagline { font-size: 0.85rem; color: rgba(255,255,255,0.35); line-height: 1.6; max-width: 220px; }
+    .footer-col-title {
       font-family: 'Space Mono', monospace;
+      font-size: 0.68rem; letter-spacing: 2px;
+      text-transform: uppercase; color: var(--accent);
+      margin-bottom: 1.2rem;
     }
+    .footer-col-links { list-style: none; display: flex; flex-direction: column; gap: .65rem; }
+    .footer-col-links li a { font-size: 0.88rem; color: rgba(255,255,255,0.45); text-decoration: none; transition: color .2s; }
+    .footer-col-links li a:hover { color: var(--accent); }
+    .footer-social { display: flex; flex-direction: column; gap: .65rem; }
+    .footer-social a { font-size: 0.88rem; color: rgba(255,255,255,0.45); text-decoration: none; transition: color .2s; display: flex; align-items: center; gap: 8px; }
+    .footer-social a:hover { color: var(--accent); }
+    .footer-bottom {
+      border-top: 1px solid rgba(255,255,255,0.07);
+      padding: 1.4rem 5vw;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 1rem;
+      max-width: 1200px; margin: 0 auto;
+    }
+    .footer-copy { font-size: 0.75rem; color: rgba(255,255,255,0.25); font-family: 'Space Mono', monospace; }
+    .footer-legal { display: flex; gap: 1.5rem; list-style: none; }
+    .footer-legal li a { font-size: 0.75rem; color: rgba(255,255,255,0.25); text-decoration: none; font-family: 'Space Mono', monospace; transition: color .2s; }
+    .footer-legal li a:hover { color: rgba(255,255,255,0.5); }
 
     /* ── BACK TO TOP ── */
     #back-to-top {
-      position: fixed;
-      bottom: 2rem;
-      right: 2rem;
-      z-index: 900;
-      width: 44px;
-      height: 44px;
-      background: var(--purple-mid);
-      border: none;
-      border-radius: 50%;
-      color: var(--white);
-      font-size: 1.2rem;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      position: fixed; bottom: 2rem; right: 2rem; z-index: 900;
+      width: 44px; height: 44px;
+      background: var(--purple-mid); border: none; border-radius: 50%;
+      color: var(--white); font-size: 1.2rem; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
       box-shadow: 0 4px 20px rgba(91,45,142,0.4);
-      opacity: 0;
-      transform: translateY(12px);
+      opacity: 0; transform: translateY(12px);
       transition: opacity .3s, transform .3s, background .2s;
       pointer-events: none;
     }
-    #back-to-top.visible {
-      opacity: 1;
-      transform: translateY(0);
-      pointer-events: auto;
-    }
+    #back-to-top.visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
     #back-to-top:hover { background: var(--purple-light); }
 
     /* ── ANIMATIONS ── */
@@ -688,16 +713,15 @@
       from { opacity: 0; transform: translateY(28px); }
       to   { opacity: 1; transform: translateY(0); }
     }
-    .reveal {
-      opacity: 0;
-      transform: translateY(30px);
-      transition: opacity .6s ease, transform .6s ease;
-    }
+    .reveal { opacity: 0; transform: translateY(30px); transition: opacity .6s ease, transform .6s ease; }
     .reveal.visible { opacity: 1; transform: none; }
 
     /* ── RESPONSIVE ── */
+    @media (max-width: 900px) {
+      .footer-main { grid-template-columns: 1fr 1fr; gap: 2rem; }
+    }
     @media (max-width: 768px) {
-      .nav-links { display: none; }
+      .nav-links, .nav-cta { display: none; }
       .hamburger { display: flex; }
       .about-grid { grid-template-columns: 1fr; gap: 2.5rem; }
       .about-visual { height: 240px; }
@@ -707,32 +731,125 @@
       .form-row { grid-template-columns: 1fr; }
       .hero-stats { gap: 2rem; }
       #back-to-top { bottom: 1.2rem; right: 1.2rem; }
+      .footer-main { grid-template-columns: 1fr 1fr; gap: 2rem; padding: 3rem 5vw 2rem; }
+    }
+    @media (max-width: 480px) {
+      .footer-main { grid-template-columns: 1fr; }
+      .footer-bottom { flex-direction: column; align-items: flex-start; }
     }
   </style>
 </head>
 <body>
 
+<!-- ANNOUNCEMENT BAR -->
+<div class="announce-bar">
+  Professional security solutions for homes &amp; businesses &mdash; Call <a href="tel:5550000000">(555) 000-0000</a>
+</div>
+
 <!-- NAV -->
 <nav>
   <a class="nav-logo" href="#home">Security <span>Warrior</span></a>
   <ul class="nav-links">
-    <li><a href="#home" data-section="home">Home</a></li>
-    <li><a href="#about" data-section="about">About Us</a></li>
-    <li><a href="#services" data-section="services">Services</a></li>
-    <li><a href="#testimonials" data-section="testimonials">Reviews</a></li>
-    <li><a href="#contact" class="nav-cta" data-section="contact">Contact Us</a></li>
+    <li class="has-dropdown">
+      <a href="#">Packages</a>
+      <div class="dropdown dropdown-wide">
+        <ul class="dropdown-links">
+          <li><a href="#">Shop All Packages</a></li>
+          <li><a href="#">Compare Packages</a></li>
+          <li><a href="quote.html">Free Consultation</a></li>
+        </ul>
+        <div class="dropdown-cards">
+          <a class="dropdown-card" href="quote.html?service=Device+Installation">
+            <span class="dropdown-card-icon">🏠</span>
+            <span class="dropdown-card-name">Residential</span>
+            <span class="dropdown-card-desc">Complete home security packages tailored to your property.</span>
+          </a>
+          <a class="dropdown-card" href="quote.html?service=Device+Installation">
+            <span class="dropdown-card-icon">🏢</span>
+            <span class="dropdown-card-name">Commercial</span>
+            <span class="dropdown-card-desc">Business-grade systems for offices, retail, and warehouses.</span>
+          </a>
+          <a class="dropdown-card" href="quote.html">
+            <span class="dropdown-card-icon">⚙️</span>
+            <span class="dropdown-card-name">Custom Build</span>
+            <span class="dropdown-card-desc">We design a solution around your exact requirements.</span>
+          </a>
+        </div>
+      </div>
+    </li>
+    <li class="has-dropdown">
+      <a href="#services">Services</a>
+      <div class="dropdown">
+        <ul class="dropdown-links" style="border-bottom:none;padding-bottom:0;margin-bottom:0;">
+          <li><a href="quote.html?service=Device+Installation">Device Installation</a></li>
+          <li><a href="quote.html?service=CCTV+%26+Surveillance">CCTV &amp; Surveillance</a></li>
+          <li><a href="quote.html?service=Access+Control">Access Control</a></li>
+          <li><a href="quote.html?service=Alarm+Systems">Alarm Systems</a></li>
+          <li><a href="quote.html?service=Maintenance+%26+Repair">Maintenance &amp; Repair</a></li>
+          <li><a href="quote.html?service=Security+Consulting">Security Consulting</a></li>
+          <li><a href="quote.html?service=Security+Gate+Installation">Security Gate Installation</a></li>
+        </ul>
+      </div>
+    </li>
+    <li class="has-dropdown">
+      <a href="#about">Why Us</a>
+      <div class="dropdown">
+        <ul class="dropdown-links" style="border-bottom:none;padding-bottom:0;margin-bottom:0;">
+          <li><a href="#about">About Security Warrior</a></li>
+          <li><a href="#how-it-works">Our Process</a></li>
+          <li><a href="#">Service Areas</a></li>
+        </ul>
+      </div>
+    </li>
+    <li><a href="#contact">Support</a></li>
   </ul>
+  <a href="quote.html" class="nav-cta">Get a Free Quote</a>
   <button class="hamburger" id="hamburger" aria-label="Toggle menu">
     <span></span><span></span><span></span>
   </button>
 </nav>
 
+<!-- MOBILE MENU -->
 <div class="mobile-menu" id="mobileMenu">
-  <a href="#home"         onclick="closeMenu()">Home</a>
-  <a href="#about"        onclick="closeMenu()">About Us</a>
-  <a href="#services"     onclick="closeMenu()">Services</a>
-  <a href="#testimonials" onclick="closeMenu()">Reviews</a>
-  <a href="#contact"      onclick="closeMenu()">Contact Us</a>
+  <div class="mobile-section" id="mob-packages">
+    <button class="mobile-section-header" onclick="toggleMobile('mob-packages')">
+      Packages <i class="mobile-chevron">▾</i>
+    </button>
+    <div class="mobile-section-body">
+      <a href="#" onclick="closeMenu()">Shop All Packages</a>
+      <a href="#" onclick="closeMenu()">Compare Packages</a>
+      <a href="quote.html" onclick="closeMenu()">Free Consultation</a>
+      <a href="quote.html?service=Device+Installation" onclick="closeMenu()">Residential</a>
+      <a href="quote.html?service=Device+Installation" onclick="closeMenu()">Commercial</a>
+      <a href="quote.html" onclick="closeMenu()">Custom Build</a>
+    </div>
+  </div>
+  <div class="mobile-section" id="mob-services">
+    <button class="mobile-section-header" onclick="toggleMobile('mob-services')">
+      Services <i class="mobile-chevron">▾</i>
+    </button>
+    <div class="mobile-section-body">
+      <a href="quote.html?service=Device+Installation" onclick="closeMenu()">Device Installation</a>
+      <a href="quote.html?service=CCTV+%26+Surveillance" onclick="closeMenu()">CCTV &amp; Surveillance</a>
+      <a href="quote.html?service=Access+Control" onclick="closeMenu()">Access Control</a>
+      <a href="quote.html?service=Alarm+Systems" onclick="closeMenu()">Alarm Systems</a>
+      <a href="quote.html?service=Maintenance+%26+Repair" onclick="closeMenu()">Maintenance &amp; Repair</a>
+      <a href="quote.html?service=Security+Consulting" onclick="closeMenu()">Security Consulting</a>
+      <a href="quote.html?service=Security+Gate+Installation" onclick="closeMenu()">Security Gate Installation</a>
+    </div>
+  </div>
+  <div class="mobile-section" id="mob-whyus">
+    <button class="mobile-section-header" onclick="toggleMobile('mob-whyus')">
+      Why Us <i class="mobile-chevron">▾</i>
+    </button>
+    <div class="mobile-section-body">
+      <a href="#about" onclick="closeMenu()">About Security Warrior</a>
+      <a href="#how-it-works" onclick="closeMenu()">Our Process</a>
+      <a href="#" onclick="closeMenu()">Service Areas</a>
+    </div>
+  </div>
+  <a class="mobile-plain-link" href="#contact" onclick="closeMenu()">Support</a>
+  <a class="mobile-cta" href="quote.html" onclick="closeMenu()">Get a Free Quote</a>
 </div>
 
 <!-- HOME -->
@@ -745,17 +862,35 @@
     <a href="#contact"  class="btn-outline">Get a Free Quote</a>
   </div>
   <div class="hero-stats">
-    <div class="stat">
-      <span class="stat-num">500+</span>
-      <span class="stat-label">Projects Done</span>
+    <div class="stat"><span class="stat-num">500+</span><span class="stat-label">Projects Done</span></div>
+    <div class="stat"><span class="stat-num">10+</span><span class="stat-label">Years Experience</span></div>
+    <div class="stat"><span class="stat-num">100%</span><span class="stat-label">Client Satisfaction</span></div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how-it-works">
+  <p class="section-label">Our Approach</p>
+  <h2 class="section-title">Choose How We Work With You</h2>
+  <p class="section-desc">Every property is different. We offer three flexible paths to getting your security set up — choose what works best for you.</p>
+  <div class="how-grid">
+    <div class="how-card reveal">
+      <span class="how-card-icon">🏠</span>
+      <div class="how-card-title">On-Site Consultation</div>
+      <p class="how-card-desc">One of our experts visits your property to assess vulnerabilities, map out the ideal system, and walk you through every option.</p>
+      <a href="quote.html" class="how-card-link">Book a Visit &rarr;</a>
     </div>
-    <div class="stat">
-      <span class="stat-num">10+</span>
-      <span class="stat-label">Years Experience</span>
+    <div class="how-card reveal">
+      <span class="how-card-icon">💻</span>
+      <div class="how-card-title">Remote Assessment</div>
+      <p class="how-card-desc">Share photos and floor plans with us remotely. We'll analyze your space and deliver a detailed security recommendation within 48 hours.</p>
+      <a href="quote.html" class="how-card-link">Start Remotely &rarr;</a>
     </div>
-    <div class="stat">
-      <span class="stat-num">100%</span>
-      <span class="stat-label">Client Satisfaction</span>
+    <div class="how-card reveal">
+      <span class="how-card-icon">🛡️</span>
+      <div class="how-card-title">Full Installation Package</div>
+      <p class="how-card-desc">From planning and permitting through full installation and testing — we handle everything end-to-end so you can focus on what matters.</p>
+      <a href="quote.html" class="how-card-link">Get Full Package &rarr;</a>
     </div>
   </div>
 </section>
@@ -833,47 +968,11 @@
       <p class="service-desc">Intrusion detection and fire alarm systems with professional monitoring options, keeping you protected around the clock.</p>
       <a href="quote.html?service=Alarm+Systems" class="btn-quote">Get a Quote &rarr;</a>
     </div>
-  </div>
-</section>
-
-<!-- TESTIMONIALS -->
-<section id="testimonials">
-  <p class="section-label reveal">What Clients Say</p>
-  <h2 class="section-title reveal">Trusted by Hundreds</h2>
-  <p class="section-desc reveal">Real feedback from homeowners and businesses we've protected.</p>
-  <div class="testimonials-grid">
-    <div class="testimonial-card reveal">
-      <div class="testimonial-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-      <p class="testimonial-quote">"Security Warrior installed our entire camera and alarm system in one day. The team was professional, clean, and walked us through everything. Couldn't be happier."</p>
-      <div class="testimonial-author">
-        <div class="testimonial-avatar">MR</div>
-        <div>
-          <div class="testimonial-name">Marcus R.</div>
-          <div class="testimonial-role">Homeowner</div>
-        </div>
-      </div>
-    </div>
-    <div class="testimonial-card reveal">
-      <div class="testimonial-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-      <p class="testimonial-quote">"We hired them for our warehouse access control system. Their consulting process really helped us think through things we hadn't even considered. Highly recommend."</p>
-      <div class="testimonial-author">
-        <div class="testimonial-avatar">JL</div>
-        <div>
-          <div class="testimonial-name">Jessica L.</div>
-          <div class="testimonial-role">Operations Manager</div>
-        </div>
-      </div>
-    </div>
-    <div class="testimonial-card reveal">
-      <div class="testimonial-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-      <p class="testimonial-quote">"Fast response, fair pricing, and zero runaround. When our alarm system had an issue, they were on-site the same day. That's the kind of service that keeps you coming back."</p>
-      <div class="testimonial-author">
-        <div class="testimonial-avatar">DK</div>
-        <div>
-          <div class="testimonial-name">David K.</div>
-          <div class="testimonial-role">Restaurant Owner</div>
-        </div>
-      </div>
+    <div class="service-card reveal">
+      <div class="service-icon">&#127963;</div>
+      <div class="service-title">Security Gate Installation</div>
+      <p class="service-desc">Automated gate systems with access control integration — securing entry points for residential driveways, commercial lots, and gated communities.</p>
+      <a href="quote.html?service=Security+Gate+Installation" class="btn-quote">Get a Quote &rarr;</a>
     </div>
   </div>
 </section>
@@ -888,24 +987,15 @@
       <div class="contact-info" style="margin-top:2.5rem;">
         <div class="contact-item reveal">
           <div class="contact-item-icon">&#128222;</div>
-          <div class="contact-item-text">
-            <strong>Phone</strong>
-            <span>(555) 000-0000</span>
-          </div>
+          <div class="contact-item-text"><strong>Phone</strong><span>(555) 000-0000</span></div>
         </div>
         <div class="contact-item reveal">
           <div class="contact-item-icon">&#9993;</div>
-          <div class="contact-item-text">
-            <strong>Email</strong>
-            <a href="mailto:info@securitywarrior.com">info@securitywarrior.com</a>
-          </div>
+          <div class="contact-item-text"><strong>Email</strong><a href="mailto:info@securitywarrior.com">info@securitywarrior.com</a></div>
         </div>
         <div class="contact-item reveal">
           <div class="contact-item-icon">&#128336;</div>
-          <div class="contact-item-text">
-            <strong>Hours</strong>
-            <span>Mon – Sat: 8:00 AM – 6:00 PM</span>
-          </div>
+          <div class="contact-item-text"><strong>Hours</strong><span>Mon – Sat: 8:00 AM – 6:00 PM</span></div>
         </div>
       </div>
     </div>
@@ -955,8 +1045,57 @@
 
 <!-- FOOTER -->
 <footer>
-  <div class="footer-logo">Security <span>Warrior</span></div>
-  <div class="footer-copy">&#169; 2026 Security Warrior. All rights reserved.</div>
+  <div class="footer-main">
+    <div>
+      <span class="footer-logo">Security <span>Warrior</span></span>
+      <p class="footer-tagline">Professional security solutions for homes and businesses — powered by expertise, built on trust.</p>
+    </div>
+    <div>
+      <div class="footer-col-title">Services</div>
+      <ul class="footer-col-links">
+        <li><a href="quote.html?service=Device+Installation">Device Installation</a></li>
+        <li><a href="quote.html?service=CCTV+%26+Surveillance">CCTV &amp; Surveillance</a></li>
+        <li><a href="quote.html?service=Access+Control">Access Control</a></li>
+        <li><a href="quote.html?service=Alarm+Systems">Alarm Systems</a></li>
+        <li><a href="quote.html?service=Security+Consulting">Security Consulting</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-title">Company</div>
+      <ul class="footer-col-links">
+        <li><a href="#about">About Us</a></li>
+        <li><a href="#how-it-works">Our Process</a></li>
+        <li><a href="#testimonials">Client Stories</a></li>
+        <li><a href="#">Careers</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-title">Support</div>
+      <ul class="footer-col-links">
+        <li><a href="#contact">Contact Us</a></li>
+        <li><a href="quote.html">Get a Quote</a></li>
+        <li><a href="#">FAQs</a></li>
+        <li><a href="#">Service Areas</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-title">Connect</div>
+      <div class="footer-social">
+        <a href="#">👍 Facebook</a>
+        <a href="#">📸 Instagram</a>
+        <a href="#">💼 LinkedIn</a>
+        <a href="#">▶️ YouTube</a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span class="footer-copy">&copy; 2026 Security Warrior. All rights reserved.</span>
+    <ul class="footer-legal">
+      <li><a href="#">Privacy Policy</a></li>
+      <li><a href="terms.html">Terms of Use</a></li>
+      <li><a href="#">Sitemap</a></li>
+    </ul>
+  </div>
 </footer>
 
 <!-- BACK TO TOP -->
@@ -973,6 +1112,11 @@
   function closeMenu() {
     hamburger.classList.remove('open');
     mobileMenu.classList.remove('open');
+  }
+
+  // ── Mobile accordion ──
+  function toggleMobile(id) {
+    document.getElementById(id).classList.toggle('open');
   }
 
   // ── Scroll reveal ──
@@ -1021,7 +1165,6 @@
     return !show;
   }
 
-  // Clear errors on input
   ['fname', 'email'].forEach(id => {
     document.getElementById(id).addEventListener('input', () => {
       document.getElementById(id).classList.remove('error');
@@ -1030,13 +1173,13 @@
   });
 
   function handleSubmit() {
-    const fname  = document.getElementById('fname').value.trim();
-    const email  = document.getElementById('email').value.trim();
+    const fname   = document.getElementById('fname').value.trim();
+    const email   = document.getElementById('email').value.trim();
     const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     let valid = true;
-    valid = setError('fname',  'fname-error',  !fname)        && valid;
-    valid = setError('email',  'email-error',  !emailRe.test(email)) && valid;
+    valid = setError('fname', 'fname-error', !fname)               && valid;
+    valid = setError('email', 'email-error', !emailRe.test(email)) && valid;
 
     if (!valid) return;
 
@@ -1044,11 +1187,9 @@
     btn.disabled = true;
     btn.textContent = 'Sending…';
 
-    // Simulate a short send delay, then show success
     setTimeout(() => {
       document.getElementById('formSuccess').classList.add('visible');
       btn.style.display = 'none';
-      // Reset fields
       ['fname','lname','email','phone','message'].forEach(id => {
         document.getElementById(id).value = '';
       });
