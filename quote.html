@@ -723,7 +723,7 @@
           <li><a href="quote.html?service=Alarm+Systems">Alarm Systems</a></li>
           <li><a href="quote.html?service=Maintenance+%26+Repair">Maintenance &amp; Repair</a></li>
           <li><a href="quote.html?service=Security+Consulting">Security Consulting</a></li>
-          <li><a href="quote.html?service=Security+Gate+Installation">Electronic Security Gate</a></li>
+          <li><a href="quote.html?service=Security+Gate+Installation">Security Gate Installation</a></li>
         </ul>
       </div>
     </li>
@@ -957,7 +957,7 @@
     'CCTV & Surveillance',
     'Access Control',
     'Alarm Systems',
-    'Electronic Security Gate',
+    'Security Gate Installation',
     'Other'
   ];
 
@@ -1008,7 +1008,7 @@
 
   function checkGateSubsection() {
     const selects = document.querySelectorAll('.service-row select');
-    const hasGate = Array.from(selects).some(s => s.value === 'Electronic Security Gate');
+    const hasGate = Array.from(selects).some(s => s.value === 'Security Gate Installation');
     document.getElementById('gateSubsection').classList.toggle('visible', hasGate);
     document.getElementById('gateInfoSection').classList.toggle('visible', hasGate);
   }
