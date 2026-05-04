@@ -612,21 +612,23 @@
       align-items: center;
       gap: 10px;
       background: var(--white);
-      border: 1px solid rgba(91,45,142,0.15);
+      border: 2px solid rgba(91,45,142,0.2);
       border-radius: 8px;
       padding: 10px 12px;
       cursor: pointer;
-      transition: border-color .2s, box-shadow .2s, background .2s;
+      transition: border-color .2s, box-shadow .2s, background .2s, color .2s;
       font-family: 'DM Sans', sans-serif;
       font-size: 0.9rem;
-      font-weight: 400;
+      font-weight: 500;
       color: var(--dark);
       text-transform: none;
       letter-spacing: normal;
+      user-select: none;
     }
-    .gate-type-option:hover { border-color: var(--purple-mid); }
+    .gate-type-option:hover { border-color: var(--purple-mid); background: #f3eafd; }
     .gate-type-option input[type="checkbox"] { accent-color: var(--purple-mid); width: 16px; height: 16px; flex-shrink: 0; cursor: pointer; }
-    .gate-type-option.checked { border-color: var(--purple-mid); background: var(--purple-pale); box-shadow: 0 0 0 2px rgba(123,63,181,0.12); }
+    .gate-type-option.checked { border-color: var(--purple-mid); background: var(--purple-mid); color: #fff; box-shadow: 0 0 0 3px rgba(123,63,181,0.18); }
+    .gate-type-option.checked input[type="checkbox"] { accent-color: #fff; }
 
     /* ── GATE INFO SECTION ── */
     .gate-info-section {
