@@ -276,8 +276,48 @@
       color: #ccc;
     }
 
+    .card-actions { display: flex; gap: .6rem; margin-top: 1rem; flex-wrap: wrap; }
+    .edit-btn {
+      background: transparent;
+      border: 1px solid rgba(169,110,223,0.35);
+      color: var(--purple-light);
+      border-radius: 6px;
+      padding: 6px 14px;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background .2s;
+    }
+    .edit-btn:hover { background: rgba(123,63,181,0.2); }
+    .save-btn {
+      background: var(--purple-mid);
+      border: none;
+      color: #fff;
+      border-radius: 6px;
+      padding: 6px 14px;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background .2s;
+    }
+    .save-btn:hover { background: var(--purple-light); }
+    .cancel-btn {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.15);
+      color: var(--gray);
+      border-radius: 6px;
+      padding: 6px 14px;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
     .delete-btn {
-      margin-top: 1rem;
       background: transparent;
       border: 1px solid rgba(248,113,113,0.3);
       color: #f87171;
@@ -292,6 +332,80 @@
     }
     .delete-btn:hover { background: rgba(248,113,113,0.15); }
 
+    .edit-input {
+      width: 100%;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(169,110,223,0.3);
+      border-radius: 6px;
+      padding: 7px 10px;
+      color: var(--white);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.88rem;
+      outline: none;
+    }
+    .edit-input:focus { border-color: var(--purple-light); }
+    textarea.edit-input { resize: vertical; min-height: 80px; }
+
+    /* ── ADD CUSTOMER MODAL ── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+    .modal-overlay.visible { display: flex; }
+    .modal {
+      background: #1a0f2e;
+      border: 1px solid rgba(169,110,223,0.25);
+      border-radius: 16px;
+      padding: 2rem;
+      width: 100%;
+      max-width: 560px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    .modal-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.4rem;
+      letter-spacing: 2px;
+      color: var(--accent);
+      margin-bottom: 1.5rem;
+    }
+    .modal-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .8rem;
+      margin-bottom: 1rem;
+    }
+    .modal-group { display: flex; flex-direction: column; gap: 5px; }
+    .modal-group.full { grid-column: 1 / -1; }
+    .modal-group label {
+      font-size: 0.65rem;
+      font-family: 'Space Mono', monospace;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--gray);
+    }
+    .modal-actions { display: flex; gap: .6rem; justify-content: flex-end; margin-top: 1.5rem; }
+    .add-customer-btn {
+      background: var(--purple-mid);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 18px;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background .2s;
+    }
+    .add-customer-btn:hover { background: var(--purple-light); }
+
     .empty-state {
       text-align: center;
       padding: 4rem 2rem;
@@ -300,7 +414,6 @@
       font-size: 0.8rem;
       letter-spacing: 1px;
     }
-
     .loading {
       text-align: center;
       padding: 3rem;
@@ -314,6 +427,7 @@
       .detail-grid { grid-template-columns: 1fr; }
       .dash-header { flex-wrap: wrap; gap: .8rem; }
       .quote-card-header { flex-wrap: wrap; }
+      .modal-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -344,12 +458,57 @@
       <div class="dash-title">Quote Submissions</div>
       <div class="dash-meta" id="dashMeta">Loading…</div>
     </div>
-    <button class="logout-btn" onclick="doLogout()">Sign Out</button>
+    <div style="display:flex;gap:.6rem;align-items:center;">
+      <button class="add-customer-btn" onclick="openAddModal()">+ Add Customer</button>
+      <button class="logout-btn" onclick="doLogout()">Sign Out</button>
+    </div>
   </div>
   <div class="dash-body">
     <div class="stats-row" id="statsRow"></div>
     <div class="section-label">All Submissions</div>
     <div class="quote-list" id="quoteList"><div class="loading">Loading submissions…</div></div>
+  </div>
+</div>
+
+<!-- ADD CUSTOMER MODAL -->
+<div class="modal-overlay" id="addModal">
+  <div class="modal">
+    <div class="modal-title">Add Customer</div>
+    <div class="modal-grid">
+      <div class="modal-group">
+        <label>First Name *</label>
+        <input class="edit-input" id="m-fname" placeholder="John"/>
+      </div>
+      <div class="modal-group">
+        <label>Last Name *</label>
+        <input class="edit-input" id="m-lname" placeholder="Doe"/>
+      </div>
+      <div class="modal-group">
+        <label>Email *</label>
+        <input class="edit-input" id="m-email" type="email" placeholder="john@example.com"/>
+      </div>
+      <div class="modal-group">
+        <label>Phone</label>
+        <input class="edit-input" id="m-phone" placeholder="(555) 000-0000"/>
+      </div>
+      <div class="modal-group full">
+        <label>Address</label>
+        <input class="edit-input" id="m-address" placeholder="123 Main St, City, State"/>
+      </div>
+      <div class="modal-group full">
+        <label>Services (comma separated)</label>
+        <input class="edit-input" id="m-services" placeholder="CCTV & Surveillance, Alarm Systems"/>
+      </div>
+      <div class="modal-group full">
+        <label>Job Description</label>
+        <textarea class="edit-input" id="m-description" placeholder="Describe the work needed…"></textarea>
+      </div>
+    </div>
+    <div id="addModalError" style="color:#f87171;font-size:0.82rem;display:none;margin-top:.5rem;"></div>
+    <div class="modal-actions">
+      <button class="cancel-btn" onclick="closeAddModal()">Cancel</button>
+      <button class="save-btn" onclick="saveNewCustomer()">Save Customer</button>
+    </div>
   </div>
 </div>
 
@@ -425,11 +584,12 @@
       return;
     }
 
-    list.innerHTML = data.map((r, i) => {
+    list.innerHTML = data.map(r => {
       const date = new Date(r.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
       const time = new Date(r.created_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-      const services = (r.services || []).map(s => `<span class="service-tag">${s}</span>`).join('');
+      const servicesTags = (r.services || []).map(s => `<span class="service-tag">${s}</span>`).join('');
       const gateTypes = (r.gate_types || []).join(', ') || '—';
+      const servicesVal = (r.services || []).join(', ');
 
       return `
         <div class="quote-card" id="card-${r.id}">
@@ -438,34 +598,93 @@
               <div class="quote-name">${r.first_name} ${r.last_name}</div>
               <div class="quote-email">${r.email}</div>
             </div>
-            <div class="quote-services">${services}</div>
+            <div class="quote-services">${servicesTags}</div>
             <div class="quote-date">${date}<br/>${time}</div>
             <div class="chevron">▼</div>
           </div>
           <div class="quote-card-body">
-            <div class="detail-grid">
-              <div class="detail-item">
-                <div class="detail-label">Phone</div>
-                <div class="detail-value">${r.phone || '—'}</div>
+            <!-- VIEW MODE -->
+            <div id="view-${r.id}">
+              <div class="detail-grid">
+                <div class="detail-item">
+                  <div class="detail-label">First Name</div>
+                  <div class="detail-value">${r.first_name}</div>
+                </div>
+                <div class="detail-item">
+                  <div class="detail-label">Last Name</div>
+                  <div class="detail-value">${r.last_name}</div>
+                </div>
+                <div class="detail-item">
+                  <div class="detail-label">Email</div>
+                  <div class="detail-value">${r.email}</div>
+                </div>
+                <div class="detail-item">
+                  <div class="detail-label">Phone</div>
+                  <div class="detail-value">${r.phone || '—'}</div>
+                </div>
+                <div class="detail-item">
+                  <div class="detail-label">Address</div>
+                  <div class="detail-value">${r.address || '—'}</div>
+                </div>
+                <div class="detail-item">
+                  <div class="detail-label">Gate Types</div>
+                  <div class="detail-value">${gateTypes}</div>
+                </div>
+                <div class="detail-item">
+                  <div class="detail-label">Services</div>
+                  <div class="detail-value">${servicesVal || '—'}</div>
+                </div>
+                <div class="detail-item">
+                  <div class="detail-label">Submitted</div>
+                  <div class="detail-value">${date} at ${time}</div>
+                </div>
+                <div class="detail-item" style="grid-column:1/-1">
+                  <div class="detail-label">Job Description</div>
+                  <div class="detail-value desc">${r.description || '—'}</div>
+                </div>
               </div>
-              <div class="detail-item">
-                <div class="detail-label">Address</div>
-                <div class="detail-value">${r.address || '—'}</div>
-              </div>
-              <div class="detail-item">
-                <div class="detail-label">Gate Types</div>
-                <div class="detail-value">${gateTypes}</div>
-              </div>
-              <div class="detail-item">
-                <div class="detail-label">Submitted</div>
-                <div class="detail-value">${date} at ${time}</div>
-              </div>
-              <div class="detail-item" style="grid-column:1/-1">
-                <div class="detail-label">Job Description</div>
-                <div class="detail-value desc">${r.description || '—'}</div>
+              <div class="card-actions">
+                <button class="edit-btn" onclick="startEdit('${r.id}')">Edit</button>
+                <button class="delete-btn" onclick="deleteRecord('${r.id}')">Delete</button>
               </div>
             </div>
-            <button class="delete-btn" onclick="deleteRecord('${r.id}')">Delete Record</button>
+            <!-- EDIT MODE -->
+            <div id="edit-${r.id}" style="display:none;">
+              <div class="detail-grid" style="margin-top:1rem;">
+                <div class="detail-item">
+                  <div class="detail-label">First Name</div>
+                  <input class="edit-input" id="e-fname-${r.id}" value="${r.first_name || ''}"/>
+                </div>
+                <div class="detail-item">
+                  <div class="detail-label">Last Name</div>
+                  <input class="edit-input" id="e-lname-${r.id}" value="${r.last_name || ''}"/>
+                </div>
+                <div class="detail-item">
+                  <div class="detail-label">Email</div>
+                  <input class="edit-input" id="e-email-${r.id}" value="${r.email || ''}"/>
+                </div>
+                <div class="detail-item">
+                  <div class="detail-label">Phone</div>
+                  <input class="edit-input" id="e-phone-${r.id}" value="${r.phone || ''}"/>
+                </div>
+                <div class="detail-item" style="grid-column:1/-1">
+                  <div class="detail-label">Address</div>
+                  <input class="edit-input" id="e-address-${r.id}" value="${r.address || ''}"/>
+                </div>
+                <div class="detail-item" style="grid-column:1/-1">
+                  <div class="detail-label">Services (comma separated)</div>
+                  <input class="edit-input" id="e-services-${r.id}" value="${servicesVal}"/>
+                </div>
+                <div class="detail-item" style="grid-column:1/-1">
+                  <div class="detail-label">Job Description</div>
+                  <textarea class="edit-input" id="e-desc-${r.id}">${r.description || ''}</textarea>
+                </div>
+              </div>
+              <div class="card-actions">
+                <button class="save-btn" onclick="saveEdit('${r.id}')">Save</button>
+                <button class="cancel-btn" onclick="cancelEdit('${r.id}')">Cancel</button>
+              </div>
+            </div>
           </div>
         </div>
       `;
@@ -476,13 +695,85 @@
     document.getElementById('card-' + id).classList.toggle('open');
   }
 
+  function startEdit(id) {
+    document.getElementById('view-' + id).style.display = 'none';
+    document.getElementById('edit-' + id).style.display = 'block';
+  }
+
+  function cancelEdit(id) {
+    document.getElementById('edit-' + id).style.display = 'none';
+    document.getElementById('view-' + id).style.display = 'block';
+  }
+
+  async function saveEdit(id) {
+    const services = document.getElementById('e-services-' + id).value.split(',').map(s => s.trim()).filter(Boolean);
+    const { error } = await initSupabase().from('customers').update({
+      first_name:  document.getElementById('e-fname-' + id).value.trim(),
+      last_name:   document.getElementById('e-lname-' + id).value.trim(),
+      email:       document.getElementById('e-email-' + id).value.trim(),
+      phone:       document.getElementById('e-phone-' + id).value.trim() || null,
+      address:     document.getElementById('e-address-' + id).value.trim() || null,
+      services,
+      description: document.getElementById('e-desc-' + id).value.trim()
+    }).eq('id', id);
+
+    if (error) { alert('Save failed: ' + error.message); return; }
+    loadSubmissions();
+  }
+
   async function deleteRecord(id) {
     if (!confirm('Delete this submission? This cannot be undone.')) return;
     const { error } = await initSupabase().from('customers').delete().eq('id', id);
     if (error) { alert('Delete failed.'); return; }
-    document.getElementById('card-' + id).remove();
     loadSubmissions();
   }
+
+  function openAddModal() {
+    ['m-fname','m-lname','m-email','m-phone','m-address','m-services','m-description'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+    document.getElementById('addModalError').style.display = 'none';
+    document.getElementById('addModal').classList.add('visible');
+  }
+
+  function closeAddModal() {
+    document.getElementById('addModal').classList.remove('visible');
+  }
+
+  async function saveNewCustomer() {
+    const fname = document.getElementById('m-fname').value.trim();
+    const lname = document.getElementById('m-lname').value.trim();
+    const email = document.getElementById('m-email').value.trim();
+    const errEl = document.getElementById('addModalError');
+
+    if (!fname || !lname || !email) {
+      errEl.textContent = 'First name, last name, and email are required.';
+      errEl.style.display = 'block';
+      return;
+    }
+
+    const services = document.getElementById('m-services').value.split(',').map(s => s.trim()).filter(Boolean);
+
+    const { error } = await initSupabase().from('customers').insert({
+      first_name:  fname,
+      last_name:   lname,
+      email,
+      phone:       document.getElementById('m-phone').value.trim() || null,
+      address:     document.getElementById('m-address').value.trim() || null,
+      services,
+      description: document.getElementById('m-description').value.trim() || null
+    });
+
+    if (error) { errEl.textContent = 'Error: ' + error.message; errEl.style.display = 'block'; return; }
+    closeAddModal();
+    loadSubmissions();
+  }
+
+  // Close modal on overlay click
+  document.getElementById('addModal').addEventListener('click', e => {
+    if (e.target === document.getElementById('addModal')) closeAddModal();
+  });
 
   // Auto-login if session exists
   initSupabase().auth.getSession().then(({ data }) => {
