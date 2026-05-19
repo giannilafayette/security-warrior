@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin | Security Warrior</title>
+  <link rel="icon" type="image/x-icon" href="favicon.ico"/>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg"/>
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png"/>
+  <link rel="apple-touch-icon" sizes="192x192" href="favicon-192x192.png"/>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --purple:       #5B2D8E;
+      --purple-mid:   #7B3FB5;
+      --purple-light: #A96EDF;
+      --purple-pale:  #EDE4F8;
+      --white:        #FFFFFF;
+      --off-white:    #F7F4FC;
+      --gray:         #6B6B7B;
+      --dark:         #12091E;
+      --accent:       #C084FC;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--dark);
+      color: var(--white);
+      min-height: 100vh;
+    }
+
+    /* ── LOGIN ── */
+    .login-wrap {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+    .login-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(169,110,223,0.2);
+      border-radius: 16px;
+      padding: 2.5rem 2rem;
+      width: 100%;
+      max-width: 380px;
+    }
+    .login-logo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.8rem;
+      letter-spacing: 2px;
+      color: var(--accent);
+      margin-bottom: .3rem;
+    }
+    .login-sub {
+      font-size: 0.8rem;
+      font-family: 'Space Mono', monospace;
+      color: var(--gray);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 2rem;
+    }
+    .login-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 1rem; }
+    .login-group label {
+      font-size: 0.72rem;
+      font-family: 'Space Mono', monospace;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--gray);
+    }
+    .login-group input {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(169,110,223,0.25);
+      border-radius: 8px;
+      padding: 11px 14px;
+      color: var(--white);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color .2s;
+    }
+    .login-group input:focus { border-color: var(--purple-light); }
+    .login-btn {
+      width: 100%;
+      background: var(--purple-mid);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 12px;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.85rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      cursor: pointer;
+      margin-top: .5rem;
+      transition: background .2s;
+    }
+    .login-btn:hover { background: var(--purple-light); }
+    .login-error {
+      color: #f87171;
+      font-size: 0.82rem;
+      margin-top: .8rem;
+      display: none;
+    }
+    .login-error.visible { display: block; }
+
+    /* ── DASHBOARD ── */
+    .dashboard { display: none; min-height: 100vh; }
+    .dashboard.visible { display: block; }
+
+    .dash-header {
+      background: rgba(255,255,255,0.03);
+      border-bottom: 1px solid rgba(169,110,223,0.15);
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .dash-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.5rem;
+      letter-spacing: 2px;
+      color: var(--accent);
+    }
+    .dash-meta {
+      font-size: 0.75rem;
+      font-family: 'Space Mono', monospace;
+      color: var(--gray);
+    }
+    .logout-btn {
+      background: transparent;
+      border: 1px solid rgba(169,110,223,0.3);
+      color: var(--purple-light);
+      border-radius: 6px;
+      padding: 6px 14px;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background .2s, color .2s;
+    }
+    .logout-btn:hover { background: var(--purple-mid); color: #fff; }
+
+    .dash-body { padding: 2rem; max-width: 1200px; margin: 0 auto; }
+
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .stat-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(169,110,223,0.15);
+      border-radius: 12px;
+      padding: 1.2rem 1.4rem;
+    }
+    .stat-label {
+      font-size: 0.65rem;
+      font-family: 'Space Mono', monospace;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--gray);
+      margin-bottom: .4rem;
+    }
+    .stat-value {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 2rem;
+      color: var(--accent);
+      letter-spacing: 1px;
+    }
+
+    .section-label {
+      font-size: 0.68rem;
+      font-family: 'Space Mono', monospace;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--gray);
+      margin-bottom: 1rem;
+    }
+
+    .quote-list { display: flex; flex-direction: column; gap: .75rem; }
+
+    .quote-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(169,110,223,0.15);
+      border-radius: 12px;
+      overflow: hidden;
+      transition: border-color .2s;
+    }
+    .quote-card:hover { border-color: rgba(169,110,223,0.4); }
+
+    .quote-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 1.4rem;
+      cursor: pointer;
+      gap: 1rem;
+    }
+    .quote-name {
+      font-weight: 600;
+      font-size: 1rem;
+      color: var(--white);
+    }
+    .quote-email {
+      font-size: 0.82rem;
+      color: var(--purple-light);
+    }
+    .quote-date {
+      font-size: 0.72rem;
+      font-family: 'Space Mono', monospace;
+      color: var(--gray);
+      flex-shrink: 0;
+    }
+    .quote-services {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .4rem;
+      flex: 1;
+    }
+    .service-tag {
+      background: rgba(91,45,142,0.3);
+      border: 1px solid rgba(169,110,223,0.25);
+      border-radius: 4px;
+      padding: 2px 8px;
+      font-size: 0.72rem;
+      font-family: 'Space Mono', monospace;
+      color: var(--purple-light);
+      letter-spacing: .5px;
+    }
+    .chevron {
+      color: var(--gray);
+      font-size: 0.8rem;
+      transition: transform .2s;
+      flex-shrink: 0;
+    }
+    .quote-card.open .chevron { transform: rotate(180deg); }
+
+    .quote-card-body {
+      display: none;
+      padding: 0 1.4rem 1.2rem;
+      border-top: 1px solid rgba(169,110,223,0.1);
+    }
+    .quote-card.open .quote-card-body { display: block; }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .8rem 2rem;
+      margin-top: 1rem;
+    }
+    .detail-item {}
+    .detail-label {
+      font-size: 0.65rem;
+      font-family: 'Space Mono', monospace;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--gray);
+      margin-bottom: .2rem;
+    }
+    .detail-value {
+      font-size: 0.9rem;
+      color: var(--white);
+      line-height: 1.5;
+    }
+    .detail-value.desc {
+      grid-column: 1 / -1;
+      background: rgba(0,0,0,0.2);
+      border-radius: 8px;
+      padding: .8rem 1rem;
+      font-size: 0.88rem;
+      color: #ccc;
+    }
+
+    .delete-btn {
+      margin-top: 1rem;
+      background: transparent;
+      border: 1px solid rgba(248,113,113,0.3);
+      color: #f87171;
+      border-radius: 6px;
+      padding: 6px 14px;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background .2s;
+    }
+    .delete-btn:hover { background: rgba(248,113,113,0.15); }
+
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: var(--gray);
+      font-family: 'Space Mono', monospace;
+      font-size: 0.8rem;
+      letter-spacing: 1px;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 3rem;
+      color: var(--gray);
+      font-family: 'Space Mono', monospace;
+      font-size: 0.8rem;
+      letter-spacing: 1px;
+    }
+
+    @media (max-width: 600px) {
+      .detail-grid { grid-template-columns: 1fr; }
+      .dash-header { flex-wrap: wrap; gap: .8rem; }
+      .quote-card-header { flex-wrap: wrap; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-wrap" id="loginWrap">
+  <div class="login-card">
+    <div class="login-logo">Security Warrior</div>
+    <div class="login-sub">Admin Portal</div>
+    <div class="login-group">
+      <label for="adminEmail">Email</label>
+      <input type="email" id="adminEmail" placeholder="admin@example.com" autocomplete="username"/>
+    </div>
+    <div class="login-group">
+      <label for="adminPassword">Password</label>
+      <input type="password" id="adminPassword" placeholder="••••••••" autocomplete="current-password"/>
+    </div>
+    <button class="login-btn" onclick="doLogin()">Sign In</button>
+    <div class="login-error" id="loginError">Invalid email or password.</div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="dashboard" id="dashboard">
+  <div class="dash-header">
+    <div>
+      <div class="dash-title">Quote Submissions</div>
+      <div class="dash-meta" id="dashMeta">Loading…</div>
+    </div>
+    <button class="logout-btn" onclick="doLogout()">Sign Out</button>
+  </div>
+  <div class="dash-body">
+    <div class="stats-row" id="statsRow"></div>
+    <div class="section-label">All Submissions</div>
+    <div class="quote-list" id="quoteList"><div class="loading">Loading submissions…</div></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script>
+  let sb;
+
+  function initSupabase() {
+    if (!sb) sb = window.supabase.createClient(CONFIG.supabase.url, CONFIG.supabase.anonKey);
+    return sb;
+  }
+
+  async function doLogin() {
+    const email = document.getElementById('adminEmail').value.trim();
+    const password = document.getElementById('adminPassword').value;
+    const errEl = document.getElementById('loginError');
+    errEl.classList.remove('visible');
+
+    const { error } = await initSupabase().auth.signInWithPassword({ email, password });
+    if (error) {
+      errEl.classList.add('visible');
+      return;
+    }
+    showDashboard();
+  }
+
+  async function doLogout() {
+    await initSupabase().auth.signOut();
+    document.getElementById('dashboard').classList.remove('visible');
+    document.getElementById('loginWrap').style.display = 'flex';
+    document.getElementById('adminPassword').value = '';
+  }
+
+  async function showDashboard() {
+    document.getElementById('loginWrap').style.display = 'none';
+    document.getElementById('dashboard').classList.add('visible');
+    loadSubmissions();
+  }
+
+  async function loadSubmissions() {
+    const { data, error } = await initSupabase()
+      .from('customers')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      document.getElementById('quoteList').innerHTML = '<div class="empty-state">Error loading submissions.</div>';
+      return;
+    }
+
+    renderStats(data);
+    renderQuotes(data);
+  }
+
+  function renderStats(data) {
+    const total = data.length;
+    const today = data.filter(r => new Date(r.created_at).toDateString() === new Date().toDateString()).length;
+    const services = [...new Set(data.flatMap(r => r.services || []))];
+
+    document.getElementById('dashMeta').textContent = `${total} total submission${total !== 1 ? 's' : ''}`;
+    document.getElementById('statsRow').innerHTML = `
+      <div class="stat-card"><div class="stat-label">Total Quotes</div><div class="stat-value">${total}</div></div>
+      <div class="stat-card"><div class="stat-label">Today</div><div class="stat-value">${today}</div></div>
+      <div class="stat-card"><div class="stat-label">Services Requested</div><div class="stat-value">${services.length}</div></div>
+    `;
+  }
+
+  function renderQuotes(data) {
+    const list = document.getElementById('quoteList');
+    if (!data.length) {
+      list.innerHTML = '<div class="empty-state">No submissions yet.</div>';
+      return;
+    }
+
+    list.innerHTML = data.map((r, i) => {
+      const date = new Date(r.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      const time = new Date(r.created_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+      const services = (r.services || []).map(s => `<span class="service-tag">${s}</span>`).join('');
+      const gateTypes = (r.gate_types || []).join(', ') || '—';
+
+      return `
+        <div class="quote-card" id="card-${r.id}">
+          <div class="quote-card-header" onclick="toggleCard('${r.id}')">
+            <div>
+              <div class="quote-name">${r.first_name} ${r.last_name}</div>
+              <div class="quote-email">${r.email}</div>
+            </div>
+            <div class="quote-services">${services}</div>
+            <div class="quote-date">${date}<br/>${time}</div>
+            <div class="chevron">▼</div>
+          </div>
+          <div class="quote-card-body">
+            <div class="detail-grid">
+              <div class="detail-item">
+                <div class="detail-label">Phone</div>
+                <div class="detail-value">${r.phone || '—'}</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-label">Address</div>
+                <div class="detail-value">${r.address || '—'}</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-label">Gate Types</div>
+                <div class="detail-value">${gateTypes}</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-label">Submitted</div>
+                <div class="detail-value">${date} at ${time}</div>
+              </div>
+              <div class="detail-item" style="grid-column:1/-1">
+                <div class="detail-label">Job Description</div>
+                <div class="detail-value desc">${r.description || '—'}</div>
+              </div>
+            </div>
+            <button class="delete-btn" onclick="deleteRecord('${r.id}')">Delete Record</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function toggleCard(id) {
+    document.getElementById('card-' + id).classList.toggle('open');
+  }
+
+  async function deleteRecord(id) {
+    if (!confirm('Delete this submission? This cannot be undone.')) return;
+    const { error } = await initSupabase().from('customers').delete().eq('id', id);
+    if (error) { alert('Delete failed.'); return; }
+    document.getElementById('card-' + id).remove();
+    loadSubmissions();
+  }
+
+  // Auto-login if session exists
+  initSupabase().auth.getSession().then(({ data }) => {
+    if (data.session) showDashboard();
+  });
+
+  // Submit on Enter
+  document.getElementById('adminPassword').addEventListener('keydown', e => {
+    if (e.key === 'Enter') doLogin();
+  });
+</script>
+</body>
+</html>
