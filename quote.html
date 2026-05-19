@@ -942,6 +942,7 @@
 
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 <script>
   // ── Mobile menu ──
@@ -1160,14 +1161,36 @@
     btn.disabled = true;
     btn.textContent = 'Sending…';
 
-    // Simulate submission delay
-    setTimeout(() => {
+    const supabase = window.supabase.createClient(CONFIG.supabase.url, CONFIG.supabase.anonKey);
+
+    const services  = Array.from(document.querySelectorAll('.service-row select')).map(s => s.value).filter(Boolean);
+    const gateTypes = Array.from(document.querySelectorAll('.gate-type-option input:checked')).map(cb => cb.value);
+    const phone     = document.getElementById('phone')?.value.trim() || null;
+    const address   = document.getElementById('address')?.value.trim() || null;
+
+    supabase.from('customers').insert({
+      first_name:  fname,
+      last_name:   lname,
+      email,
+      phone,
+      address,
+      services,
+      gate_types:  gateTypes.length ? gateTypes : null,
+      description
+    }).then(({ error }) => {
+      if (error) {
+        console.error('Supabase error:', error);
+        btn.disabled = false;
+        btn.textContent = 'Submit Request';
+        alert('Something went wrong submitting your request. Please try again or call us directly.');
+        return;
+      }
       document.getElementById('formCard').style.display = 'none';
       document.getElementById('serviceBadge').style.display = 'none';
       document.querySelector('.page-header').style.display = 'none';
       document.getElementById('successCard').classList.add('visible');
       window.scrollTo({ top: 0, behavior: 'smooth' });
-    }, 900);
+    });
   }
 </script>
 </body>
