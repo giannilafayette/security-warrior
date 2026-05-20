@@ -16,12 +16,18 @@
       --purple:       #5B2D8E;
       --purple-mid:   #7B3FB5;
       --purple-light: #A96EDF;
-      --purple-pale:  #EDE4F8;
+      --purple-pale:  #F3EEFF;
       --white:        #FFFFFF;
-      --off-white:    #F7F4FC;
+      --off-white:    #F5F6F8;
       --gray:         #6B6B7B;
       --dark:         #12091E;
       --accent:       #C084FC;
+      --pop-blue:     #3B82F6;
+      --pop-teal:     #14B8A6;
+      --pop-amber:    #F59E0B;
+      --pop-rose:     #F43F5E;
+      --pop-green:    #22C55E;
+      --pop-indigo:   #6366F1;
     }
 
     html { scroll-behavior: smooth; }
@@ -420,7 +426,11 @@
       transition: transform .2s, box-shadow .2s;
     }
     .how-card:hover { transform: translateY(-4px); box-shadow: 0 12px 36px rgba(91,45,142,0.13); }
-    .how-card-icon { font-size: 2.4rem; margin-bottom: 1rem; display: block; }
+    .how-card-icon {
+      width: 64px; height: 64px;
+      display: inline-flex; align-items: center; justify-content: center;
+      border-radius: 16px; margin-bottom: 1rem; font-size: 1.9rem;
+    }
     .how-card-title {
       font-family: 'Bebas Neue', sans-serif;
       font-size: 1.35rem;
@@ -711,6 +721,39 @@
     }
     #back-to-top.visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
     #back-to-top:hover { background: var(--purple-light); }
+
+    /* ── POP COLOR ACCENTS ── */
+
+    /* Service card: colored icon bg + top stripe per card */
+    .service-card:nth-child(1) .service-icon { background: rgba(59,130,246,0.12); }
+    .service-card:nth-child(1)::before        { background: linear-gradient(90deg, var(--pop-blue), #93c5fd); }
+    .service-card:nth-child(2) .service-icon { background: rgba(245,158,11,0.12); }
+    .service-card:nth-child(2)::before        { background: linear-gradient(90deg, var(--pop-amber), #fcd34d); }
+    .service-card:nth-child(3) .service-icon { background: rgba(99,102,241,0.12); }
+    .service-card:nth-child(3)::before        { background: linear-gradient(90deg, var(--pop-indigo), #a5b4fc); }
+    .service-card:nth-child(4) .service-icon { background: rgba(20,184,166,0.12); }
+    .service-card:nth-child(4)::before        { background: linear-gradient(90deg, var(--pop-teal), #5eead4); }
+    .service-card:nth-child(5) .service-icon { background: rgba(34,197,94,0.12); }
+    .service-card:nth-child(5)::before        { background: linear-gradient(90deg, var(--pop-green), #86efac); }
+    .service-card:nth-child(6) .service-icon { background: rgba(244,63,94,0.12); }
+    .service-card:nth-child(6)::before        { background: linear-gradient(90deg, var(--pop-rose), #fda4af); }
+    .service-card:nth-child(7) .service-icon { background: rgba(91,45,142,0.1); }
+
+    /* How-it-works: colored icon badge per step */
+    .how-card:nth-child(1) .how-card-icon { background: rgba(59,130,246,0.1); }
+    .how-card:nth-child(2) .how-card-icon { background: rgba(20,184,166,0.1); }
+    .how-card:nth-child(3) .how-card-icon { background: rgba(34,197,94,0.1); }
+
+    /* Contact icons: colored per item */
+    .contact-item:nth-child(1) .contact-item-icon { background: rgba(59,130,246,0.1); border-color: rgba(59,130,246,0.2); }
+    .contact-item:nth-child(2) .contact-item-icon { background: rgba(20,184,166,0.1); border-color: rgba(20,184,166,0.2); }
+    .contact-item:nth-child(3) .contact-item-icon { background: rgba(34,197,94,0.1); border-color: rgba(34,197,94,0.2); }
+
+    /* About value dots: colorful */
+    .values-list li:nth-child(1) .value-dot { background: var(--pop-blue); }
+    .values-list li:nth-child(2) .value-dot { background: var(--pop-teal); }
+    .values-list li:nth-child(3) .value-dot { background: var(--pop-amber); }
+    .values-list li:nth-child(4) .value-dot { background: var(--pop-green); }
 
     /* ── ANIMATIONS ── */
     @keyframes fadeUp {
