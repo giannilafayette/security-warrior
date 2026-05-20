@@ -1,449 +1,155 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Admin | Security Warrior</title>
   <link rel="icon" type="image/x-icon" href="favicon.ico"/>
   <link rel="icon" type="image/svg+xml" href="favicon.svg"/>
-  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png"/>
-  <link rel="apple-touch-icon" sizes="192x192" href="favicon-192x192.png"/>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
-      --purple:       #5B2D8E;
-      --purple-mid:   #7B3FB5;
-      --purple-light: #A96EDF;
-      --purple-pale:  #EDE4F8;
-      --white:        #FFFFFF;
-      --off-white:    #F7F4FC;
-      --gray:         #6B6B7B;
-      --dark:         #12091E;
-      --accent:       #C084FC;
+      --purple: #5B2D8E; --purple-mid: #7B3FB5; --purple-light: #A96EDF;
+      --purple-pale: #EDE4F8; --white: #FFFFFF; --off-white: #F7F4FC;
+      --gray: #6B6B7B; --dark: #12091E; --accent: #C084FC;
+      --green: #4ade80; --yellow: #fbbf24; --red: #f87171; --blue: #60a5fa;
     }
-
-    body {
-      font-family: 'DM Sans', sans-serif;
-      background: var(--dark);
-      color: var(--white);
-      min-height: 100vh;
-    }
+    body { font-family: 'DM Sans', sans-serif; background: var(--dark); color: var(--white); min-height: 100vh; }
 
     /* ── LOGIN ── */
-    .login-wrap {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 2rem;
-    }
-    .login-card {
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(169,110,223,0.2);
-      border-radius: 16px;
-      padding: 2.5rem 2rem;
-      width: 100%;
-      max-width: 380px;
-    }
-    .login-logo {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 1.8rem;
-      letter-spacing: 2px;
-      color: var(--accent);
-      margin-bottom: .3rem;
-    }
-    .login-sub {
-      font-size: 0.8rem;
-      font-family: 'Space Mono', monospace;
-      color: var(--gray);
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      margin-bottom: 2rem;
-    }
+    .login-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem; }
+    .login-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(169,110,223,0.2); border-radius: 16px; padding: 2.5rem 2rem; width: 100%; max-width: 380px; }
+    .login-logo { font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; letter-spacing: 2px; color: var(--accent); margin-bottom: .3rem; }
+    .login-sub { font-size: 0.8rem; font-family: 'Space Mono', monospace; color: var(--gray); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 2rem; }
     .login-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 1rem; }
-    .login-group label {
-      font-size: 0.72rem;
-      font-family: 'Space Mono', monospace;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      color: var(--gray);
-    }
-    .login-group input {
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(169,110,223,0.25);
-      border-radius: 8px;
-      padding: 11px 14px;
-      color: var(--white);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 0.95rem;
-      outline: none;
-      transition: border-color .2s;
-    }
+    .login-group label { font-size: 0.72rem; font-family: 'Space Mono', monospace; letter-spacing: 1px; text-transform: uppercase; color: var(--gray); }
+    .login-group input { background: rgba(255,255,255,0.06); border: 1px solid rgba(169,110,223,0.25); border-radius: 8px; padding: 11px 14px; color: var(--white); font-family: 'DM Sans', sans-serif; font-size: 0.95rem; outline: none; transition: border-color .2s; }
     .login-group input:focus { border-color: var(--purple-light); }
-    .login-btn {
-      width: 100%;
-      background: var(--purple-mid);
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      padding: 12px;
-      font-family: 'Space Mono', monospace;
-      font-size: 0.85rem;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      cursor: pointer;
-      margin-top: .5rem;
-      transition: background .2s;
-    }
+    .login-btn { width: 100%; background: var(--purple-mid); color: #fff; border: none; border-radius: 8px; padding: 12px; font-family: 'Space Mono', monospace; font-size: 0.85rem; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; margin-top: .5rem; transition: background .2s; }
     .login-btn:hover { background: var(--purple-light); }
-    .login-error {
-      color: #f87171;
-      font-size: 0.82rem;
-      margin-top: .8rem;
-      display: none;
-    }
+    .login-error { color: var(--red); font-size: 0.82rem; margin-top: .8rem; display: none; }
     .login-error.visible { display: block; }
 
-    /* ── DASHBOARD ── */
+    /* ── DASHBOARD SHELL ── */
     .dashboard { display: none; min-height: 100vh; }
-    .dashboard.visible { display: block; }
+    .dashboard.visible { display: flex; flex-direction: column; }
+    .dash-header { background: rgba(255,255,255,0.03); border-bottom: 1px solid rgba(169,110,223,0.15); padding: .8rem 2rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .8rem; }
+    .dash-brand { font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; letter-spacing: 2px; color: var(--accent); }
+    .header-right { display: flex; gap: .6rem; align-items: center; }
 
-    .dash-header {
-      background: rgba(255,255,255,0.03);
-      border-bottom: 1px solid rgba(169,110,223,0.15);
-      padding: 1rem 2rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .dash-title {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 1.5rem;
-      letter-spacing: 2px;
-      color: var(--accent);
-    }
-    .dash-meta {
-      font-size: 0.75rem;
-      font-family: 'Space Mono', monospace;
-      color: var(--gray);
-    }
-    .logout-btn {
-      background: transparent;
-      border: 1px solid rgba(169,110,223,0.3);
-      color: var(--purple-light);
-      border-radius: 6px;
-      padding: 6px 14px;
-      font-family: 'Space Mono', monospace;
-      font-size: 0.72rem;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      cursor: pointer;
-      transition: background .2s, color .2s;
-    }
-    .logout-btn:hover { background: var(--purple-mid); color: #fff; }
+    /* ── TABS ── */
+    .tab-bar { display: flex; gap: 0; border-bottom: 1px solid rgba(169,110,223,0.15); background: rgba(255,255,255,0.02); padding: 0 2rem; }
+    .tab-btn { background: none; border: none; color: var(--gray); font-family: 'Space Mono', monospace; font-size: 0.72rem; letter-spacing: 1.5px; text-transform: uppercase; padding: .9rem 1.4rem; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color .2s, border-color .2s; }
+    .tab-btn:hover { color: var(--white); }
+    .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .tab-content { display: none; flex: 1; padding: 1.5rem 2rem; }
+    .tab-content.active { display: block; }
 
-    .dash-body { padding: 2rem; max-width: 1200px; margin: 0 auto; }
+    /* ── SHARED COMPONENTS ── */
+    .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.2rem; flex-wrap: wrap; gap: .8rem; }
+    .section-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.3rem; letter-spacing: 1.5px; color: var(--white); }
+    .stats-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px,1fr)); gap: .8rem; margin-bottom: 1.5rem; }
+    .stat-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(169,110,223,0.15); border-radius: 10px; padding: 1rem 1.2rem; }
+    .stat-label { font-size: 0.62rem; font-family: 'Space Mono', monospace; letter-spacing: 1.5px; text-transform: uppercase; color: var(--gray); margin-bottom: .3rem; }
+    .stat-value { font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; color: var(--accent); }
 
-    .stats-row {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-      gap: 1rem;
-      margin-bottom: 2rem;
-    }
-    .stat-card {
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(169,110,223,0.15);
-      border-radius: 12px;
-      padding: 1.2rem 1.4rem;
-    }
-    .stat-label {
-      font-size: 0.65rem;
-      font-family: 'Space Mono', monospace;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      color: var(--gray);
-      margin-bottom: .4rem;
-    }
-    .stat-value {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 2rem;
-      color: var(--accent);
-      letter-spacing: 1px;
-    }
+    /* filter bar */
+    .filter-bar { display: flex; gap: .6rem; flex-wrap: wrap; margin-bottom: 1.2rem; align-items: center; }
+    .filter-select, .search-input { background: rgba(255,255,255,0.05); border: 1px solid rgba(169,110,223,0.2); border-radius: 7px; padding: 7px 12px; color: var(--white); font-family: 'DM Sans', sans-serif; font-size: 0.88rem; outline: none; }
+    .filter-select option { background: #1a0f2e; }
+    .search-input { min-width: 200px; }
+    .search-input::placeholder { color: var(--gray); }
 
-    .section-label {
-      font-size: 0.68rem;
-      font-family: 'Space Mono', monospace;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      color: var(--gray);
-      margin-bottom: 1rem;
-    }
+    /* cards list */
+    .card-list { display: flex; flex-direction: column; gap: .6rem; }
+    .rec-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(169,110,223,0.13); border-radius: 10px; overflow: hidden; transition: border-color .2s; }
+    .rec-card:hover { border-color: rgba(169,110,223,0.35); }
+    .rec-card-header { display: flex; align-items: center; justify-content: space-between; padding: .9rem 1.2rem; cursor: pointer; gap: 1rem; flex-wrap: wrap; }
+    .rec-main { flex: 1; min-width: 0; }
+    .rec-name { font-weight: 600; font-size: .95rem; color: var(--white); }
+    .rec-sub { font-size: .78rem; color: var(--purple-light); margin-top: 1px; }
+    .rec-tags { display: flex; flex-wrap: wrap; gap: .35rem; }
+    .tag { border-radius: 4px; padding: 2px 7px; font-size: 0.68rem; font-family: 'Space Mono', monospace; letter-spacing: .4px; }
+    .tag-region { background: rgba(96,165,250,0.15); border: 1px solid rgba(96,165,250,0.3); color: var(--blue); }
+    .tag-warranty { background: rgba(74,222,128,0.12); border: 1px solid rgba(74,222,128,0.3); color: var(--green); }
+    .tag-no-warranty { background: rgba(248,113,113,0.12); border: 1px solid rgba(248,113,113,0.3); color: var(--red); }
+    .tag-service { background: rgba(91,45,142,0.3); border: 1px solid rgba(169,110,223,0.25); color: var(--purple-light); }
+    .tag-status-active { background: rgba(74,222,128,0.12); border: 1px solid rgba(74,222,128,0.3); color: var(--green); }
+    .tag-status-inactive { background: rgba(107,107,123,0.2); border: 1px solid rgba(107,107,123,0.3); color: var(--gray); }
+    .tag-job-scheduled { background: rgba(251,191,36,0.12); border: 1px solid rgba(251,191,36,0.3); color: var(--yellow); }
+    .tag-job-inprogress { background: rgba(96,165,250,0.12); border: 1px solid rgba(96,165,250,0.3); color: var(--blue); }
+    .tag-job-completed { background: rgba(74,222,128,0.12); border: 1px solid rgba(74,222,128,0.3); color: var(--green); }
+    .tag-job-cancelled { background: rgba(248,113,113,0.12); border: 1px solid rgba(248,113,113,0.3); color: var(--red); }
+    .tag-tech-available { background: rgba(74,222,128,0.12); border: 1px solid rgba(74,222,128,0.3); color: var(--green); }
+    .tag-tech-on_job { background: rgba(251,191,36,0.12); border: 1px solid rgba(251,191,36,0.3); color: var(--yellow); }
+    .tag-tech-off { background: rgba(107,107,123,0.2); border: 1px solid rgba(107,107,123,0.3); color: var(--gray); }
+    .chevron { color: var(--gray); font-size: 0.75rem; transition: transform .2s; flex-shrink: 0; }
+    .rec-card.open .chevron { transform: rotate(180deg); }
+    .rec-card-body { display: none; padding: 0 1.2rem 1.1rem; border-top: 1px solid rgba(169,110,223,0.08); }
+    .rec-card.open .rec-card-body { display: block; }
+    .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .7rem 2rem; margin-top: .9rem; }
+    .detail-item .detail-label { font-size: 0.62rem; font-family: 'Space Mono', monospace; letter-spacing: 1px; text-transform: uppercase; color: var(--gray); margin-bottom: .2rem; }
+    .detail-item .detail-value { font-size: 0.88rem; color: var(--white); line-height: 1.5; }
+    .detail-item.full { grid-column: 1 / -1; }
+    .desc-box { background: rgba(0,0,0,0.2); border-radius: 7px; padding: .7rem .9rem; font-size: 0.85rem; color: #ccc; line-height: 1.6; }
+    .card-actions { display: flex; gap: .5rem; margin-top: .9rem; flex-wrap: wrap; }
 
-    .quote-list { display: flex; flex-direction: column; gap: .75rem; }
-
-    .quote-card {
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(169,110,223,0.15);
-      border-radius: 12px;
-      overflow: hidden;
-      transition: border-color .2s;
-    }
-    .quote-card:hover { border-color: rgba(169,110,223,0.4); }
-
-    .quote-card-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 1rem 1.4rem;
-      cursor: pointer;
-      gap: 1rem;
-    }
-    .quote-name {
-      font-weight: 600;
-      font-size: 1rem;
-      color: var(--white);
-    }
-    .quote-email {
-      font-size: 0.82rem;
-      color: var(--purple-light);
-    }
-    .quote-date {
-      font-size: 0.72rem;
-      font-family: 'Space Mono', monospace;
-      color: var(--gray);
-      flex-shrink: 0;
-    }
-    .quote-services {
-      display: flex;
-      flex-wrap: wrap;
-      gap: .4rem;
-      flex: 1;
-    }
-    .service-tag {
-      background: rgba(91,45,142,0.3);
-      border: 1px solid rgba(169,110,223,0.25);
-      border-radius: 4px;
-      padding: 2px 8px;
-      font-size: 0.72rem;
-      font-family: 'Space Mono', monospace;
-      color: var(--purple-light);
-      letter-spacing: .5px;
-    }
-    .chevron {
-      color: var(--gray);
-      font-size: 0.8rem;
-      transition: transform .2s;
-      flex-shrink: 0;
-    }
-    .quote-card.open .chevron { transform: rotate(180deg); }
-
-    .quote-card-body {
-      display: none;
-      padding: 0 1.4rem 1.2rem;
-      border-top: 1px solid rgba(169,110,223,0.1);
-    }
-    .quote-card.open .quote-card-body { display: block; }
-
-    .detail-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: .8rem 2rem;
-      margin-top: 1rem;
-    }
-    .detail-item {}
-    .detail-label {
-      font-size: 0.65rem;
-      font-family: 'Space Mono', monospace;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      color: var(--gray);
-      margin-bottom: .2rem;
-    }
-    .detail-value {
-      font-size: 0.9rem;
-      color: var(--white);
-      line-height: 1.5;
-    }
-    .detail-value.desc {
-      grid-column: 1 / -1;
-      background: rgba(0,0,0,0.2);
-      border-radius: 8px;
-      padding: .8rem 1rem;
-      font-size: 0.88rem;
-      color: #ccc;
-    }
-
-    .card-actions { display: flex; gap: .6rem; margin-top: 1rem; flex-wrap: wrap; }
-    .edit-btn {
-      background: transparent;
-      border: 1px solid rgba(169,110,223,0.35);
-      color: var(--purple-light);
-      border-radius: 6px;
-      padding: 6px 14px;
-      font-family: 'Space Mono', monospace;
-      font-size: 0.7rem;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      cursor: pointer;
-      transition: background .2s;
-    }
-    .edit-btn:hover { background: rgba(123,63,181,0.2); }
-    .save-btn {
-      background: var(--purple-mid);
-      border: none;
-      color: #fff;
-      border-radius: 6px;
-      padding: 6px 14px;
-      font-family: 'Space Mono', monospace;
-      font-size: 0.7rem;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      cursor: pointer;
-      transition: background .2s;
-    }
-    .save-btn:hover { background: var(--purple-light); }
-    .cancel-btn {
-      background: transparent;
-      border: 1px solid rgba(255,255,255,0.15);
-      color: var(--gray);
-      border-radius: 6px;
-      padding: 6px 14px;
-      font-family: 'Space Mono', monospace;
-      font-size: 0.7rem;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      cursor: pointer;
-    }
-    .delete-btn {
-      background: transparent;
-      border: 1px solid rgba(248,113,113,0.3);
-      color: #f87171;
-      border-radius: 6px;
-      padding: 6px 14px;
-      font-family: 'Space Mono', monospace;
-      font-size: 0.7rem;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      cursor: pointer;
-      transition: background .2s;
-    }
-    .delete-btn:hover { background: rgba(248,113,113,0.15); }
-
-    .edit-input {
-      width: 100%;
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(169,110,223,0.3);
-      border-radius: 6px;
-      padding: 7px 10px;
-      color: var(--white);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 0.88rem;
-      outline: none;
-    }
+    /* edit mode inputs */
+    .edit-input { width: 100%; background: rgba(255,255,255,0.06); border: 1px solid rgba(169,110,223,0.3); border-radius: 6px; padding: 7px 10px; color: var(--white); font-family: 'DM Sans', sans-serif; font-size: 0.86rem; outline: none; }
     .edit-input:focus { border-color: var(--purple-light); }
-    textarea.edit-input { resize: vertical; min-height: 80px; }
+    textarea.edit-input { resize: vertical; min-height: 70px; }
+    select.edit-input option { background: #1a0f2e; }
 
-    /* ── ADD CUSTOMER MODAL ── */
-    .modal-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.7);
-      z-index: 200;
-      align-items: center;
-      justify-content: center;
-      padding: 1.5rem;
-    }
+    /* buttons */
+    .btn { border-radius: 6px; padding: 6px 14px; font-family: 'Space Mono', monospace; font-size: 0.68rem; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; transition: background .2s, color .2s; border: 1px solid transparent; }
+    .btn-primary { background: var(--purple-mid); color: #fff; }
+    .btn-primary:hover { background: var(--purple-light); }
+    .btn-outline { background: transparent; border-color: rgba(169,110,223,0.35); color: var(--purple-light); }
+    .btn-outline:hover { background: rgba(123,63,181,0.2); }
+    .btn-ghost { background: transparent; border-color: rgba(255,255,255,0.12); color: var(--gray); }
+    .btn-danger { background: transparent; border-color: rgba(248,113,113,0.3); color: var(--red); }
+    .btn-danger:hover { background: rgba(248,113,113,0.1); }
+    .btn-sm { padding: 5px 10px; font-size: 0.63rem; }
+    .btn-success { background: rgba(74,222,128,0.15); border-color: rgba(74,222,128,0.3); color: var(--green); }
+
+    /* ── MODAL ── */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 300; align-items: center; justify-content: center; padding: 1.5rem; }
     .modal-overlay.visible { display: flex; }
-    .modal {
-      background: #1a0f2e;
-      border: 1px solid rgba(169,110,223,0.25);
-      border-radius: 16px;
-      padding: 2rem;
-      width: 100%;
-      max-width: 560px;
-      max-height: 90vh;
-      overflow-y: auto;
-    }
-    .modal-title {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 1.4rem;
-      letter-spacing: 2px;
-      color: var(--accent);
-      margin-bottom: 1.5rem;
-    }
-    .modal-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: .8rem;
-      margin-bottom: 1rem;
-    }
+    .modal { background: #160d28; border: 1px solid rgba(169,110,223,0.25); border-radius: 14px; padding: 1.8rem; width: 100%; max-width: 580px; max-height: 90vh; overflow-y: auto; }
+    .modal-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.3rem; letter-spacing: 2px; color: var(--accent); margin-bottom: 1.3rem; }
+    .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .7rem; margin-bottom: .8rem; }
     .modal-group { display: flex; flex-direction: column; gap: 5px; }
     .modal-group.full { grid-column: 1 / -1; }
-    .modal-group label {
-      font-size: 0.65rem;
-      font-family: 'Space Mono', monospace;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      color: var(--gray);
-    }
-    .modal-actions { display: flex; gap: .6rem; justify-content: flex-end; margin-top: 1.5rem; }
-    .add-customer-btn {
-      background: var(--purple-mid);
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      padding: 8px 18px;
-      font-family: 'Space Mono', monospace;
-      font-size: 0.72rem;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      cursor: pointer;
-      transition: background .2s;
-    }
-    .add-customer-btn:hover { background: var(--purple-light); }
+    .modal-group label { font-size: 0.62rem; font-family: 'Space Mono', monospace; letter-spacing: 1px; text-transform: uppercase; color: var(--gray); }
+    .modal-actions { display: flex; gap: .6rem; justify-content: flex-end; margin-top: 1.3rem; }
+    .modal-error { color: var(--red); font-size: 0.8rem; margin-top: .5rem; display: none; }
+    .modal-error.visible { display: block; }
 
-    .empty-state {
-      text-align: center;
-      padding: 4rem 2rem;
-      color: var(--gray);
-      font-family: 'Space Mono', monospace;
-      font-size: 0.8rem;
-      letter-spacing: 1px;
-    }
-    .loading {
-      text-align: center;
-      padding: 3rem;
-      color: var(--gray);
-      font-family: 'Space Mono', monospace;
-      font-size: 0.8rem;
-      letter-spacing: 1px;
-    }
+    .empty-state { text-align: center; padding: 3rem 2rem; color: var(--gray); font-family: 'Space Mono', monospace; font-size: 0.78rem; letter-spacing: 1px; }
+    .loading { text-align: center; padding: 2.5rem; color: var(--gray); font-family: 'Space Mono', monospace; font-size: 0.78rem; }
 
-    @media (max-width: 600px) {
-      .detail-grid { grid-template-columns: 1fr; }
-      .dash-header { flex-wrap: wrap; gap: .8rem; }
-      .quote-card-header { flex-wrap: wrap; }
-      .modal-grid { grid-template-columns: 1fr; }
+    @media (max-width: 640px) {
+      .detail-grid, .modal-grid { grid-template-columns: 1fr; }
+      .tab-btn { padding: .7rem .8rem; font-size: 0.65rem; }
+      .dash-header, .tab-bar { padding: .8rem 1rem; }
+      .tab-content { padding: 1rem; }
     }
   </style>
 </head>
 <body>
 
-<!-- LOGIN -->
+<!-- ── LOGIN ── -->
 <div class="login-wrap" id="loginWrap">
   <div class="login-card">
     <div class="login-logo">Security Warrior</div>
     <div class="login-sub">Admin Portal</div>
     <div class="login-group">
-      <label for="adminEmail">Email</label>
+      <label>Email</label>
       <input type="email" id="adminEmail" placeholder="admin@example.com" autocomplete="username"/>
     </div>
     <div class="login-group">
-      <label for="adminPassword">Password</label>
+      <label>Password</label>
       <input type="password" id="adminPassword" placeholder="••••••••" autocomplete="current-password"/>
     </div>
     <button class="login-btn" onclick="doLogin()">Sign In</button>
@@ -451,63 +157,209 @@
   </div>
 </div>
 
-<!-- DASHBOARD -->
+<!-- ── DASHBOARD ── -->
 <div class="dashboard" id="dashboard">
   <div class="dash-header">
-    <div>
-      <div class="dash-title">Quote Submissions</div>
-      <div class="dash-meta" id="dashMeta">Loading…</div>
-    </div>
-    <div style="display:flex;gap:.6rem;align-items:center;">
-      <button class="add-customer-btn" onclick="openAddModal()">+ Add Customer</button>
-      <button class="logout-btn" onclick="doLogout()">Sign Out</button>
+    <div class="dash-brand">Security Warrior CRM</div>
+    <div class="header-right">
+      <button class="btn btn-ghost btn-sm" onclick="doLogout()">Sign Out</button>
     </div>
   </div>
-  <div class="dash-body">
-    <div class="stats-row" id="statsRow"></div>
-    <div class="section-label">All Submissions</div>
-    <div class="quote-list" id="quoteList"><div class="loading">Loading submissions…</div></div>
+
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('customers')">Customers</button>
+    <button class="tab-btn" onclick="switchTab('jobs')">Jobs / Schedule</button>
+    <button class="tab-btn" onclick="switchTab('technicians')">Technicians</button>
+  </div>
+
+  <!-- ══ CUSTOMERS TAB ══ -->
+  <div class="tab-content active" id="tab-customers">
+    <div class="stats-row" id="cust-stats"></div>
+    <div class="section-header">
+      <div class="section-title">Customers</div>
+      <button class="btn btn-primary" onclick="openModal('addCustomer')">+ Add Customer</button>
+    </div>
+    <div class="filter-bar">
+      <input class="search-input" id="cust-search" placeholder="Search name, address…" oninput="renderCustomers()"/>
+      <select class="filter-select" id="cust-region" onchange="renderCustomers()">
+        <option value="">All Regions</option>
+        <option>Region 1 (Ocho Rios to St. Ann's Bay)</option>
+        <option>Region 2 (Ocho Rios to Oracabessa)</option>
+        <option>Region 3 (Oracabessa to Port Maria)</option>
+        <option>Region 4 (St. Ann's Bay to Runaway Bay)</option>
+        <option>Region 5 (Runaway Bay to Duncan's)</option>
+        <option>Zone: Capital &amp; Southeast</option>
+        <option>Miscellaneous</option>
+      </select>
+      <select class="filter-select" id="cust-warranty" onchange="renderCustomers()">
+        <option value="">All</option>
+        <option value="true">Warranty</option>
+        <option value="false">No Warranty</option>
+      </select>
+      <select class="filter-select" id="cust-status" onchange="renderCustomers()">
+        <option value="">All Status</option>
+        <option value="active">Active</option>
+        <option value="inactive">Inactive</option>
+      </select>
+    </div>
+    <div class="card-list" id="cust-list"><div class="loading">Loading…</div></div>
+  </div>
+
+  <!-- ══ JOBS TAB ══ -->
+  <div class="tab-content" id="tab-jobs">
+    <div class="stats-row" id="jobs-stats"></div>
+    <div class="section-header">
+      <div class="section-title">Jobs &amp; Schedule</div>
+      <button class="btn btn-primary" onclick="openModal('addJob')">+ Schedule Job</button>
+    </div>
+    <div class="filter-bar">
+      <select class="filter-select" id="jobs-status" onchange="renderJobs()">
+        <option value="">All Status</option>
+        <option value="scheduled">Scheduled</option>
+        <option value="in_progress">In Progress</option>
+        <option value="completed">Completed</option>
+        <option value="cancelled">Cancelled</option>
+      </select>
+      <select class="filter-select" id="jobs-tech" onchange="renderJobs()">
+        <option value="">All Technicians</option>
+      </select>
+    </div>
+    <div class="card-list" id="jobs-list"><div class="loading">Loading…</div></div>
+  </div>
+
+  <!-- ══ TECHNICIANS TAB ══ -->
+  <div class="tab-content" id="tab-technicians">
+    <div class="stats-row" id="tech-stats"></div>
+    <div class="section-header">
+      <div class="section-title">Technicians</div>
+      <button class="btn btn-primary" onclick="openModal('addTech')">+ Add Technician</button>
+    </div>
+    <div class="card-list" id="tech-list"><div class="loading">Loading…</div></div>
   </div>
 </div>
 
-<!-- ADD CUSTOMER MODAL -->
-<div class="modal-overlay" id="addModal">
+<!-- ══ MODALS ══ -->
+
+<!-- Add/Edit Customer -->
+<div class="modal-overlay" id="modal-addCustomer">
   <div class="modal">
-    <div class="modal-title">Add Customer</div>
+    <div class="modal-title" id="addCustomer-title">Add Customer</div>
+    <input type="hidden" id="addCustomer-id"/>
     <div class="modal-grid">
+      <div class="modal-group"><label>First Name *</label><input class="edit-input" id="ac-fname" placeholder="John"/></div>
+      <div class="modal-group"><label>Last Name *</label><input class="edit-input" id="ac-lname" placeholder="Doe"/></div>
+      <div class="modal-group"><label>Email *</label><input class="edit-input" id="ac-email" type="email" placeholder="john@example.com"/></div>
+      <div class="modal-group"><label>Phone</label><input class="edit-input" id="ac-phone" placeholder="(555) 000-0000"/></div>
+      <div class="modal-group full"><label>Address</label><input class="edit-input" id="ac-address" placeholder="123 Main St"/></div>
+      <div class="modal-group"><label>Account No.</label><input class="edit-input" id="ac-account" placeholder="ACC-001"/></div>
       <div class="modal-group">
-        <label>First Name *</label>
-        <input class="edit-input" id="m-fname" placeholder="John"/>
+        <label>Region</label>
+        <select class="edit-input" id="ac-region">
+          <option value="">Select region…</option>
+          <option>Region 1 (Ocho Rios to St. Ann's Bay)</option>
+          <option>Region 2 (Ocho Rios to Oracabessa)</option>
+          <option>Region 3 (Oracabessa to Port Maria)</option>
+          <option>Region 4 (St. Ann's Bay to Runaway Bay)</option>
+          <option>Region 5 (Runaway Bay to Duncan's)</option>
+          <option>Zone: Capital &amp; Southeast</option>
+          <option>Miscellaneous</option>
+        </select>
+      </div>
+      <div class="modal-group"><label>Services (comma separated)</label><input class="edit-input" id="ac-services" placeholder="CCTV, Alarm Systems"/></div>
+      <div class="modal-group"><label>Address Coordinate</label><input class="edit-input" id="ac-coord" placeholder="18.4762, -77.8939"/></div>
+      <div class="modal-group">
+        <label>Status</label>
+        <select class="edit-input" id="ac-status">
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+        </select>
       </div>
       <div class="modal-group">
-        <label>Last Name *</label>
-        <input class="edit-input" id="m-lname" placeholder="Doe"/>
+        <label>Warranty</label>
+        <select class="edit-input" id="ac-warranty">
+          <option value="false">No Warranty</option>
+          <option value="true">Warranty</option>
+        </select>
       </div>
-      <div class="modal-group">
-        <label>Email *</label>
-        <input class="edit-input" id="m-email" type="email" placeholder="john@example.com"/>
-      </div>
-      <div class="modal-group">
-        <label>Phone</label>
-        <input class="edit-input" id="m-phone" placeholder="(555) 000-0000"/>
+      <div class="modal-group full"><label>Notes / Description</label><textarea class="edit-input" id="ac-description" placeholder="Additional notes…"></textarea></div>
+    </div>
+    <div class="modal-error" id="addCustomer-error"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('addCustomer')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveCustomer()">Save Customer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add/Edit Job -->
+<div class="modal-overlay" id="modal-addJob">
+  <div class="modal">
+    <div class="modal-title" id="addJob-title">Schedule Job</div>
+    <input type="hidden" id="addJob-id"/>
+    <div class="modal-grid">
+      <div class="modal-group full">
+        <label>Customer *</label>
+        <select class="edit-input" id="aj-customer"><option value="">Select customer…</option></select>
       </div>
       <div class="modal-group full">
-        <label>Address</label>
-        <input class="edit-input" id="m-address" placeholder="123 Main St, City, State"/>
+        <label>Technician</label>
+        <select class="edit-input" id="aj-tech"><option value="">Unassigned</option></select>
       </div>
-      <div class="modal-group full">
-        <label>Services (comma separated)</label>
-        <input class="edit-input" id="m-services" placeholder="CCTV & Surveillance, Alarm Systems"/>
+      <div class="modal-group"><label>Service Type</label><input class="edit-input" id="aj-service" placeholder="CCTV Install, Gate Repair…"/></div>
+      <div class="modal-group"><label>Scheduled Date &amp; Time</label><input class="edit-input" id="aj-date" type="datetime-local"/></div>
+      <div class="modal-group">
+        <label>Status</label>
+        <select class="edit-input" id="aj-status">
+          <option value="scheduled">Scheduled</option>
+          <option value="in_progress">In Progress</option>
+          <option value="completed">Completed</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
       </div>
-      <div class="modal-group full">
-        <label>Job Description</label>
-        <textarea class="edit-input" id="m-description" placeholder="Describe the work needed…"></textarea>
+      <div class="modal-group full"><label>Notes</label><textarea class="edit-input" id="aj-notes" placeholder="Job details, access instructions…"></textarea></div>
+    </div>
+    <div class="modal-error" id="addJob-error"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('addJob')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveJob()">Save Job</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add/Edit Technician -->
+<div class="modal-overlay" id="modal-addTech">
+  <div class="modal">
+    <div class="modal-title" id="addTech-title">Add Technician</div>
+    <input type="hidden" id="addTech-id"/>
+    <div class="modal-grid">
+      <div class="modal-group full"><label>Name *</label><input class="edit-input" id="at-name" placeholder="John Smith"/></div>
+      <div class="modal-group"><label>Phone</label><input class="edit-input" id="at-phone" placeholder="(555) 000-0000"/></div>
+      <div class="modal-group">
+        <label>Region</label>
+        <select class="edit-input" id="at-region">
+          <option value="">All Regions</option>
+          <option>Region 1 (Ocho Rios to St. Ann's Bay)</option>
+          <option>Region 2 (Ocho Rios to Oracabessa)</option>
+          <option>Region 3 (Oracabessa to Port Maria)</option>
+          <option>Region 4 (St. Ann's Bay to Runaway Bay)</option>
+          <option>Region 5 (Runaway Bay to Duncan's)</option>
+          <option>Zone: Capital &amp; Southeast</option>
+          <option>Miscellaneous</option>
+        </select>
+      </div>
+      <div class="modal-group">
+        <label>Status</label>
+        <select class="edit-input" id="at-status">
+          <option value="available">Available</option>
+          <option value="on_job">On Job</option>
+          <option value="off">Off</option>
+        </select>
       </div>
     </div>
-    <div id="addModalError" style="color:#f87171;font-size:0.82rem;display:none;margin-top:.5rem;"></div>
+    <div class="modal-error" id="addTech-error"></div>
     <div class="modal-actions">
-      <button class="cancel-btn" onclick="closeAddModal()">Cancel</button>
-      <button class="save-btn" onclick="saveNewCustomer()">Save Customer</button>
+      <button class="btn btn-ghost" onclick="closeModal('addTech')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveTech()">Save Technician</button>
     </div>
   </div>
 </div>
@@ -515,29 +367,26 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 <script>
-  let sb;
+  let sb, allCustomers = [], allJobs = [], allTechs = [];
 
-  function initSupabase() {
+  function initSB() {
     if (!sb) sb = window.supabase.createClient(CONFIG.supabase.url, CONFIG.supabase.anonKey);
     return sb;
   }
 
+  /* ── AUTH ── */
   async function doLogin() {
     const email = document.getElementById('adminEmail').value.trim();
-    const password = document.getElementById('adminPassword').value;
+    const pw = document.getElementById('adminPassword').value;
     const errEl = document.getElementById('loginError');
     errEl.classList.remove('visible');
-
-    const { error } = await initSupabase().auth.signInWithPassword({ email, password });
-    if (error) {
-      errEl.classList.add('visible');
-      return;
-    }
+    const { error } = await initSB().auth.signInWithPassword({ email, password: pw });
+    if (error) { errEl.classList.add('visible'); return; }
     showDashboard();
   }
 
   async function doLogout() {
-    await initSupabase().auth.signOut();
+    await initSB().auth.signOut();
     document.getElementById('dashboard').classList.remove('visible');
     document.getElementById('loginWrap').style.display = 'flex';
     document.getElementById('adminPassword').value = '';
@@ -546,244 +395,446 @@
   async function showDashboard() {
     document.getElementById('loginWrap').style.display = 'none';
     document.getElementById('dashboard').classList.add('visible');
-    loadSubmissions();
+    await loadAll();
   }
 
-  async function loadSubmissions() {
-    const { data, error } = await initSupabase()
-      .from('customers')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      document.getElementById('quoteList').innerHTML = '<div class="empty-state">Error loading submissions.</div>';
-      return;
-    }
-
-    renderStats(data);
-    renderQuotes(data);
+  async function loadAll() {
+    await Promise.all([loadCustomers(), loadTechs()]);
+    await loadJobs();
   }
 
-  function renderStats(data) {
-    const total = data.length;
-    const today = data.filter(r => new Date(r.created_at).toDateString() === new Date().toDateString()).length;
-    const services = [...new Set(data.flatMap(r => r.services || []))];
+  /* ── TABS ── */
+  function switchTab(name) {
+    document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', ['customers','jobs','technicians'][i] === name));
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.toggle('active', t.id === 'tab-' + name));
+  }
 
-    document.getElementById('dashMeta').textContent = `${total} total submission${total !== 1 ? 's' : ''}`;
-    document.getElementById('statsRow').innerHTML = `
-      <div class="stat-card"><div class="stat-label">Total Quotes</div><div class="stat-value">${total}</div></div>
-      <div class="stat-card"><div class="stat-label">Today</div><div class="stat-value">${today}</div></div>
-      <div class="stat-card"><div class="stat-label">Services Requested</div><div class="stat-value">${services.length}</div></div>
+  /* ══════════════════════════════════════════
+     CUSTOMERS
+  ══════════════════════════════════════════ */
+  async function loadCustomers() {
+    const { data, error } = await initSB().from('customers').select('*').order('created_at', { ascending: false });
+    if (error) { document.getElementById('cust-list').innerHTML = '<div class="empty-state">Error loading customers.</div>'; return; }
+    allCustomers = data || [];
+    renderCustomers();
+    renderCustStats();
+    populateCustomerDropdown();
+  }
+
+  function renderCustStats() {
+    const total = allCustomers.length;
+    const active = allCustomers.filter(c => c.status === 'active' || !c.status).length;
+    const warranty = allCustomers.filter(c => c.warranty).length;
+    document.getElementById('cust-stats').innerHTML = `
+      <div class="stat-card"><div class="stat-label">Total</div><div class="stat-value">${total}</div></div>
+      <div class="stat-card"><div class="stat-label">Active</div><div class="stat-value">${active}</div></div>
+      <div class="stat-card"><div class="stat-label">Warranty</div><div class="stat-value">${warranty}</div></div>
+      <div class="stat-card"><div class="stat-label">No Warranty</div><div class="stat-value">${total - warranty}</div></div>
     `;
   }
 
-  function renderQuotes(data) {
-    const list = document.getElementById('quoteList');
-    if (!data.length) {
-      list.innerHTML = '<div class="empty-state">No submissions yet.</div>';
-      return;
-    }
+  function renderCustomers() {
+    const search = document.getElementById('cust-search').value.toLowerCase();
+    const region = document.getElementById('cust-region').value;
+    const warranty = document.getElementById('cust-warranty').value;
+    const status = document.getElementById('cust-status').value;
 
-    list.innerHTML = data.map(r => {
-      const date = new Date(r.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-      const time = new Date(r.created_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-      const servicesTags = (r.services || []).map(s => `<span class="service-tag">${s}</span>`).join('');
-      const gateTypes = (r.gate_types || []).join(', ') || '—';
-      const servicesVal = (r.services || []).join(', ');
+    let data = allCustomers.filter(c => {
+      const matchSearch = !search || `${c.first_name} ${c.last_name} ${c.address || ''} ${c.account_no || ''}`.toLowerCase().includes(search);
+      const matchRegion = !region || c.region === region;
+      const matchWarranty = warranty === '' || String(c.warranty) === warranty;
+      const matchStatus = !status || (c.status || 'active') === status;
+      return matchSearch && matchRegion && matchWarranty && matchStatus;
+    });
+
+    const list = document.getElementById('cust-list');
+    if (!data.length) { list.innerHTML = '<div class="empty-state">No customers found.</div>'; return; }
+
+    list.innerHTML = data.map(c => {
+      const name = `${c.first_name || ''} ${c.last_name || ''}`.trim() || '(No Name)';
+      const services = (c.services || []).map(s => `<span class="tag tag-service">${s}</span>`).join('');
+      const warrantyTag = c.warranty
+        ? `<span class="tag tag-warranty">Warranty</span>`
+        : `<span class="tag tag-no-warranty">No Warranty</span>`;
+      const regionTag = c.region ? `<span class="tag tag-region">${c.region}</span>` : '';
+      const statusTag = (c.status === 'inactive')
+        ? `<span class="tag tag-status-inactive">Inactive</span>`
+        : `<span class="tag tag-status-active">Active</span>`;
 
       return `
-        <div class="quote-card" id="card-${r.id}">
-          <div class="quote-card-header" onclick="toggleCard('${r.id}')">
-            <div>
-              <div class="quote-name">${r.first_name} ${r.last_name}</div>
-              <div class="quote-email">${r.email}</div>
+        <div class="rec-card" id="cust-${c.id}">
+          <div class="rec-card-header" onclick="toggleCard('cust-${c.id}')">
+            <div class="rec-main">
+              <div class="rec-name">${name} ${c.account_no ? `<span style="font-size:.75rem;color:var(--gray);font-weight:400;">#${c.account_no}</span>` : ''}</div>
+              <div class="rec-sub">${c.address || c.email || ''}</div>
             </div>
-            <div class="quote-services">${servicesTags}</div>
-            <div class="quote-date">${date}<br/>${time}</div>
+            <div class="rec-tags">${regionTag}${warrantyTag}${statusTag}${services}</div>
             <div class="chevron">▼</div>
           </div>
-          <div class="quote-card-body">
-            <!-- VIEW MODE -->
-            <div id="view-${r.id}">
+          <div class="rec-card-body">
+            <div id="cust-view-${c.id}">
               <div class="detail-grid">
-                <div class="detail-item">
-                  <div class="detail-label">First Name</div>
-                  <div class="detail-value">${r.first_name}</div>
-                </div>
-                <div class="detail-item">
-                  <div class="detail-label">Last Name</div>
-                  <div class="detail-value">${r.last_name}</div>
-                </div>
-                <div class="detail-item">
-                  <div class="detail-label">Email</div>
-                  <div class="detail-value">${r.email}</div>
-                </div>
-                <div class="detail-item">
-                  <div class="detail-label">Phone</div>
-                  <div class="detail-value">${r.phone || '—'}</div>
-                </div>
-                <div class="detail-item">
-                  <div class="detail-label">Address</div>
-                  <div class="detail-value">${r.address || '—'}</div>
-                </div>
-                <div class="detail-item">
-                  <div class="detail-label">Gate Types</div>
-                  <div class="detail-value">${gateTypes}</div>
-                </div>
-                <div class="detail-item">
-                  <div class="detail-label">Services</div>
-                  <div class="detail-value">${servicesVal || '—'}</div>
-                </div>
-                <div class="detail-item">
-                  <div class="detail-label">Submitted</div>
-                  <div class="detail-value">${date} at ${time}</div>
-                </div>
-                <div class="detail-item" style="grid-column:1/-1">
-                  <div class="detail-label">Job Description</div>
-                  <div class="detail-value desc">${r.description || '—'}</div>
-                </div>
+                <div class="detail-item"><div class="detail-label">Email</div><div class="detail-value">${c.email || '—'}</div></div>
+                <div class="detail-item"><div class="detail-label">Phone</div><div class="detail-value">${c.phone || '—'}</div></div>
+                <div class="detail-item"><div class="detail-label">Region</div><div class="detail-value">${c.region || '—'}</div></div>
+                <div class="detail-item"><div class="detail-label">Account No.</div><div class="detail-value">${c.account_no || '—'}</div></div>
+                <div class="detail-item"><div class="detail-label">Address</div><div class="detail-value">${c.address || '—'}</div></div>
+                <div class="detail-item"><div class="detail-label">Coordinates</div><div class="detail-value">${c.address_coordinate || '—'}</div></div>
+                <div class="detail-item"><div class="detail-label">Services</div><div class="detail-value">${(c.services||[]).join(', ') || '—'}</div></div>
+                <div class="detail-item"><div class="detail-label">Warranty</div><div class="detail-value">${c.warranty ? 'Yes' : 'No'}</div></div>
+                ${c.description ? `<div class="detail-item full"><div class="detail-label">Notes</div><div class="detail-value desc-box">${c.description}</div></div>` : ''}
               </div>
               <div class="card-actions">
-                <button class="edit-btn" onclick="startEdit('${r.id}')">Edit</button>
-                <button class="delete-btn" onclick="deleteRecord('${r.id}')">Delete</button>
-              </div>
-            </div>
-            <!-- EDIT MODE -->
-            <div id="edit-${r.id}" style="display:none;">
-              <div class="detail-grid" style="margin-top:1rem;">
-                <div class="detail-item">
-                  <div class="detail-label">First Name</div>
-                  <input class="edit-input" id="e-fname-${r.id}" value="${r.first_name || ''}"/>
-                </div>
-                <div class="detail-item">
-                  <div class="detail-label">Last Name</div>
-                  <input class="edit-input" id="e-lname-${r.id}" value="${r.last_name || ''}"/>
-                </div>
-                <div class="detail-item">
-                  <div class="detail-label">Email</div>
-                  <input class="edit-input" id="e-email-${r.id}" value="${r.email || ''}"/>
-                </div>
-                <div class="detail-item">
-                  <div class="detail-label">Phone</div>
-                  <input class="edit-input" id="e-phone-${r.id}" value="${r.phone || ''}"/>
-                </div>
-                <div class="detail-item" style="grid-column:1/-1">
-                  <div class="detail-label">Address</div>
-                  <input class="edit-input" id="e-address-${r.id}" value="${r.address || ''}"/>
-                </div>
-                <div class="detail-item" style="grid-column:1/-1">
-                  <div class="detail-label">Services (comma separated)</div>
-                  <input class="edit-input" id="e-services-${r.id}" value="${servicesVal}"/>
-                </div>
-                <div class="detail-item" style="grid-column:1/-1">
-                  <div class="detail-label">Job Description</div>
-                  <textarea class="edit-input" id="e-desc-${r.id}">${r.description || ''}</textarea>
-                </div>
-              </div>
-              <div class="card-actions">
-                <button class="save-btn" onclick="saveEdit('${r.id}')">Save</button>
-                <button class="cancel-btn" onclick="cancelEdit('${r.id}')">Cancel</button>
+                <button class="btn btn-outline btn-sm" onclick="editCustomer('${c.id}')">Edit</button>
+                <button class="btn btn-primary btn-sm" onclick="scheduleForCustomer('${c.id}')">Schedule Job</button>
+                <button class="btn btn-danger btn-sm" onclick="deleteCustomer('${c.id}')">Delete</button>
               </div>
             </div>
           </div>
-        </div>
-      `;
+        </div>`;
     }).join('');
   }
 
-  function toggleCard(id) {
-    document.getElementById('card-' + id).classList.toggle('open');
+  function editCustomer(id) {
+    const c = allCustomers.find(x => x.id === id);
+    if (!c) return;
+    document.getElementById('addCustomer-title').textContent = 'Edit Customer';
+    document.getElementById('addCustomer-id').value = id;
+    document.getElementById('ac-fname').value = c.first_name || '';
+    document.getElementById('ac-lname').value = c.last_name || '';
+    document.getElementById('ac-email').value = c.email || '';
+    document.getElementById('ac-phone').value = c.phone || '';
+    document.getElementById('ac-address').value = c.address || '';
+    document.getElementById('ac-account').value = c.account_no || '';
+    document.getElementById('ac-region').value = c.region || '';
+    document.getElementById('ac-services').value = (c.services || []).join(', ');
+    document.getElementById('ac-coord').value = c.address_coordinate || '';
+    document.getElementById('ac-status').value = c.status || 'active';
+    document.getElementById('ac-warranty').value = String(c.warranty || false);
+    document.getElementById('ac-description').value = c.description || '';
+    openModal('addCustomer');
   }
 
-  function startEdit(id) {
-    document.getElementById('view-' + id).style.display = 'none';
-    document.getElementById('edit-' + id).style.display = 'block';
-  }
-
-  function cancelEdit(id) {
-    document.getElementById('edit-' + id).style.display = 'none';
-    document.getElementById('view-' + id).style.display = 'block';
-  }
-
-  async function saveEdit(id) {
-    const services = document.getElementById('e-services-' + id).value.split(',').map(s => s.trim()).filter(Boolean);
-    const { error } = await initSupabase().from('customers').update({
-      first_name:  document.getElementById('e-fname-' + id).value.trim(),
-      last_name:   document.getElementById('e-lname-' + id).value.trim(),
-      email:       document.getElementById('e-email-' + id).value.trim(),
-      phone:       document.getElementById('e-phone-' + id).value.trim() || null,
-      address:     document.getElementById('e-address-' + id).value.trim() || null,
-      services,
-      description: document.getElementById('e-desc-' + id).value.trim()
-    }).eq('id', id);
-
-    if (error) { alert('Save failed: ' + error.message); return; }
-    loadSubmissions();
-  }
-
-  async function deleteRecord(id) {
-    if (!confirm('Delete this submission? This cannot be undone.')) return;
-    const { error } = await initSupabase().from('customers').delete().eq('id', id);
-    if (error) { alert('Delete failed.'); return; }
-    loadSubmissions();
-  }
-
-  function openAddModal() {
-    ['m-fname','m-lname','m-email','m-phone','m-address','m-services','m-description'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.value = '';
-    });
-    document.getElementById('addModalError').style.display = 'none';
-    document.getElementById('addModal').classList.add('visible');
-  }
-
-  function closeAddModal() {
-    document.getElementById('addModal').classList.remove('visible');
-  }
-
-  async function saveNewCustomer() {
-    const fname = document.getElementById('m-fname').value.trim();
-    const lname = document.getElementById('m-lname').value.trim();
-    const email = document.getElementById('m-email').value.trim();
-    const errEl = document.getElementById('addModalError');
+  async function saveCustomer() {
+    const id = document.getElementById('addCustomer-id').value;
+    const fname = document.getElementById('ac-fname').value.trim();
+    const lname = document.getElementById('ac-lname').value.trim();
+    const email = document.getElementById('ac-email').value.trim();
+    const errEl = document.getElementById('addCustomer-error');
+    errEl.classList.remove('visible');
 
     if (!fname || !lname || !email) {
       errEl.textContent = 'First name, last name, and email are required.';
-      errEl.style.display = 'block';
-      return;
+      errEl.classList.add('visible'); return;
     }
 
-    const services = document.getElementById('m-services').value.split(',').map(s => s.trim()).filter(Boolean);
+    const payload = {
+      first_name: fname, last_name: lname, email,
+      phone: document.getElementById('ac-phone').value.trim() || null,
+      address: document.getElementById('ac-address').value.trim() || null,
+      account_no: document.getElementById('ac-account').value.trim() || null,
+      region: document.getElementById('ac-region').value || null,
+      services: document.getElementById('ac-services').value.split(',').map(s=>s.trim()).filter(Boolean),
+      address_coordinate: document.getElementById('ac-coord').value.trim() || null,
+      status: document.getElementById('ac-status').value,
+      warranty: document.getElementById('ac-warranty').value === 'true',
+      description: document.getElementById('ac-description').value.trim() || null,
+    };
 
-    const { error } = await initSupabase().from('customers').insert({
-      first_name:  fname,
-      last_name:   lname,
-      email,
-      phone:       document.getElementById('m-phone').value.trim() || null,
-      address:     document.getElementById('m-address').value.trim() || null,
-      services,
-      description: document.getElementById('m-description').value.trim() || null
-    });
+    const { error } = id
+      ? await initSB().from('customers').update(payload).eq('id', id)
+      : await initSB().from('customers').insert(payload);
 
-    if (error) { errEl.textContent = 'Error: ' + error.message; errEl.style.display = 'block'; return; }
-    closeAddModal();
-    loadSubmissions();
+    if (error) { errEl.textContent = 'Error: ' + error.message; errEl.classList.add('visible'); return; }
+    closeModal('addCustomer');
+    await loadCustomers();
   }
 
-  // Close modal on overlay click
-  document.getElementById('addModal').addEventListener('click', e => {
-    if (e.target === document.getElementById('addModal')) closeAddModal();
+  async function deleteCustomer(id) {
+    if (!confirm('Delete this customer? This will also remove linked jobs.')) return;
+    await initSB().from('customers').delete().eq('id', id);
+    await loadCustomers();
+    await loadJobs();
+  }
+
+  function scheduleForCustomer(customerId) {
+    switchTab('jobs');
+    openModal('addJob');
+    setTimeout(() => {
+      document.getElementById('aj-customer').value = customerId;
+    }, 50);
+  }
+
+  function populateCustomerDropdown() {
+    const sel = document.getElementById('aj-customer');
+    const cur = sel.value;
+    sel.innerHTML = '<option value="">Select customer…</option>' +
+      allCustomers.map(c => `<option value="${c.id}">${c.first_name} ${c.last_name}${c.address ? ' — ' + c.address : ''}</option>`).join('');
+    if (cur) sel.value = cur;
+  }
+
+  /* ══════════════════════════════════════════
+     TECHNICIANS
+  ══════════════════════════════════════════ */
+  async function loadTechs() {
+    const { data } = await initSB().from('technicians').select('*').order('name');
+    allTechs = data || [];
+    renderTechs();
+    renderTechStats();
+    populateTechDropdowns();
+  }
+
+  function renderTechStats() {
+    const total = allTechs.length;
+    const avail = allTechs.filter(t => t.status === 'available').length;
+    const onJob = allTechs.filter(t => t.status === 'on_job').length;
+    document.getElementById('tech-stats').innerHTML = `
+      <div class="stat-card"><div class="stat-label">Total</div><div class="stat-value">${total}</div></div>
+      <div class="stat-card"><div class="stat-label">Available</div><div class="stat-value">${avail}</div></div>
+      <div class="stat-card"><div class="stat-label">On Job</div><div class="stat-value">${onJob}</div></div>
+    `;
+  }
+
+  function renderTechs() {
+    const list = document.getElementById('tech-list');
+    if (!allTechs.length) { list.innerHTML = '<div class="empty-state">No technicians added yet.</div>'; return; }
+    list.innerHTML = allTechs.map(t => {
+      const statusTag = `<span class="tag tag-tech-${t.status || 'available'}">${(t.status||'available').replace('_',' ')}</span>`;
+      const regionTag = t.region ? `<span class="tag tag-region">${t.region}</span>` : '';
+      return `
+        <div class="rec-card" id="tech-${t.id}">
+          <div class="rec-card-header" onclick="toggleCard('tech-${t.id}')">
+            <div class="rec-main">
+              <div class="rec-name">${t.name}</div>
+              <div class="rec-sub">${t.phone || 'No phone'}</div>
+            </div>
+            <div class="rec-tags">${statusTag}${regionTag}</div>
+            <div class="chevron">▼</div>
+          </div>
+          <div class="rec-card-body">
+            <div class="detail-grid">
+              <div class="detail-item"><div class="detail-label">Phone</div><div class="detail-value">${t.phone || '—'}</div></div>
+              <div class="detail-item"><div class="detail-label">Region</div><div class="detail-value">${t.region || '—'}</div></div>
+              <div class="detail-item"><div class="detail-label">Status</div><div class="detail-value">${(t.status||'available').replace('_',' ')}</div></div>
+            </div>
+            <div class="card-actions">
+              <button class="btn btn-outline btn-sm" onclick="editTech('${t.id}')">Edit</button>
+              <button class="btn btn-danger btn-sm" onclick="deleteTech('${t.id}')">Delete</button>
+            </div>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  function editTech(id) {
+    const t = allTechs.find(x => x.id === id);
+    if (!t) return;
+    document.getElementById('addTech-title').textContent = 'Edit Technician';
+    document.getElementById('addTech-id').value = id;
+    document.getElementById('at-name').value = t.name || '';
+    document.getElementById('at-phone').value = t.phone || '';
+    document.getElementById('at-region').value = t.region || '';
+    document.getElementById('at-status').value = t.status || 'available';
+    openModal('addTech');
+  }
+
+  async function saveTech() {
+    const id = document.getElementById('addTech-id').value;
+    const name = document.getElementById('at-name').value.trim();
+    const errEl = document.getElementById('addTech-error');
+    errEl.classList.remove('visible');
+    if (!name) { errEl.textContent = 'Name is required.'; errEl.classList.add('visible'); return; }
+
+    const payload = {
+      name,
+      phone: document.getElementById('at-phone').value.trim() || null,
+      region: document.getElementById('at-region').value || null,
+      status: document.getElementById('at-status').value,
+    };
+
+    const { error } = id
+      ? await initSB().from('technicians').update(payload).eq('id', id)
+      : await initSB().from('technicians').insert(payload);
+
+    if (error) { errEl.textContent = 'Error: ' + error.message; errEl.classList.add('visible'); return; }
+    closeModal('addTech');
+    await loadTechs();
+    await loadJobs();
+  }
+
+  async function deleteTech(id) {
+    if (!confirm('Delete this technician?')) return;
+    await initSB().from('technicians').delete().eq('id', id);
+    await loadTechs();
+  }
+
+  function populateTechDropdowns() {
+    ['aj-tech', 'jobs-tech'].forEach(selId => {
+      const sel = document.getElementById(selId);
+      const cur = sel.value;
+      const placeholder = selId === 'jobs-tech' ? '<option value="">All Technicians</option>' : '<option value="">Unassigned</option>';
+      sel.innerHTML = placeholder + allTechs.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+      if (cur) sel.value = cur;
+    });
+  }
+
+  /* ══════════════════════════════════════════
+     JOBS
+  ══════════════════════════════════════════ */
+  async function loadJobs() {
+    const { data } = await initSB().from('jobs').select('*, customers(first_name, last_name, address, region), technicians(name)').order('scheduled_date', { ascending: true });
+    allJobs = data || [];
+    renderJobs();
+    renderJobStats();
+  }
+
+  function renderJobStats() {
+    const total = allJobs.length;
+    const scheduled = allJobs.filter(j => j.status === 'scheduled').length;
+    const inProgress = allJobs.filter(j => j.status === 'in_progress').length;
+    const completed = allJobs.filter(j => j.status === 'completed').length;
+    document.getElementById('jobs-stats').innerHTML = `
+      <div class="stat-card"><div class="stat-label">Total</div><div class="stat-value">${total}</div></div>
+      <div class="stat-card"><div class="stat-label">Scheduled</div><div class="stat-value">${scheduled}</div></div>
+      <div class="stat-card"><div class="stat-label">In Progress</div><div class="stat-value">${inProgress}</div></div>
+      <div class="stat-card"><div class="stat-label">Completed</div><div class="stat-value">${completed}</div></div>
+    `;
+  }
+
+  function renderJobs() {
+    const statusFilter = document.getElementById('jobs-status').value;
+    const techFilter = document.getElementById('jobs-tech').value;
+
+    let data = allJobs.filter(j => {
+      const matchStatus = !statusFilter || j.status === statusFilter;
+      const matchTech = !techFilter || j.technician_id === techFilter;
+      return matchStatus && matchTech;
+    });
+
+    const list = document.getElementById('jobs-list');
+    if (!data.length) { list.innerHTML = '<div class="empty-state">No jobs found.</div>'; return; }
+
+    list.innerHTML = data.map(j => {
+      const custName = j.customers ? `${j.customers.first_name} ${j.customers.last_name}` : 'Unknown';
+      const custAddr = j.customers?.address || j.customers?.region || '';
+      const techName = j.technicians?.name || 'Unassigned';
+      const dateStr = j.scheduled_date
+        ? new Date(j.scheduled_date).toLocaleString('en-US', { month:'short', day:'numeric', year:'numeric', hour:'numeric', minute:'2-digit' })
+        : 'No date set';
+      const statusKey = (j.status || 'scheduled').replace('_','');
+      const statusTag = `<span class="tag tag-job-${statusKey === 'inprogress' ? 'inprogress' : j.status}">${(j.status||'scheduled').replace('_',' ')}</span>`;
+
+      return `
+        <div class="rec-card" id="job-${j.id}">
+          <div class="rec-card-header" onclick="toggleCard('job-${j.id}')">
+            <div class="rec-main">
+              <div class="rec-name">${custName}</div>
+              <div class="rec-sub">${j.service_type || 'General Service'} · ${techName}</div>
+            </div>
+            <div class="rec-tags">${statusTag}<span style="font-size:.72rem;color:var(--gray);font-family:'Space Mono',monospace;">${dateStr}</span></div>
+            <div class="chevron">▼</div>
+          </div>
+          <div class="rec-card-body">
+            <div class="detail-grid">
+              <div class="detail-item"><div class="detail-label">Customer</div><div class="detail-value">${custName}</div></div>
+              <div class="detail-item"><div class="detail-label">Address</div><div class="detail-value">${custAddr || '—'}</div></div>
+              <div class="detail-item"><div class="detail-label">Technician</div><div class="detail-value">${techName}</div></div>
+              <div class="detail-item"><div class="detail-label">Service</div><div class="detail-value">${j.service_type || '—'}</div></div>
+              <div class="detail-item"><div class="detail-label">Scheduled</div><div class="detail-value">${dateStr}</div></div>
+              <div class="detail-item"><div class="detail-label">Status</div><div class="detail-value">${(j.status||'scheduled').replace('_',' ')}</div></div>
+              ${j.notes ? `<div class="detail-item full"><div class="detail-label">Notes</div><div class="detail-value desc-box">${j.notes}</div></div>` : ''}
+            </div>
+            <div class="card-actions">
+              <button class="btn btn-outline btn-sm" onclick="editJob('${j.id}')">Edit</button>
+              ${j.status === 'scheduled' ? `<button class="btn btn-success btn-sm" onclick="updateJobStatus('${j.id}','in_progress')">Mark In Progress</button>` : ''}
+              ${j.status === 'in_progress' ? `<button class="btn btn-success btn-sm" onclick="updateJobStatus('${j.id}','completed')">Mark Completed</button>` : ''}
+              <button class="btn btn-danger btn-sm" onclick="deleteJob('${j.id}')">Delete</button>
+            </div>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  function editJob(id) {
+    const j = allJobs.find(x => x.id === id);
+    if (!j) return;
+    document.getElementById('addJob-title').textContent = 'Edit Job';
+    document.getElementById('addJob-id').value = id;
+    document.getElementById('aj-customer').value = j.customer_id || '';
+    document.getElementById('aj-tech').value = j.technician_id || '';
+    document.getElementById('aj-service').value = j.service_type || '';
+    document.getElementById('aj-date').value = j.scheduled_date ? j.scheduled_date.slice(0,16) : '';
+    document.getElementById('aj-status').value = j.status || 'scheduled';
+    document.getElementById('aj-notes').value = j.notes || '';
+    openModal('addJob');
+  }
+
+  async function saveJob() {
+    const id = document.getElementById('addJob-id').value;
+    const customerId = document.getElementById('aj-customer').value;
+    const errEl = document.getElementById('addJob-error');
+    errEl.classList.remove('visible');
+    if (!customerId) { errEl.textContent = 'Please select a customer.'; errEl.classList.add('visible'); return; }
+
+    const techId = document.getElementById('aj-tech').value;
+    const dateVal = document.getElementById('aj-date').value;
+
+    const payload = {
+      customer_id: customerId,
+      technician_id: techId || null,
+      service_type: document.getElementById('aj-service').value.trim() || null,
+      scheduled_date: dateVal ? new Date(dateVal).toISOString() : null,
+      status: document.getElementById('aj-status').value,
+      notes: document.getElementById('aj-notes').value.trim() || null,
+    };
+
+    const { error } = id
+      ? await initSB().from('jobs').update(payload).eq('id', id)
+      : await initSB().from('jobs').insert(payload);
+
+    if (error) { errEl.textContent = 'Error: ' + error.message; errEl.classList.add('visible'); return; }
+    closeModal('addJob');
+    await loadJobs();
+  }
+
+  async function updateJobStatus(id, status) {
+    await initSB().from('jobs').update({ status }).eq('id', id);
+    await loadJobs();
+  }
+
+  async function deleteJob(id) {
+    if (!confirm('Delete this job?')) return;
+    await initSB().from('jobs').delete().eq('id', id);
+    await loadJobs();
+  }
+
+  /* ── SHARED HELPERS ── */
+  function toggleCard(id) { document.getElementById(id).classList.toggle('open'); }
+
+  function openModal(name) {
+    const errEl = document.getElementById(name + '-error');
+    if (errEl) errEl.classList.remove('visible');
+    document.getElementById('modal-' + name).classList.add('visible');
+  }
+
+  function closeModal(name) {
+    document.getElementById('modal-' + name).classList.remove('visible');
+    const idEl = document.getElementById(name + '-id');
+    if (idEl) idEl.value = '';
+    const titleEl = document.getElementById(name + '-title');
+    if (titleEl) {
+      const defaults = { addCustomer: 'Add Customer', addJob: 'Schedule Job', addTech: 'Add Technician' };
+      titleEl.textContent = defaults[name] || '';
+    }
+  }
+
+  document.querySelectorAll('.modal-overlay').forEach(el => {
+    el.addEventListener('click', e => { if (e.target === el) closeModal(el.id.replace('modal-','')); });
   });
 
-  // Auto-login if session exists
-  initSupabase().auth.getSession().then(({ data }) => {
-    if (data.session) showDashboard();
-  });
+  document.getElementById('adminPassword').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
 
-  // Submit on Enter
-  document.getElementById('adminPassword').addEventListener('keydown', e => {
-    if (e.key === 'Enter') doLogin();
-  });
+  initSB().auth.getSession().then(({ data }) => { if (data.session) showDashboard(); });
 </script>
 </body>
 </html>
