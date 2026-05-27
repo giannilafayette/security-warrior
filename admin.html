@@ -855,14 +855,22 @@
     const total = allTechs.length;
     const avail = allTechs.filter(t => t.status === 'available').length;
     const onJob = allTechs.filter(t => t.status === 'on_job').length;
+    const tsel = k => techStatFilter === k ? ' stat-selected' : '';
     document.getElementById('tech-stats').innerHTML = `
-      <div class="stat-card"><div class="stat-label">Total</div><div class="stat-value">${total}</div></div>
-      <div class="stat-card"><div class="stat-label">Available</div><div class="stat-value">${avail}</div></div>
-      <div class="stat-card"><div class="stat-label">On Job</div><div class="stat-value">${onJob}</div></div>
+      <div class="stat-card${tsel('total')}"     onclick="toggleTechStatFilter('total')"><div class="stat-label">Total</div><div class="stat-value">${total}</div></div>
+      <div class="stat-card${tsel('available')}" onclick="toggleTechStatFilter('available')"><div class="stat-label">Available</div><div class="stat-value">${avail}</div></div>
+      <div class="stat-card${tsel('on_job')}"    onclick="toggleTechStatFilter('on_job')"><div class="stat-label">On Job</div><div class="stat-value">${onJob}</div></div>
     `;
   }
 
   let techSortCol = 'name', techSortDir = 'asc';
+  let techStatFilter = null; // null | 'total' | 'available' | 'on_job'
+
+  function toggleTechStatFilter(key) {
+    techStatFilter = techStatFilter === key ? null : key;
+    renderTechStats();
+    renderTechs();
+  }
 
   function sortTechs(col) {
     techSortDir = techSortCol === col ? (techSortDir === 'asc' ? 'desc' : 'asc') : 'asc';
@@ -880,7 +888,8 @@
     let data = allTechs.filter(t => {
       const matchSearch = !search || `${t.name} ${t.phone||''} ${t.email||''}`.toLowerCase().includes(search);
       const matchStatus = !statusF || (t.status||'available') === statusF;
-      return matchSearch && matchStatus;
+      const matchStat   = !techStatFilter || techStatFilter === 'total' || (t.status||'available') === techStatFilter;
+      return matchSearch && matchStatus && matchStat;
     });
 
     data.sort((a,b) => {
@@ -977,15 +986,23 @@
     const scheduled = allJobs.filter(j => j.status === 'scheduled').length;
     const inProgress = allJobs.filter(j => j.status === 'in_progress').length;
     const completed = allJobs.filter(j => j.status === 'completed').length;
+    const jsel = k => jobStatFilter === k ? ' stat-selected' : '';
     document.getElementById('jobs-stats').innerHTML = `
-      <div class="stat-card"><div class="stat-label">Total</div><div class="stat-value">${total}</div></div>
-      <div class="stat-card"><div class="stat-label">Scheduled</div><div class="stat-value">${scheduled}</div></div>
-      <div class="stat-card"><div class="stat-label">In Progress</div><div class="stat-value">${inProgress}</div></div>
-      <div class="stat-card"><div class="stat-label">Completed</div><div class="stat-value">${completed}</div></div>
+      <div class="stat-card${jsel('total')}"       onclick="toggleJobStatFilter('total')"><div class="stat-label">Total</div><div class="stat-value">${total}</div></div>
+      <div class="stat-card${jsel('scheduled')}"   onclick="toggleJobStatFilter('scheduled')"><div class="stat-label">Scheduled</div><div class="stat-value">${scheduled}</div></div>
+      <div class="stat-card${jsel('in_progress')}" onclick="toggleJobStatFilter('in_progress')"><div class="stat-label">In Progress</div><div class="stat-value">${inProgress}</div></div>
+      <div class="stat-card${jsel('completed')}"   onclick="toggleJobStatFilter('completed')"><div class="stat-label">Completed</div><div class="stat-value">${completed}</div></div>
     `;
   }
 
   let jobSortCol = 'date', jobSortDir = 'asc';
+  let jobStatFilter = null; // null | 'total' | 'scheduled' | 'in_progress' | 'completed'
+
+  function toggleJobStatFilter(key) {
+    jobStatFilter = jobStatFilter === key ? null : key;
+    renderJobStats();
+    renderJobs();
+  }
 
   function sortJobs(col) {
     jobSortDir = jobSortCol === col ? (jobSortDir === 'asc' ? 'desc' : 'asc') : 'asc';
@@ -1005,7 +1022,8 @@
       const matchTech   = !techFilter || j.technician_id === techFilter;
       const custName    = j.customers ? `${j.customers.first_name} ${j.customers.last_name||''}`.toLowerCase() : '';
       const matchSearch = !searchVal || custName.includes(searchVal);
-      return matchStatus && matchTech && matchSearch;
+      const matchStat   = !jobStatFilter || jobStatFilter === 'total' || j.status === jobStatFilter;
+      return matchStatus && matchTech && matchSearch && matchStat;
     });
 
     data.sort((a, b) => {
