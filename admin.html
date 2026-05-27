@@ -269,15 +269,24 @@
       <select class="filter-select" id="jobs-tech" onchange="renderJobs()">
         <option value="">All Technicians</option>
       </select>
-      <select class="filter-select" id="jobs-sort" onchange="renderJobs()">
-        <option value="date_asc">Date ↑</option>
-        <option value="date_desc">Date ↓</option>
-        <option value="customer">Customer A–Z</option>
-        <option value="status">Status</option>
-        <option value="tech">Technician</option>
-      </select>
     </div>
-    <div class="card-list" id="jobs-list"><div class="loading">Loading…</div></div>
+    <div style="overflow-x:auto;border:1px solid var(--border);border-radius:10px;">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th onclick="sortJobs('customer')">Customer <span id="jsort-customer"></span></th>
+            <th>Phone</th>
+            <th onclick="sortJobs('service')">Service Type <span id="jsort-service"></span></th>
+            <th onclick="sortJobs('tech')">Technician <span id="jsort-tech"></span></th>
+            <th onclick="sortJobs('date')">Scheduled Date <span id="jsort-date">↑</span></th>
+            <th onclick="sortJobs('status')">Status <span id="jsort-status"></span></th>
+            <th>Notes</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="jobs-list"><tr><td colspan="8" class="loading">Loading…</td></tr></tbody>
+      </table>
+    </div>
   </div>
 
   <!-- ══ TECHNICIANS TAB ══ -->
@@ -287,7 +296,30 @@
       <div class="section-title">Technicians</div>
       <button class="btn btn-primary" onclick="openModal('addTech')">+ Add Technician</button>
     </div>
-    <div class="card-list" id="tech-list"><div class="loading">Loading…</div></div>
+    <div class="filter-bar">
+      <input class="search-input" id="tech-search" placeholder="Search name…" oninput="renderTechs()" style="min-width:180px;"/>
+      <select class="filter-select" id="tech-status-filter" onchange="renderTechs()">
+        <option value="">All Status</option>
+        <option value="available">Available</option>
+        <option value="on_job">On Job</option>
+        <option value="off">Off</option>
+      </select>
+    </div>
+    <div style="overflow-x:auto;border:1px solid var(--border);border-radius:10px;">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th onclick="sortTechs('name')">Name <span id="tsort-name">↑</span></th>
+            <th onclick="sortTechs('phone')">Phone <span id="tsort-phone"></span></th>
+            <th onclick="sortTechs('email')">Email <span id="tsort-email"></span></th>
+            <th onclick="sortTechs('region')">Region <span id="tsort-region"></span></th>
+            <th onclick="sortTechs('status')">Status <span id="tsort-status"></span></th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="tech-list"><tr><td colspan="6" class="loading">Loading…</td></tr></tbody>
+      </table>
+    </div>
   </div>
 </div>
 
@@ -743,35 +775,48 @@
     `;
   }
 
+  let techSortCol = 'name', techSortDir = 'asc';
+
+  function sortTechs(col) {
+    techSortDir = techSortCol === col ? (techSortDir === 'asc' ? 'desc' : 'asc') : 'asc';
+    techSortCol = col;
+    ['name','phone','email','region','status'].forEach(c => { const el = document.getElementById('tsort-'+c); if(el) el.textContent=''; });
+    const el = document.getElementById('tsort-'+col); if(el) el.textContent = techSortDir==='asc'?'↑':'↓';
+    renderTechs();
+  }
+
   function renderTechs() {
+    const search = (document.getElementById('tech-search')?.value||'').toLowerCase();
+    const statusF = document.getElementById('tech-status-filter')?.value||'';
     const list = document.getElementById('tech-list');
-    if (!allTechs.length) { list.innerHTML = '<div class="empty-state">No technicians added yet.</div>'; return; }
-    list.innerHTML = allTechs.map(t => {
-      const statusTag = `<span class="tag tag-tech-${t.status || 'available'}">${(t.status||'available').replace('_',' ')}</span>`;
-      const regionTag = t.region ? `<span class="tag tag-region">${t.region}</span>` : '';
-      return `
-        <div class="rec-card" id="tech-${t.id}">
-          <div class="rec-card-header" onclick="toggleCard('tech-${t.id}')">
-            <div class="rec-main">
-              <div class="rec-name">${t.name}</div>
-              <div class="rec-sub">${t.phone || 'No phone'}</div>
-            </div>
-            <div class="rec-tags">${statusTag}${regionTag}</div>
-            <div class="chevron">▼</div>
-          </div>
-          <div class="rec-card-body">
-            <div class="detail-grid">
-              <div class="detail-item"><div class="detail-label">Phone</div><div class="detail-value">${t.phone || '—'}</div></div>
-              <div class="detail-item"><div class="detail-label">Email</div><div class="detail-value">${t.email || '—'}</div></div>
-              <div class="detail-item"><div class="detail-label">Region</div><div class="detail-value">${t.region || '—'}</div></div>
-              <div class="detail-item"><div class="detail-label">Status</div><div class="detail-value">${(t.status||'available').replace('_',' ')}</div></div>
-            </div>
-            <div class="card-actions">
-              <button class="btn btn-outline btn-sm" onclick="editTech('${t.id}')">Edit</button>
-              <button class="btn btn-danger btn-sm" onclick="deleteTech('${t.id}')">Delete</button>
-            </div>
-          </div>
-        </div>`;
+
+    let data = allTechs.filter(t => {
+      const matchSearch = !search || `${t.name} ${t.phone||''} ${t.email||''}`.toLowerCase().includes(search);
+      const matchStatus = !statusF || (t.status||'available') === statusF;
+      return matchSearch && matchStatus;
+    });
+
+    data.sort((a,b) => {
+      const av = a[techSortCol]||'', bv = b[techSortCol]||'';
+      return techSortDir==='asc' ? av.localeCompare(bv) : bv.localeCompare(av);
+    });
+
+    if (!data.length) { list.innerHTML = '<tr><td colspan="6" class="empty-state">No technicians found.</td></tr>'; return; }
+
+    list.innerHTML = data.map(t => {
+      const statusTag = `<span class="tag tag-tech-${t.status||'available'}">${(t.status||'available').replace('_',' ')}</span>`;
+      const region = t.region ? t.region.replace(/Region \d+ \(([^)]+)\)/,'$1') : '—';
+      return `<tr>
+        <td><div class="td-name">🔧 ${t.name}</div></td>
+        <td>${t.phone||'<span class="muted">—</span>'}</td>
+        <td class="muted">${t.email||'—'}</td>
+        <td class="wrap muted">${region}</td>
+        <td>${statusTag}</td>
+        <td><div class="td-actions">
+          <button class="btn btn-outline btn-sm" onclick="editTech('${t.id}')">Edit</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteTech('${t.id}')">Delete</button>
+        </div></td>
+      </tr>`;
     }).join('');
   }
 
@@ -853,11 +898,20 @@
     `;
   }
 
+  let jobSortCol = 'date', jobSortDir = 'asc';
+
+  function sortJobs(col) {
+    jobSortDir = jobSortCol === col ? (jobSortDir === 'asc' ? 'desc' : 'asc') : 'asc';
+    jobSortCol = col;
+    ['customer','service','tech','date','status'].forEach(c => { const el = document.getElementById('jsort-'+c); if(el) el.textContent=''; });
+    const el = document.getElementById('jsort-'+col); if(el) el.textContent = jobSortDir==='asc'?'↑':'↓';
+    renderJobs();
+  }
+
   function renderJobs() {
     const statusFilter = document.getElementById('jobs-status').value;
     const techFilter   = document.getElementById('jobs-tech').value;
-    const searchVal    = (document.getElementById('jobs-search')?.value || '').toLowerCase();
-    const sortVal      = document.getElementById('jobs-sort')?.value || 'date_asc';
+    const searchVal    = (document.getElementById('jobs-search')?.value||'').toLowerCase();
 
     let data = allJobs.filter(j => {
       const matchStatus = !statusFilter || j.status === statusFilter;
@@ -868,55 +922,44 @@
     });
 
     data.sort((a, b) => {
-      if (sortVal === 'date_asc')  return (a.scheduled_date||'') > (b.scheduled_date||'') ? 1 : -1;
-      if (sortVal === 'date_desc') return (a.scheduled_date||'') < (b.scheduled_date||'') ? 1 : -1;
-      if (sortVal === 'customer')  return (`${a.customers?.first_name||''}`).localeCompare(`${b.customers?.first_name||''}`);
-      if (sortVal === 'status')    return (a.status||'').localeCompare(b.status||'');
-      if (sortVal === 'tech')      return (a.technicians?.name||'').localeCompare(b.technicians?.name||'');
-      return 0;
+      let av, bv;
+      if (jobSortCol === 'customer') { av = `${a.customers?.first_name||''}`; bv = `${b.customers?.first_name||''}`; }
+      else if (jobSortCol === 'tech')    { av = a.technicians?.name||''; bv = b.technicians?.name||''; }
+      else if (jobSortCol === 'service') { av = a.service_type||''; bv = b.service_type||''; }
+      else if (jobSortCol === 'status')  { av = a.status||''; bv = b.status||''; }
+      else { av = a.scheduled_date||''; bv = b.scheduled_date||''; }
+      return jobSortDir==='asc' ? av.localeCompare(bv) : bv.localeCompare(av);
     });
 
     const list = document.getElementById('jobs-list');
-    if (!data.length) { list.innerHTML = '<div class="empty-state">No jobs found.</div>'; return; }
+    if (!data.length) { list.innerHTML = '<tr><td colspan="8" class="empty-state">No jobs found.</td></tr>'; return; }
 
     list.innerHTML = data.map(j => {
-      const custName = j.customers ? `${j.customers.first_name} ${j.customers.last_name}` : 'Unknown';
-      const custAddr = j.customers?.address || j.customers?.region || '';
-      const techName = j.technicians?.name || 'Unassigned';
+      const custName = j.customers ? `${j.customers.first_name} ${j.customers.last_name||''}`.trim() : 'Unknown';
+      const custPhone = j.customers?.phone || '—';
+      const techName = j.technicians?.name || '<span class="muted">Unassigned</span>';
       const dateStr = j.scheduled_date
-        ? new Date(j.scheduled_date).toLocaleString('en-US', { month:'short', day:'numeric', year:'numeric', hour:'numeric', minute:'2-digit' })
-        : 'No date set';
-      const statusKey = (j.status || 'scheduled').replace('_','');
-      const statusTag = `<span class="tag tag-job-${statusKey === 'inprogress' ? 'inprogress' : j.status}">${(j.status||'scheduled').replace('_',' ')}</span>`;
+        ? new Date(j.scheduled_date).toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit',hour12:true})
+        : '<span class="muted">Not set</span>';
+      const statusKey = (j.status||'scheduled').replace('_','');
+      const statusTag = `<span class="tag tag-job-${statusKey==='inprogress'?'inprogress':j.status}">${(j.status||'scheduled').replace('_',' ')}</span>`;
+      const notes = j.notes ? (j.notes.length > 50 ? j.notes.slice(0,50)+'…' : j.notes) : '<span class="muted">—</span>';
 
-      return `
-        <div class="rec-card" id="job-${j.id}">
-          <div class="rec-card-header" onclick="toggleCard('job-${j.id}')">
-            <div class="rec-main">
-              <div class="rec-name">${custName}</div>
-              <div class="rec-sub">${j.service_type || 'General Service'} · ${techName}</div>
-            </div>
-            <div class="rec-tags">${statusTag}<span style="font-size:.72rem;color:var(--gray);font-family:'Space Mono',monospace;">${dateStr}</span></div>
-            <div class="chevron">▼</div>
-          </div>
-          <div class="rec-card-body">
-            <div class="detail-grid">
-              <div class="detail-item"><div class="detail-label">Customer</div><div class="detail-value">${custName}</div></div>
-              <div class="detail-item"><div class="detail-label">Address</div><div class="detail-value">${custAddr || '—'}</div></div>
-              <div class="detail-item"><div class="detail-label">Technician</div><div class="detail-value">${techName}</div></div>
-              <div class="detail-item"><div class="detail-label">Service</div><div class="detail-value">${j.service_type || '—'}</div></div>
-              <div class="detail-item"><div class="detail-label">Scheduled</div><div class="detail-value">${dateStr}</div></div>
-              <div class="detail-item"><div class="detail-label">Status</div><div class="detail-value">${(j.status||'scheduled').replace('_',' ')}</div></div>
-              ${j.notes ? `<div class="detail-item full"><div class="detail-label">Notes</div><div class="detail-value desc-box">${j.notes}</div></div>` : ''}
-            </div>
-            <div class="card-actions">
-              <button class="btn btn-outline btn-sm" onclick="editJob('${j.id}')">Edit</button>
-              ${j.status === 'scheduled' ? `<button class="btn btn-success btn-sm" onclick="updateJobStatus('${j.id}','in_progress')">Mark In Progress</button>` : ''}
-              ${j.status === 'in_progress' ? `<button class="btn btn-success btn-sm" onclick="updateJobStatus('${j.id}','completed')">Mark Completed</button>` : ''}
-              <button class="btn btn-danger btn-sm" onclick="deleteJob('${j.id}')">Delete</button>
-            </div>
-          </div>
-        </div>`;
+      return `<tr>
+        <td><div class="td-name">${custName}</div></td>
+        <td class="muted">${custPhone}</td>
+        <td>${j.service_type||'<span class="muted">—</span>'}</td>
+        <td>${techName}</td>
+        <td style="white-space:nowrap;">${dateStr}</td>
+        <td>${statusTag}</td>
+        <td class="wrap muted" style="max-width:180px;">${notes}</td>
+        <td><div class="td-actions">
+          <button class="btn btn-outline btn-sm" onclick="editJob('${j.id}')">Edit</button>
+          ${j.status==='scheduled' ? `<button class="btn btn-success btn-sm" onclick="updateJobStatus('${j.id}','in_progress')">In Progress</button>` : ''}
+          ${j.status==='in_progress' ? `<button class="btn btn-success btn-sm" onclick="updateJobStatus('${j.id}','completed')">Complete</button>` : ''}
+          <button class="btn btn-danger btn-sm" onclick="deleteJob('${j.id}')">Del</button>
+        </div></td>
+      </tr>`;
     }).join('');
   }
 
