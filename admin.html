@@ -259,9 +259,28 @@
   <div class="modal">
     <div class="modal-title" id="addCustomer-title">Add Customer</div>
     <input type="hidden" id="addCustomer-id"/>
+    <input type="hidden" id="ac-client-type" value="client"/>
+
+    <!-- Client / Company toggle -->
+    <div style="display:flex;border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:1.2rem;">
+      <button type="button" id="ac-tab-client" onclick="setClientType('client')"
+        style="flex:1;padding:9px;font-family:'Space Mono',monospace;font-size:0.72rem;letter-spacing:1px;text-transform:uppercase;cursor:pointer;border:none;background:var(--purple-mid);color:#fff;transition:background .2s;">
+        👤 Client
+      </button>
+      <button type="button" id="ac-tab-company" onclick="setClientType('company')"
+        style="flex:1;padding:9px;font-family:'Space Mono',monospace;font-size:0.72rem;letter-spacing:1px;text-transform:uppercase;cursor:pointer;border:none;background:var(--white);color:var(--gray);transition:background .2s;">
+        🏢 Company
+      </button>
+    </div>
+
     <div class="modal-grid">
-      <div class="modal-group"><label>First Name *</label><input class="edit-input" id="ac-fname" placeholder="John"/></div>
-      <div class="modal-group"><label>Last Name</label><input class="edit-input" id="ac-lname" placeholder="Doe"/></div>
+      <!-- Client fields -->
+      <div class="modal-group" id="ac-fname-group"><label>First Name *</label><input class="edit-input" id="ac-fname" placeholder="John"/></div>
+      <div class="modal-group" id="ac-lname-group"><label>Last Name</label><input class="edit-input" id="ac-lname" placeholder="Doe"/></div>
+      <!-- Company fields (hidden by default) -->
+      <div class="modal-group full" id="ac-company-group" style="display:none;"><label>Company Name *</label><input class="edit-input" id="ac-company" placeholder="ABC Security Ltd."/></div>
+      <div class="modal-group full" id="ac-contact-group" style="display:none;"><label>Contact Person</label><input class="edit-input" id="ac-contact" placeholder="Jane Smith"/></div>
+
       <div class="modal-group"><label>Phone 1 *</label><input class="edit-input" id="ac-phone" placeholder="(555) 000-0000"/></div>
       <div class="modal-group"><label>Phone 2</label><input class="edit-input" id="ac-phone2" placeholder="(555) 000-0000"/></div>
       <div class="modal-group full"><label>Email</label><input class="edit-input" id="ac-email" type="email" placeholder="john@example.com"/></div>
@@ -469,7 +488,10 @@
     if (!data.length) { list.innerHTML = '<div class="empty-state">No customers found.</div>'; return; }
 
     list.innerHTML = data.map(c => {
-      const name = `${c.first_name || ''} ${c.last_name || ''}`.trim() || '(No Name)';
+      const name = c.client_type === 'company'
+        ? (c.company_name || c.first_name || '(No Name)')
+        : `${c.first_name || ''} ${c.last_name || ''}`.trim() || '(No Name)';
+      const typeTag = c.client_type === 'company' ? '🏢 ' : '👤 ';
       const services = (c.services || []).map(s => `<span class="tag tag-service">${s}</span>`).join('');
       const warrantyTag = c.warranty
         ? `<span class="tag tag-warranty">Warranty</span>`
@@ -483,7 +505,7 @@
         <div class="rec-card" id="cust-${c.id}">
           <div class="rec-card-header" onclick="toggleCard('cust-${c.id}')">
             <div class="rec-main">
-              <div class="rec-name">${name} ${c.account_no ? `<span style="font-size:.75rem;color:var(--gray);font-weight:400;">#${c.account_no}</span>` : ''}</div>
+              <div class="rec-name">${typeTag}${name} ${c.account_no ? `<span style="font-size:.75rem;color:var(--gray);font-weight:400;">#${c.account_no}</span>` : ''}</div>
               <div class="rec-sub">${c.address || c.email || ''}</div>
             </div>
             <div class="rec-tags">${regionTag}${warrantyTag}${statusTag}${services}</div>
@@ -519,8 +541,11 @@
     if (!c) return;
     document.getElementById('addCustomer-title').textContent = 'Edit Customer';
     document.getElementById('addCustomer-id').value = id;
+    setClientType(c.client_type || 'client');
     document.getElementById('ac-fname').value = c.first_name || '';
     document.getElementById('ac-lname').value = c.last_name || '';
+    document.getElementById('ac-company').value = c.company_name || '';
+    document.getElementById('ac-contact').value = c.description?.startsWith('Contact:') ? c.description.replace('Contact:','').trim() : '';
     document.getElementById('ac-phone').value = c.phone || '';
     document.getElementById('ac-phone2').value = c.phone2 || '';
     document.getElementById('ac-email').value = c.email || '';
@@ -537,21 +562,24 @@
 
   async function saveCustomer() {
     const id = document.getElementById('addCustomer-id').value;
-    const fname = document.getElementById('ac-fname').value.trim();
-    const lname = document.getElementById('ac-lname').value.trim();
-    const email = document.getElementById('ac-email').value.trim();
+    const clientType = document.getElementById('ac-client-type').value;
+    const isCompany = clientType === 'company';
     const errEl = document.getElementById('addCustomer-error');
     errEl.classList.remove('visible');
 
     const phone = document.getElementById('ac-phone').value.trim();
+    const fname = isCompany ? document.getElementById('ac-company').value.trim() : document.getElementById('ac-fname').value.trim();
+
     if (!fname || !phone) {
-      errEl.textContent = 'First name and phone number are required.';
+      errEl.textContent = isCompany ? 'Company name and phone are required.' : 'First name and phone number are required.';
       errEl.classList.add('visible'); return;
     }
 
     const payload = {
-      first_name: fname,
-      last_name: document.getElementById('ac-lname').value.trim() || null,
+      client_type: clientType,
+      first_name: isCompany ? fname : fname,
+      last_name: isCompany ? null : document.getElementById('ac-lname').value.trim() || null,
+      company_name: isCompany ? fname : null,
       email: document.getElementById('ac-email').value.trim() || null,
       phone,
       phone2: document.getElementById('ac-phone2').value.trim() || null,
@@ -610,6 +638,21 @@
     document.getElementById('aj-customer').value = id;
     document.getElementById('aj-customer-search').value = name;
     document.getElementById('aj-customer-dropdown').style.display = 'none';
+  }
+
+  function setClientType(type) {
+    document.getElementById('ac-client-type').value = type;
+    const isCompany = type === 'company';
+    // toggle tab styles
+    document.getElementById('ac-tab-client').style.background  = isCompany ? 'var(--white)'      : 'var(--purple-mid)';
+    document.getElementById('ac-tab-client').style.color       = isCompany ? 'var(--gray)'        : '#fff';
+    document.getElementById('ac-tab-company').style.background = isCompany ? 'var(--purple-mid)'  : 'var(--white)';
+    document.getElementById('ac-tab-company').style.color      = isCompany ? '#fff'               : 'var(--gray)';
+    // show/hide fields
+    document.getElementById('ac-fname-group').style.display    = isCompany ? 'none' : '';
+    document.getElementById('ac-lname-group').style.display    = isCompany ? 'none' : '';
+    document.getElementById('ac-company-group').style.display  = isCompany ? '' : 'none';
+    document.getElementById('ac-contact-group').style.display  = isCompany ? '' : 'none';
   }
 
   function populateCustomerDropdown() {
