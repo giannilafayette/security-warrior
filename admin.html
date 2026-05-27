@@ -391,7 +391,7 @@
           <option value="cancelled">Cancelled</option>
         </select>
       </div>
-      <div class="modal-group full"><label>Notes</label><textarea class="edit-input" id="aj-notes" placeholder="Job details, access instructions…"></textarea></div>
+      <div class="modal-group full"><label>Notes / Job Details</label><textarea class="edit-input" id="aj-notes" placeholder="Job details, access instructions, customer notes…" style="min-height:100px;"></textarea></div>
     </div>
     <div class="modal-error" id="addJob-error"></div>
     <div class="modal-actions">
@@ -669,7 +669,14 @@
     setTimeout(() => {
       document.getElementById('aj-customer').value = customerId;
       const cust = allCustomers.find(c => c.id === customerId);
-      if (cust) document.getElementById('aj-customer-search').value = `${cust.first_name} ${cust.last_name||''}`;
+      if (cust) {
+        const custName = cust.client_type === 'company' ? (cust.company_name || cust.first_name) : `${cust.first_name} ${cust.last_name||''}`;
+        document.getElementById('aj-customer-search').value = custName.trim();
+        // Pull in customer notes as a starting point for job notes
+        if (cust.description) {
+          document.getElementById('aj-notes').value = cust.description;
+        }
+      }
     }, 50);
   }
 
