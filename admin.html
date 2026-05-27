@@ -137,6 +137,22 @@
     .sort-col-btn:last-child { border-right: none; }
     .sort-col-btn:hover { color: var(--purple-mid); background: var(--purple-pale); }
 
+    /* ── DATA TABLE ── */
+    .data-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+    .data-table thead tr { background: var(--off-white); border-bottom: 2px solid var(--border); }
+    .data-table th { padding: .7rem 1rem; font-family: 'Space Mono', monospace; font-size: 0.62rem; letter-spacing: 1px; text-transform: uppercase; color: var(--gray); text-align: left; white-space: nowrap; cursor: pointer; user-select: none; }
+    .data-table th:hover { color: var(--purple-mid); }
+    .data-table th:last-child { cursor: default; }
+    .data-table tbody tr { border-bottom: 1px solid var(--border); transition: background .15s; }
+    .data-table tbody tr:last-child { border-bottom: none; }
+    .data-table tbody tr:hover { background: #faf8ff; }
+    .data-table td { padding: .75rem 1rem; color: var(--text); vertical-align: middle; white-space: nowrap; }
+    .data-table td.wrap { white-space: normal; max-width: 160px; }
+    .data-table td.muted { color: var(--gray); font-size: 0.82rem; }
+    .td-name { font-weight: 600; }
+    .td-sub  { font-size: 0.78rem; color: var(--gray); margin-top: 2px; }
+    .td-actions { display: flex; gap: .4rem; }
+
     @media (max-width: 640px) {
       .detail-grid, .modal-grid { grid-template-columns: 1fr; }
       .tab-btn { padding: .7rem .8rem; font-size: 0.65rem; }
@@ -211,15 +227,27 @@
         <option value="inactive">Inactive</option>
       </select>
     </div>
-    <!-- Sort header -->
-    <div id="cust-sort-bar" style="display:grid;grid-template-columns:2fr 1.5fr 1fr 1fr 1fr;gap:0;background:var(--off-white);border:1px solid var(--border);border-radius:8px 8px 0 0;margin-bottom:0;padding:0 1.2rem;">
-      <button onclick="sortCustomers('name')"       class="sort-col-btn">Name <span id="sort-icon-name"></span></button>
-      <button onclick="sortCustomers('region')"     class="sort-col-btn">Region <span id="sort-icon-region"></span></button>
-      <button onclick="sortCustomers('status')"     class="sort-col-btn">Status <span id="sort-icon-status"></span></button>
-      <button onclick="sortCustomers('warranty')"   class="sort-col-btn">Warranty <span id="sort-icon-warranty"></span></button>
-      <button onclick="sortCustomers('created_at')" class="sort-col-btn">Date Added <span id="sort-icon-created_at">↓</span></button>
+    <div style="overflow-x:auto;border:1px solid var(--border);border-radius:10px;">
+      <table class="data-table" id="cust-table">
+        <thead>
+          <tr>
+            <th onclick="sortCustomers('name')">Name <span id="sort-icon-name"></span></th>
+            <th onclick="sortCustomers('phone')">Phone 1</th>
+            <th>Phone 2</th>
+            <th onclick="sortCustomers('email')">Email</th>
+            <th onclick="sortCustomers('address')">Address</th>
+            <th onclick="sortCustomers('region')">Region <span id="sort-icon-region">↓</span></th>
+            <th>Account No.</th>
+            <th>Services</th>
+            <th onclick="sortCustomers('status')">Status <span id="sort-icon-status"></span></th>
+            <th onclick="sortCustomers('warranty')">Warranty <span id="sort-icon-warranty"></span></th>
+            <th onclick="sortCustomers('created_at')">Date Added <span id="sort-icon-created_at"></span></th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="cust-list"><tr><td colspan="12" class="loading">Loading…</td></tr></tbody>
+      </table>
     </div>
-    <div class="card-list" id="cust-list" style="border-radius:0 0 8px 8px;"><div class="loading">Loading…</div></div>
   </div>
 
   <!-- ══ JOBS TAB ══ -->
@@ -522,55 +550,43 @@
     });
 
     const list = document.getElementById('cust-list');
-    if (!data.length) { list.innerHTML = '<div class="empty-state">No customers found.</div>'; return; }
+    if (!data.length) { list.innerHTML = '<tr><td colspan="12" class="empty-state">No customers found.</td></tr>'; return; }
 
     list.innerHTML = data.map(c => {
       const name = c.client_type === 'company'
         ? (c.company_name || c.first_name || '(No Name)')
         : `${c.first_name || ''} ${c.last_name || ''}`.trim() || '(No Name)';
-      const typeTag = c.client_type === 'company' ? '🏢 ' : '👤 ';
-      const services = (c.services || []).map(s => `<span class="tag tag-service">${s}</span>`).join('');
-      const warrantyTag = c.warranty
-        ? `<span class="tag tag-warranty">Warranty</span>`
-        : `<span class="tag tag-no-warranty">No Warranty</span>`;
-      const regionTag = c.region ? `<span class="tag tag-region">${c.region}</span>` : '';
+      const typeIcon = c.client_type === 'company' ? '🏢' : '👤';
       const statusTag = (c.status === 'inactive')
         ? `<span class="tag tag-status-inactive">Inactive</span>`
         : `<span class="tag tag-status-active">Active</span>`;
+      const warrantyTag = c.warranty
+        ? `<span class="tag tag-warranty">Warranty</span>`
+        : `<span class="tag tag-no-warranty">No Warranty</span>`;
+      const dateStr = c.created_at
+        ? new Date(c.created_at).toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit',hour12:true})
+        : '—';
+      const services = (c.services||[]).join(', ') || '—';
+      const region = c.region ? c.region.replace(/Region \d+ \(([^)]+)\)/,'$1') : '—';
 
-      return `
-        <div class="rec-card" id="cust-${c.id}">
-          <div class="rec-card-header" onclick="toggleCard('cust-${c.id}')">
-            <div class="rec-main">
-              <div class="rec-name">${typeTag}${name} ${c.account_no ? `<span style="font-size:.75rem;color:var(--gray);font-weight:400;">#${c.account_no}</span>` : ''}</div>
-              <div class="rec-sub">${c.address || c.email || ''}</div>
-            </div>
-            <div class="rec-tags">${regionTag}${warrantyTag}${statusTag}${services}</div>
-            <div class="chevron">▼</div>
-          </div>
-          <div class="rec-card-body">
-            <div id="cust-view-${c.id}">
-              <div class="detail-grid">
-                <div class="detail-item"><div class="detail-label">Phone 1</div><div class="detail-value">${c.phone || '—'}</div></div>
-                <div class="detail-item"><div class="detail-label">Phone 2</div><div class="detail-value">${c.phone2 || '—'}</div></div>
-                <div class="detail-item"><div class="detail-label">Email</div><div class="detail-value">${c.email || '—'}</div></div>
-                <div class="detail-item"><div class="detail-label">Region</div><div class="detail-value">${c.region || '—'}</div></div>
-                <div class="detail-item"><div class="detail-label">Account No.</div><div class="detail-value">${c.account_no || '—'}</div></div>
-                <div class="detail-item"><div class="detail-label">Address</div><div class="detail-value">${c.address || '—'}</div></div>
-                <div class="detail-item"><div class="detail-label">Coordinates</div><div class="detail-value">${c.address_coordinate || '—'}</div></div>
-                <div class="detail-item"><div class="detail-label">Services</div><div class="detail-value">${(c.services||[]).join(', ') || '—'}</div></div>
-                <div class="detail-item"><div class="detail-label">Warranty</div><div class="detail-value">${c.warranty ? 'Yes' : 'No'}</div></div>
-                <div class="detail-item"><div class="detail-label">Date Added</div><div class="detail-value">${c.created_at ? new Date(c.created_at).toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit',hour12:true}) : '—'}</div></div>
-                ${c.description ? `<div class="detail-item full"><div class="detail-label">Notes</div><div class="detail-value desc-box">${c.description}</div></div>` : ''}
-              </div>
-              <div class="card-actions">
-                <button class="btn btn-outline btn-sm" onclick="editCustomer('${c.id}')">Edit</button>
-                <button class="btn btn-primary btn-sm" onclick="scheduleForCustomer('${c.id}')">Schedule Job</button>
-                <button class="btn btn-danger btn-sm" onclick="deleteCustomer('${c.id}')">Delete</button>
-              </div>
-            </div>
-          </div>
-        </div>`;
+      return `<tr>
+        <td><div class="td-name">${typeIcon} ${name}</div>${c.account_no ? `<div class="td-sub">#${c.account_no}</div>` : ''}</td>
+        <td>${c.phone || '<span class="muted">—</span>'}</td>
+        <td class="muted">${c.phone2 || '—'}</td>
+        <td class="wrap">${c.email || '<span class="muted">—</span>'}</td>
+        <td class="wrap">${c.address || '<span class="muted">—</span>'}</td>
+        <td class="wrap">${region}</td>
+        <td class="muted">${c.account_no || '—'}</td>
+        <td class="wrap">${services}</td>
+        <td>${statusTag}</td>
+        <td>${warrantyTag}</td>
+        <td class="muted" style="white-space:nowrap;">${dateStr}</td>
+        <td><div class="td-actions">
+          <button class="btn btn-outline btn-sm" onclick="editCustomer('${c.id}')">Edit</button>
+          <button class="btn btn-primary btn-sm" onclick="scheduleForCustomer('${c.id}')">Job</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteCustomer('${c.id}')">Del</button>
+        </div></td>
+      </tr>`;
     }).join('');
   }
 
