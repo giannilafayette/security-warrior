@@ -133,6 +133,9 @@
 
     .empty-state { text-align: center; padding: 3rem 2rem; color: var(--gray); font-family: 'Space Mono', monospace; font-size: 0.78rem; letter-spacing: 1px; }
     .loading { text-align: center; padding: 2.5rem; color: var(--gray); font-family: 'Space Mono', monospace; font-size: 0.78rem; }
+    .sort-col-btn { background: none; border: none; border-right: 1px solid var(--border); padding: .6rem .5rem; font-family: 'Space Mono', monospace; font-size: 0.65rem; letter-spacing: 1px; text-transform: uppercase; color: var(--gray); cursor: pointer; text-align: left; transition: color .2s, background .2s; }
+    .sort-col-btn:last-child { border-right: none; }
+    .sort-col-btn:hover { color: var(--purple-mid); background: var(--purple-pale); }
 
     @media (max-width: 640px) {
       .detail-grid, .modal-grid { grid-template-columns: 1fr; }
@@ -208,7 +211,15 @@
         <option value="inactive">Inactive</option>
       </select>
     </div>
-    <div class="card-list" id="cust-list"><div class="loading">Loading…</div></div>
+    <!-- Sort header -->
+    <div id="cust-sort-bar" style="display:grid;grid-template-columns:2fr 1.5fr 1fr 1fr 1fr;gap:0;background:var(--off-white);border:1px solid var(--border);border-radius:8px 8px 0 0;margin-bottom:0;padding:0 1.2rem;">
+      <button onclick="sortCustomers('name')"       class="sort-col-btn">Name <span id="sort-icon-name"></span></button>
+      <button onclick="sortCustomers('region')"     class="sort-col-btn">Region <span id="sort-icon-region"></span></button>
+      <button onclick="sortCustomers('status')"     class="sort-col-btn">Status <span id="sort-icon-status"></span></button>
+      <button onclick="sortCustomers('warranty')"   class="sort-col-btn">Warranty <span id="sort-icon-warranty"></span></button>
+      <button onclick="sortCustomers('created_at')" class="sort-col-btn">Date Added <span id="sort-icon-created_at">↓</span></button>
+    </div>
+    <div class="card-list" id="cust-list" style="border-radius:0 0 8px 8px;"><div class="loading">Loading…</div></div>
   </div>
 
   <!-- ══ JOBS TAB ══ -->
@@ -470,6 +481,21 @@
     `;
   }
 
+  let custSortCol = 'created_at', custSortDir = 'desc';
+
+  function sortCustomers(col) {
+    if (custSortCol === col) { custSortDir = custSortDir === 'asc' ? 'desc' : 'asc'; }
+    else { custSortCol = col; custSortDir = 'asc'; }
+    // update icons
+    ['name','region','status','warranty','created_at'].forEach(c => {
+      const el = document.getElementById('sort-icon-' + c);
+      if (el) el.textContent = '';
+    });
+    const icon = document.getElementById('sort-icon-' + col);
+    if (icon) icon.textContent = custSortDir === 'asc' ? '↑' : '↓';
+    renderCustomers();
+  }
+
   function renderCustomers() {
     const search = document.getElementById('cust-search').value.toLowerCase();
     const region = document.getElementById('cust-region').value;
@@ -477,11 +503,22 @@
     const status = document.getElementById('cust-status').value;
 
     let data = allCustomers.filter(c => {
-      const matchSearch = !search || `${c.first_name} ${c.last_name} ${c.address || ''} ${c.account_no || ''}`.toLowerCase().includes(search);
+      const nameStr = c.client_type === 'company' ? (c.company_name || c.first_name || '') : `${c.first_name||''} ${c.last_name||''}`;
+      const matchSearch = !search || `${nameStr} ${c.address || ''} ${c.account_no || ''}`.toLowerCase().includes(search);
       const matchRegion = !region || c.region === region;
       const matchWarranty = warranty === '' || String(c.warranty) === warranty;
       const matchStatus = !status || (c.status || 'active') === status;
       return matchSearch && matchRegion && matchWarranty && matchStatus;
+    });
+
+    data.sort((a, b) => {
+      let av, bv;
+      if (custSortCol === 'name') {
+        av = a.client_type === 'company' ? (a.company_name||a.first_name||'') : `${a.first_name||''} ${a.last_name||''}`;
+        bv = b.client_type === 'company' ? (b.company_name||b.first_name||'') : `${b.first_name||''} ${b.last_name||''}`;
+      } else if (custSortCol === 'warranty') { av = String(a.warranty); bv = String(b.warranty); }
+      else { av = a[custSortCol] || ''; bv = b[custSortCol] || ''; }
+      return custSortDir === 'asc' ? av.toString().localeCompare(bv.toString()) : bv.toString().localeCompare(av.toString());
     });
 
     const list = document.getElementById('cust-list');
@@ -523,6 +560,7 @@
                 <div class="detail-item"><div class="detail-label">Coordinates</div><div class="detail-value">${c.address_coordinate || '—'}</div></div>
                 <div class="detail-item"><div class="detail-label">Services</div><div class="detail-value">${(c.services||[]).join(', ') || '—'}</div></div>
                 <div class="detail-item"><div class="detail-label">Warranty</div><div class="detail-value">${c.warranty ? 'Yes' : 'No'}</div></div>
+                <div class="detail-item"><div class="detail-label">Date Added</div><div class="detail-value">${c.created_at ? new Date(c.created_at).toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit',hour12:true}) : '—'}</div></div>
                 ${c.description ? `<div class="detail-item full"><div class="detail-label">Notes</div><div class="detail-value desc-box">${c.description}</div></div>` : ''}
               </div>
               <div class="card-actions">
