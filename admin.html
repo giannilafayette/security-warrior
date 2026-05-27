@@ -535,6 +535,30 @@
   }
 
   /* ── AUTH ── */
+  /* ── SESSION TIMEOUT (3 hours) ── */
+  const SESSION_TTL = 3 * 60 * 60 * 1000; // 3 hrs in ms
+  const LOGIN_KEY   = 'sw_login_time';
+
+  function sessionExpired() {
+    const t = localStorage.getItem(LOGIN_KEY);
+    return !t || (Date.now() - parseInt(t, 10)) > SESSION_TTL;
+  }
+
+  async function forceLogout(notify) {
+    await initSB().auth.signOut();
+    localStorage.removeItem(LOGIN_KEY);
+    document.getElementById('dashboard').classList.remove('visible');
+    document.getElementById('loginWrap').style.display = 'flex';
+    document.getElementById('adminPassword').value = '';
+    if (notify) alert('Your session expired after 3 hours. Please sign in again.');
+  }
+
+  // Check every minute while the tab is open
+  setInterval(async () => {
+    const { data } = await initSB().auth.getSession();
+    if (data.session && sessionExpired()) forceLogout(true);
+  }, 60 * 1000);
+
   async function doLogin() {
     const email = document.getElementById('adminEmail').value.trim();
     const pw = document.getElementById('adminPassword').value;
@@ -542,14 +566,12 @@
     errEl.classList.remove('visible');
     const { error } = await initSB().auth.signInWithPassword({ email, password: pw });
     if (error) { errEl.classList.add('visible'); return; }
+    localStorage.setItem(LOGIN_KEY, Date.now());
     showDashboard();
   }
 
   async function doLogout() {
-    await initSB().auth.signOut();
-    document.getElementById('dashboard').classList.remove('visible');
-    document.getElementById('loginWrap').style.display = 'flex';
-    document.getElementById('adminPassword').value = '';
+    await forceLogout(false);
   }
 
   async function showDashboard() {
@@ -1109,7 +1131,13 @@
 
   document.getElementById('adminPassword').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
 
-  initSB().auth.getSession().then(({ data }) => { if (data.session) showDashboard(); });
+  initSB().auth.getSession().then(async ({ data }) => {
+    if (data.session && !sessionExpired()) {
+      showDashboard(); // valid session within 3-hour window
+    } else if (data.session) {
+      forceLogout(false); // session exists but expired — clear it silently
+    }
+  });
 </script>
 </body>
 </html>
