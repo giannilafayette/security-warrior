@@ -54,6 +54,16 @@
     .login-error { color: var(--red); font-size: 0.82rem; margin-top: .8rem; display: none; }
     .login-error.visible { display: block; }
 
+    /* ── STAT CARD TOGGLE ── */
+    .stat-card { cursor: pointer; }
+    .stat-card.stat-selected {
+      border-color: var(--purple-mid);
+      box-shadow: 0 0 0 2px var(--purple-mid), 0 4px 16px rgba(123,63,181,0.18);
+      background: var(--purple-pale);
+    }
+    .stat-card.stat-selected .stat-label { color: var(--purple-mid); }
+    .stat-card.stat-selected .stat-value { color: var(--purple); }
+
     /* ── DASHBOARD SHELL ── */
     .dashboard { display: none; min-height: 100vh; }
     .dashboard.visible { display: flex; flex-direction: column; }
@@ -575,15 +585,23 @@
     const total = allCustomers.length;
     const active = allCustomers.filter(c => c.status === 'active' || !c.status).length;
     const warranty = allCustomers.filter(c => c.warranty).length;
+    const sel = k => custStatFilter === k ? ' stat-selected' : '';
     document.getElementById('cust-stats').innerHTML = `
-      <div class="stat-card"><div class="stat-label">Total</div><div class="stat-value">${total}</div></div>
-      <div class="stat-card"><div class="stat-label">Active</div><div class="stat-value">${active}</div></div>
-      <div class="stat-card"><div class="stat-label">Warranty</div><div class="stat-value">${warranty}</div></div>
-      <div class="stat-card"><div class="stat-label">No Warranty</div><div class="stat-value">${total - warranty}</div></div>
+      <div class="stat-card${sel('total')}"       onclick="toggleStatFilter('total')"><div class="stat-label">Total</div><div class="stat-value">${total}</div></div>
+      <div class="stat-card${sel('active')}"      onclick="toggleStatFilter('active')"><div class="stat-label">Active</div><div class="stat-value">${active}</div></div>
+      <div class="stat-card${sel('warranty')}"    onclick="toggleStatFilter('warranty')"><div class="stat-label">Warranty</div><div class="stat-value">${warranty}</div></div>
+      <div class="stat-card${sel('no-warranty')}" onclick="toggleStatFilter('no-warranty')"><div class="stat-label">No Warranty</div><div class="stat-value">${total - warranty}</div></div>
     `;
   }
 
   let custSortCol = 'created_at', custSortDir = 'desc';
+  let custStatFilter = null; // null | 'total' | 'active' | 'warranty' | 'no-warranty'
+
+  function toggleStatFilter(key) {
+    custStatFilter = custStatFilter === key ? null : key;
+    renderCustStats();
+    renderCustomers();
+  }
 
   function sortCustomers(col) {
     if (custSortCol === col) { custSortDir = custSortDir === 'asc' ? 'desc' : 'asc'; }
@@ -610,7 +628,12 @@
       const matchRegion = !region || c.region === region;
       const matchWarranty = warranty === '' || String(c.warranty) === warranty;
       const matchStatus = !status || (c.status || 'active') === status;
-      return matchSearch && matchRegion && matchWarranty && matchStatus;
+      let matchStat = true;
+      if      (custStatFilter === 'active')     matchStat = c.status === 'active' || !c.status;
+      else if (custStatFilter === 'warranty')   matchStat = c.warranty === true;
+      else if (custStatFilter === 'no-warranty') matchStat = !c.warranty;
+      // 'total' and null both show everything
+      return matchSearch && matchRegion && matchWarranty && matchStatus && matchStat;
     });
 
     data.sort((a, b) => {
