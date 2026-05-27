@@ -214,6 +214,7 @@
       <button class="btn btn-primary" onclick="openModal('addJob')">+ Schedule Job</button>
     </div>
     <div class="filter-bar">
+      <input class="search-input" id="jobs-search" placeholder="Search customer…" oninput="renderJobs()" style="min-width:180px;"/>
       <select class="filter-select" id="jobs-status" onchange="renderJobs()">
         <option value="">All Status</option>
         <option value="scheduled">Scheduled</option>
@@ -223,6 +224,13 @@
       </select>
       <select class="filter-select" id="jobs-tech" onchange="renderJobs()">
         <option value="">All Technicians</option>
+      </select>
+      <select class="filter-select" id="jobs-sort" onchange="renderJobs()">
+        <option value="date_asc">Date ↑</option>
+        <option value="date_desc">Date ↓</option>
+        <option value="customer">Customer A–Z</option>
+        <option value="status">Status</option>
+        <option value="tech">Technician</option>
       </select>
     </div>
     <div class="card-list" id="jobs-list"><div class="loading">Loading…</div></div>
@@ -248,9 +256,10 @@
     <input type="hidden" id="addCustomer-id"/>
     <div class="modal-grid">
       <div class="modal-group"><label>First Name *</label><input class="edit-input" id="ac-fname" placeholder="John"/></div>
-      <div class="modal-group"><label>Last Name *</label><input class="edit-input" id="ac-lname" placeholder="Doe"/></div>
-      <div class="modal-group"><label>Email *</label><input class="edit-input" id="ac-email" type="email" placeholder="john@example.com"/></div>
-      <div class="modal-group"><label>Phone</label><input class="edit-input" id="ac-phone" placeholder="(555) 000-0000"/></div>
+      <div class="modal-group"><label>Last Name</label><input class="edit-input" id="ac-lname" placeholder="Doe"/></div>
+      <div class="modal-group"><label>Phone 1 *</label><input class="edit-input" id="ac-phone" placeholder="(555) 000-0000"/></div>
+      <div class="modal-group"><label>Phone 2</label><input class="edit-input" id="ac-phone2" placeholder="(555) 000-0000"/></div>
+      <div class="modal-group full"><label>Email</label><input class="edit-input" id="ac-email" type="email" placeholder="john@example.com"/></div>
       <div class="modal-group full"><label>Address</label><input class="edit-input" id="ac-address" placeholder="123 Main St"/></div>
       <div class="modal-group"><label>Account No.</label><input class="edit-input" id="ac-account" placeholder="ACC-001"/></div>
       <div class="modal-group">
@@ -298,9 +307,11 @@
     <div class="modal-title" id="addJob-title">Schedule Job</div>
     <input type="hidden" id="addJob-id"/>
     <div class="modal-grid">
-      <div class="modal-group full">
+      <div class="modal-group full" style="position:relative;">
         <label>Customer *</label>
-        <select class="edit-input" id="aj-customer"><option value="">Select customer…</option></select>
+        <input class="edit-input" id="aj-customer-search" placeholder="Type name to search…" autocomplete="off" oninput="filterCustomerSearch()"/>
+        <input type="hidden" id="aj-customer"/>
+        <div id="aj-customer-dropdown" style="display:none;position:absolute;top:100%;left:0;right:0;background:#1a0f2e;border:1px solid rgba(169,110,223,0.3);border-radius:8px;max-height:180px;overflow-y:auto;z-index:100;"></div>
       </div>
       <div class="modal-group full">
         <label>Technician</label>
@@ -334,7 +345,8 @@
     <input type="hidden" id="addTech-id"/>
     <div class="modal-grid">
       <div class="modal-group full"><label>Name *</label><input class="edit-input" id="at-name" placeholder="John Smith"/></div>
-      <div class="modal-group"><label>Phone</label><input class="edit-input" id="at-phone" placeholder="(555) 000-0000"/></div>
+      <div class="modal-group"><label>Phone *</label><input class="edit-input" id="at-phone" placeholder="(555) 000-0000"/></div>
+      <div class="modal-group"><label>Email</label><input class="edit-input" id="at-email" type="email" placeholder="tech@example.com"/></div>
       <div class="modal-group">
         <label>Region</label>
         <select class="edit-input" id="at-region">
@@ -475,8 +487,9 @@
           <div class="rec-card-body">
             <div id="cust-view-${c.id}">
               <div class="detail-grid">
+                <div class="detail-item"><div class="detail-label">Phone 1</div><div class="detail-value">${c.phone || '—'}</div></div>
+                <div class="detail-item"><div class="detail-label">Phone 2</div><div class="detail-value">${c.phone2 || '—'}</div></div>
                 <div class="detail-item"><div class="detail-label">Email</div><div class="detail-value">${c.email || '—'}</div></div>
-                <div class="detail-item"><div class="detail-label">Phone</div><div class="detail-value">${c.phone || '—'}</div></div>
                 <div class="detail-item"><div class="detail-label">Region</div><div class="detail-value">${c.region || '—'}</div></div>
                 <div class="detail-item"><div class="detail-label">Account No.</div><div class="detail-value">${c.account_no || '—'}</div></div>
                 <div class="detail-item"><div class="detail-label">Address</div><div class="detail-value">${c.address || '—'}</div></div>
@@ -503,8 +516,9 @@
     document.getElementById('addCustomer-id').value = id;
     document.getElementById('ac-fname').value = c.first_name || '';
     document.getElementById('ac-lname').value = c.last_name || '';
-    document.getElementById('ac-email').value = c.email || '';
     document.getElementById('ac-phone').value = c.phone || '';
+    document.getElementById('ac-phone2').value = c.phone2 || '';
+    document.getElementById('ac-email').value = c.email || '';
     document.getElementById('ac-address').value = c.address || '';
     document.getElementById('ac-account').value = c.account_no || '';
     document.getElementById('ac-region').value = c.region || '';
@@ -524,14 +538,18 @@
     const errEl = document.getElementById('addCustomer-error');
     errEl.classList.remove('visible');
 
-    if (!fname || !lname || !email) {
-      errEl.textContent = 'First name, last name, and email are required.';
+    const phone = document.getElementById('ac-phone').value.trim();
+    if (!fname || !phone) {
+      errEl.textContent = 'First name and phone number are required.';
       errEl.classList.add('visible'); return;
     }
 
     const payload = {
-      first_name: fname, last_name: lname, email,
-      phone: document.getElementById('ac-phone').value.trim() || null,
+      first_name: fname,
+      last_name: document.getElementById('ac-lname').value.trim() || null,
+      email: document.getElementById('ac-email').value.trim() || null,
+      phone,
+      phone2: document.getElementById('ac-phone2').value.trim() || null,
       address: document.getElementById('ac-address').value.trim() || null,
       account_no: document.getElementById('ac-account').value.trim() || null,
       region: document.getElementById('ac-region').value || null,
@@ -563,14 +581,34 @@
     openModal('addJob');
     setTimeout(() => {
       document.getElementById('aj-customer').value = customerId;
+      const cust = allCustomers.find(c => c.id === customerId);
+      if (cust) document.getElementById('aj-customer-search').value = `${cust.first_name} ${cust.last_name||''}`;
     }, 50);
   }
 
+  function filterCustomerSearch() {
+    const q = document.getElementById('aj-customer-search').value.toLowerCase();
+    const dd = document.getElementById('aj-customer-dropdown');
+    if (!q) { dd.style.display = 'none'; return; }
+    const matches = allCustomers.filter(c => `${c.first_name} ${c.last_name||''}`.toLowerCase().includes(q)).slice(0, 8);
+    if (!matches.length) { dd.style.display = 'none'; return; }
+    dd.style.display = 'block';
+    dd.innerHTML = matches.map(c =>
+      `<div onclick="selectJobCustomer('${c.id}','${c.first_name} ${c.last_name||''}')"
+        style="padding:8px 12px;cursor:pointer;font-size:.88rem;color:#fff;border-bottom:1px solid rgba(255,255,255,0.06);"
+        onmouseover="this.style.background='rgba(169,110,223,0.15)'" onmouseout="this.style.background=''"
+       >${c.first_name} ${c.last_name||''} ${c.phone ? '· '+c.phone : ''}</div>`
+    ).join('');
+  }
+
+  function selectJobCustomer(id, name) {
+    document.getElementById('aj-customer').value = id;
+    document.getElementById('aj-customer-search').value = name;
+    document.getElementById('aj-customer-dropdown').style.display = 'none';
+  }
+
   function populateCustomerDropdown() {
-    const sel = document.getElementById('aj-customer');
-    const cur = sel.value;
-    sel.innerHTML = '<option value="">Select customer…</option>' +
-      allCustomers.map(c => `<option value="${c.id}">${c.first_name} ${c.last_name}${c.address ? ' — ' + c.address : ''}</option>`).join('');
+    // kept for compatibility — search field now handles this
     if (cur) sel.value = cur;
   }
 
@@ -615,6 +653,7 @@
           <div class="rec-card-body">
             <div class="detail-grid">
               <div class="detail-item"><div class="detail-label">Phone</div><div class="detail-value">${t.phone || '—'}</div></div>
+              <div class="detail-item"><div class="detail-label">Email</div><div class="detail-value">${t.email || '—'}</div></div>
               <div class="detail-item"><div class="detail-label">Region</div><div class="detail-value">${t.region || '—'}</div></div>
               <div class="detail-item"><div class="detail-label">Status</div><div class="detail-value">${(t.status||'available').replace('_',' ')}</div></div>
             </div>
@@ -634,6 +673,7 @@
     document.getElementById('addTech-id').value = id;
     document.getElementById('at-name').value = t.name || '';
     document.getElementById('at-phone').value = t.phone || '';
+    document.getElementById('at-email').value = t.email || '';
     document.getElementById('at-region').value = t.region || '';
     document.getElementById('at-status').value = t.status || 'available';
     openModal('addTech');
@@ -644,11 +684,13 @@
     const name = document.getElementById('at-name').value.trim();
     const errEl = document.getElementById('addTech-error');
     errEl.classList.remove('visible');
-    if (!name) { errEl.textContent = 'Name is required.'; errEl.classList.add('visible'); return; }
+    const phone = document.getElementById('at-phone').value.trim();
+    if (!name || !phone) { errEl.textContent = 'Name and phone are required.'; errEl.classList.add('visible'); return; }
 
     const payload = {
       name,
-      phone: document.getElementById('at-phone').value.trim() || null,
+      phone,
+      email: document.getElementById('at-email').value.trim() || null,
       region: document.getElementById('at-region').value || null,
       status: document.getElementById('at-status').value,
     };
@@ -704,12 +746,25 @@
 
   function renderJobs() {
     const statusFilter = document.getElementById('jobs-status').value;
-    const techFilter = document.getElementById('jobs-tech').value;
+    const techFilter   = document.getElementById('jobs-tech').value;
+    const searchVal    = (document.getElementById('jobs-search')?.value || '').toLowerCase();
+    const sortVal      = document.getElementById('jobs-sort')?.value || 'date_asc';
 
     let data = allJobs.filter(j => {
       const matchStatus = !statusFilter || j.status === statusFilter;
-      const matchTech = !techFilter || j.technician_id === techFilter;
-      return matchStatus && matchTech;
+      const matchTech   = !techFilter || j.technician_id === techFilter;
+      const custName    = j.customers ? `${j.customers.first_name} ${j.customers.last_name||''}`.toLowerCase() : '';
+      const matchSearch = !searchVal || custName.includes(searchVal);
+      return matchStatus && matchTech && matchSearch;
+    });
+
+    data.sort((a, b) => {
+      if (sortVal === 'date_asc')  return (a.scheduled_date||'') > (b.scheduled_date||'') ? 1 : -1;
+      if (sortVal === 'date_desc') return (a.scheduled_date||'') < (b.scheduled_date||'') ? 1 : -1;
+      if (sortVal === 'customer')  return (`${a.customers?.first_name||''}`).localeCompare(`${b.customers?.first_name||''}`);
+      if (sortVal === 'status')    return (a.status||'').localeCompare(b.status||'');
+      if (sortVal === 'tech')      return (a.technicians?.name||'').localeCompare(b.technicians?.name||'');
+      return 0;
     });
 
     const list = document.getElementById('jobs-list');
@@ -762,6 +817,8 @@
     document.getElementById('addJob-title').textContent = 'Edit Job';
     document.getElementById('addJob-id').value = id;
     document.getElementById('aj-customer').value = j.customer_id || '';
+    const cust = allCustomers.find(c => c.id === j.customer_id);
+    document.getElementById('aj-customer-search').value = cust ? `${cust.first_name} ${cust.last_name||''}` : '';
     document.getElementById('aj-tech').value = j.technician_id || '';
     document.getElementById('aj-service').value = j.service_type || '';
     document.getElementById('aj-date').value = j.scheduled_date ? j.scheduled_date.slice(0,16) : '';
