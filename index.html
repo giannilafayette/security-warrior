@@ -687,6 +687,10 @@
     .form-group select option { background: var(--white); }
     .field-error { font-size: 0.72rem; color: #dc2626; font-family: 'Space Mono', monospace; display: none; }
     .field-error.visible { display: block; }
+    .char-counter { font-size: 0.7rem; color: var(--gray); font-family: 'Space Mono', monospace; text-align: right; margin-top: -2px; }
+    .char-counter.warn { color: #d97706; }
+    .char-counter.danger { color: #dc2626; }
+    .hp-field { position: absolute; left: -9999px; opacity: 0; pointer-events: none; }
     .btn-submit {
       background: var(--purple-mid);
       color: var(--white); padding: 14px 28px;
@@ -1108,22 +1112,24 @@
       <div class="form-row">
         <div class="form-group">
           <label for="fname">First Name</label>
-          <input type="text" id="fname" placeholder="John"/>
-          <span class="field-error" id="fname-error">Please enter your first name.</span>
+          <input type="text" id="fname" placeholder="John" maxlength="50"/>
+          <span class="field-error" id="fname-error">First name must be 2–50 characters (letters and hyphens only).</span>
         </div>
         <div class="form-group">
           <label for="lname">Last Name</label>
-          <input type="text" id="lname" placeholder="Doe"/>
+          <input type="text" id="lname" placeholder="Doe" maxlength="50"/>
+          <span class="field-error" id="lname-error">Last name must be 2–50 characters (letters and hyphens only).</span>
         </div>
       </div>
       <div class="form-group">
         <label for="email">Email Address</label>
-        <input type="email" id="email" placeholder="john@example.com"/>
-        <span class="field-error" id="email-error">Please enter a valid email address.</span>
+        <input type="email" id="email" placeholder="john@example.com" maxlength="100"/>
+        <span class="field-error" id="email-error">Please enter a valid email address (max 100 characters).</span>
       </div>
       <div class="form-group">
         <label for="phone">Phone</label>
-        <input type="tel" id="phone" placeholder="(555) 000-0000"/>
+        <input type="tel" id="phone" placeholder="(555) 000-0000" maxlength="20"/>
+        <span class="field-error" id="phone-error">Please enter a valid phone number (max 20 characters).</span>
       </div>
       <div class="form-group">
         <label for="service">Service Needed</label>
@@ -1140,7 +1146,13 @@
       </div>
       <div class="form-group">
         <label for="message">Message</label>
-        <textarea id="message" placeholder="Tell us about your security needs..."></textarea>
+        <textarea id="message" placeholder="Tell us about your security needs..." maxlength="500"></textarea>
+        <div class="char-counter" id="msg-counter">0 / 500</div>
+        <span class="field-error" id="message-error">Message is required (max 500 characters).</span>
+      </div>
+      <div class="hp-field" aria-hidden="true">
+        <label for="website">Website</label>
+        <input type="text" id="website" name="website" tabindex="-1" autocomplete="off"/>
       </div>
       <button class="btn-submit" id="submitBtn" onclick="handleSubmit()">Send Message &#8594;</button>
       <div class="form-success" id="formSuccess">&#10003; Thank you! We'll be in touch within 24 hours.</div>
@@ -1260,49 +1272,90 @@
     mainNav.classList.toggle('scrolled', y > 80);
   }, { passive: true });
 
-  // ── Form validation ──
+  // ── Form validation & anti-spam ──
+  const MSG_MAX = 500;
+  const formLoadTime = Date.now();
+
   function setError(inputId, errorId, show) {
     const input = document.getElementById(inputId);
-    const error = document.getElementById(errorId);
+    const error = errorId ? document.getElementById(errorId) : null;
     if (show) {
       input.classList.add('error');
-      error.classList.add('visible');
+      if (error) error.classList.add('visible');
     } else {
       input.classList.remove('error');
-      error.classList.remove('visible');
+      if (error) error.classList.remove('visible');
     }
     return !show;
   }
 
-  ['fname', 'email'].forEach(id => {
-    document.getElementById(id).addEventListener('input', () => {
-      document.getElementById(id).classList.remove('error');
-      document.getElementById(id + '-error').classList.remove('visible');
+  const validators = {
+    fname:   v => /^[A-Za-z\-]{2,50}$/.test(v),
+    lname:   v => v === '' || /^[A-Za-z\-]{2,50}$/.test(v),
+    email:   v => v.length <= 100 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v),
+    phone:   v => v === '' || (v.length <= 20 && /^[\d\s\+\-\(\)\.]{7,20}$/.test(v)),
+    message: v => v.length >= 1 && v.length <= MSG_MAX
+  };
+
+  function blurValidate(id) {
+    const val = document.getElementById(id).value.trim();
+    setError(id, id + '-error', !validators[id](val));
+  }
+
+  ['fname', 'lname', 'email', 'phone', 'message'].forEach(id => {
+    const el = document.getElementById(id);
+    el.addEventListener('blur', () => blurValidate(id));
+    el.addEventListener('input', () => {
+      if (el.classList.contains('error')) blurValidate(id);
     });
   });
 
+  const msgEl = document.getElementById('message');
+  const counterEl = document.getElementById('msg-counter');
+  msgEl.addEventListener('input', () => {
+    const len = msgEl.value.length;
+    counterEl.textContent = len + ' / ' + MSG_MAX;
+    counterEl.className = 'char-counter' + (len > MSG_MAX ? ' danger' : len > MSG_MAX * 0.8 ? ' warn' : '');
+  });
+
   function handleSubmit() {
-    const fname   = document.getElementById('fname').value.trim();
-    const email   = document.getElementById('email').value.trim();
-    const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (document.getElementById('website').value) return;
+
+    if (Date.now() - formLoadTime < 4000) return;
+
+    const RATE_KEY = 'sw_last_submit';
+    const RATE_TTL = 5 * 60 * 1000;
+    const last = localStorage.getItem(RATE_KEY);
+    if (last && (Date.now() - parseInt(last, 10)) < RATE_TTL) {
+      alert('Please wait a few minutes before submitting again.');
+      return;
+    }
 
     let valid = true;
-    valid = setError('fname', 'fname-error', !fname)               && valid;
-    valid = setError('email', 'email-error', !emailRe.test(email)) && valid;
+    ['fname', 'lname', 'email', 'phone', 'message'].forEach(id => {
+      const val = document.getElementById(id).value.trim();
+      if (!validators[id](val)) {
+        setError(id, id + '-error', true);
+        valid = false;
+      }
+    });
 
     if (!valid) return;
 
     const btn = document.getElementById('submitBtn');
     btn.disabled = true;
     btn.textContent = 'Sending…';
+    localStorage.setItem(RATE_KEY, Date.now());
 
     setTimeout(() => {
       document.getElementById('formSuccess').classList.add('visible');
       btn.style.display = 'none';
-      ['fname','lname','email','phone','message'].forEach(id => {
+      ['fname', 'lname', 'email', 'phone', 'message'].forEach(id => {
         document.getElementById(id).value = '';
       });
       document.getElementById('service').selectedIndex = 0;
+      counterEl.textContent = '0 / ' + MSG_MAX;
+      counterEl.className = 'char-counter';
     }, 800);
   }
 </script>
