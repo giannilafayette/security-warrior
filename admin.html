@@ -259,15 +259,22 @@
     </div>
     <div class="filter-bar">
       <input class="search-input" id="cust-search" placeholder="Search name, address…" oninput="renderCustomers()"/>
-      <select class="filter-select" id="cust-region" onchange="renderCustomers()">
-        <option value="">All Regions</option>
-        <option>Region 1 (Ocho Rios to St. Ann's Bay)</option>
-        <option>Region 2 (Ocho Rios to Oracabessa)</option>
-        <option>Region 3 (Oracabessa to Port Maria)</option>
-        <option>Region 4 (St. Ann's Bay to Runaway Bay)</option>
-        <option>Region 5 (Runaway Bay to Duncan's)</option>
-        <option>Zone: Capital &amp; Southeast</option>
-        <option>Miscellaneous</option>
+      <select class="filter-select" id="cust-parish" onchange="renderCustomers()">
+        <option value="">All Parishes</option>
+        <option>Clarendon</option>
+        <option>Hanover</option>
+        <option>Kingston</option>
+        <option>Manchester</option>
+        <option>Portland</option>
+        <option>Saint Andrew</option>
+        <option>Saint Ann</option>
+        <option>Saint Catherine</option>
+        <option>Saint Elizabeth</option>
+        <option>Saint James</option>
+        <option>Saint Mary</option>
+        <option>Saint Thomas</option>
+        <option>Trelawny</option>
+        <option>Westmoreland</option>
       </select>
       <select class="filter-select" id="cust-warranty" onchange="renderCustomers()">
         <option value="">All</option>
@@ -290,7 +297,8 @@
             <th>Phone 2</th>
             <th onclick="sortCustomers('email')">Email</th>
             <th onclick="sortCustomers('address')">Address</th>
-            <th onclick="sortCustomers('region')">Region <span id="sort-icon-region">↓</span></th>
+            <th onclick="sortCustomers('town')">Town / City <span id="sort-icon-town"></span></th>
+            <th onclick="sortCustomers('parish')">Parish <span id="sort-icon-parish"></span></th>
             <th>Account No.</th>
             <th>Services</th>
             <th onclick="sortCustomers('status')">Status <span id="sort-icon-status"></span></th>
@@ -411,17 +419,25 @@
       <div class="modal-group full"><label>Email</label><input class="edit-input" id="ac-email" type="email" placeholder="john@example.com"/></div>
       <div class="modal-group full"><label>Address</label><input class="edit-input" id="ac-address" placeholder="123 Main St"/></div>
       <div class="modal-group"><label>Account No.</label><input class="edit-input" id="ac-account" placeholder="ACC-001"/></div>
+      <div class="modal-group"><label>Town / City</label><input class="edit-input" id="ac-town" placeholder="Ocho Rios"/></div>
       <div class="modal-group">
-        <label>Region</label>
-        <select class="edit-input" id="ac-region">
-          <option value="">Select region…</option>
-          <option>Region 1 (Ocho Rios to St. Ann's Bay)</option>
-          <option>Region 2 (Ocho Rios to Oracabessa)</option>
-          <option>Region 3 (Oracabessa to Port Maria)</option>
-          <option>Region 4 (St. Ann's Bay to Runaway Bay)</option>
-          <option>Region 5 (Runaway Bay to Duncan's)</option>
-          <option>Zone: Capital &amp; Southeast</option>
-          <option>Miscellaneous</option>
+        <label>Parish</label>
+        <select class="edit-input" id="ac-parish">
+          <option value="">Select parish…</option>
+          <option>Clarendon</option>
+          <option>Hanover</option>
+          <option>Kingston</option>
+          <option>Manchester</option>
+          <option>Portland</option>
+          <option>Saint Andrew</option>
+          <option>Saint Ann</option>
+          <option>Saint Catherine</option>
+          <option>Saint Elizabeth</option>
+          <option>Saint James</option>
+          <option>Saint Mary</option>
+          <option>Saint Thomas</option>
+          <option>Trelawny</option>
+          <option>Westmoreland</option>
         </select>
       </div>
       <div class="modal-group"><label>Services (comma separated)</label><input class="edit-input" id="ac-services" placeholder="CCTV, Alarm Systems"/></div>
@@ -691,7 +707,7 @@ const CONFIG = {
     if (custSortCol === col) { custSortDir = custSortDir === 'asc' ? 'desc' : 'asc'; }
     else { custSortCol = col; custSortDir = 'asc'; }
     // update icons
-    ['name','region','status','warranty','created_at'].forEach(c => {
+    ['name','town','parish','status','warranty','created_at'].forEach(c => {
       const el = document.getElementById('sort-icon-' + c);
       if (el) el.textContent = '';
     });
@@ -701,15 +717,15 @@ const CONFIG = {
   }
 
   function renderCustomers() {
-    const search = document.getElementById('cust-search').value.toLowerCase();
-    const region = document.getElementById('cust-region').value;
+    const search  = document.getElementById('cust-search').value.toLowerCase();
+    const parish  = document.getElementById('cust-parish').value;
     const warranty = document.getElementById('cust-warranty').value;
-    const status = document.getElementById('cust-status').value;
+    const status  = document.getElementById('cust-status').value;
 
     let data = allCustomers.filter(c => {
       const nameStr = c.client_type === 'company' ? (c.company_name || c.first_name || '') : `${c.first_name||''} ${c.last_name||''}`;
-      const matchSearch = !search || `${nameStr} ${c.address || ''} ${c.account_no || ''}`.toLowerCase().includes(search);
-      const matchRegion = !region || c.region === region;
+      const matchSearch = !search || `${nameStr} ${c.address || ''} ${c.town || ''} ${c.parish || ''} ${c.account_no || ''}`.toLowerCase().includes(search);
+      const matchRegion = !parish || c.parish === parish;
       const matchWarranty = warranty === '' || String(c.warranty) === warranty;
       const matchStatus = !status || (c.status || 'active') === status;
       let matchStat = true;
@@ -750,7 +766,8 @@ const CONFIG = {
         ? new Date(c.created_at).toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit',hour12:true})
         : '—';
       const services = (c.services||[]).join(', ') || '—';
-      const region = c.region ? c.region.replace(/Region \d+ \(([^)]+)\)/,'$1') : '—';
+      const town    = c.town   || '<span class="muted">—</span>';
+      const parish  = c.parish || '<span class="muted">—</span>';
 
       return `<tr>
         <td><div class="td-name">${typeIcon} ${name}</div>${c.account_no ? `<div class="td-sub">#${c.account_no}</div>` : ''}</td>
@@ -758,7 +775,8 @@ const CONFIG = {
         <td class="muted">${c.phone2 || '—'}</td>
         <td class="wrap">${c.email || '<span class="muted">—</span>'}</td>
         <td class="wrap">${c.address || '<span class="muted">—</span>'}</td>
-        <td class="wrap">${region}</td>
+        <td class="wrap">${town}</td>
+        <td class="wrap">${parish}</td>
         <td class="muted">${c.account_no || '—'}</td>
         <td class="wrap">${services}</td>
         <td>${statusTag}</td>
@@ -788,7 +806,8 @@ const CONFIG = {
     document.getElementById('ac-email').value = c.email || '';
     document.getElementById('ac-address').value = c.address || '';
     document.getElementById('ac-account').value = c.account_no || '';
-    document.getElementById('ac-region').value = c.region || '';
+    document.getElementById('ac-town').value   = c.town   || '';
+    document.getElementById('ac-parish').value = c.parish || '';
     document.getElementById('ac-services').value = (c.services || []).join(', ');
     document.getElementById('ac-coord').value = c.address_coordinate || '';
     document.getElementById('ac-status').value = c.status || 'active';
@@ -820,9 +839,10 @@ const CONFIG = {
       email: document.getElementById('ac-email').value.trim() || null,
       phone,
       phone2: document.getElementById('ac-phone2').value.trim() || null,
-      address: document.getElementById('ac-address').value.trim() || null,
+      address:    document.getElementById('ac-address').value.trim() || null,
       account_no: document.getElementById('ac-account').value.trim() || null,
-      region: document.getElementById('ac-region').value || null,
+      town:       document.getElementById('ac-town').value.trim()   || null,
+      parish:     document.getElementById('ac-parish').value        || null,
       services: document.getElementById('ac-services').value.split(',').map(s=>s.trim()).filter(Boolean),
       address_coordinate: document.getElementById('ac-coord').value.trim() || null,
       status: document.getElementById('ac-status').value,
@@ -1039,7 +1059,7 @@ const CONFIG = {
      JOBS
   ══════════════════════════════════════════ */
   async function loadJobs() {
-    const { data } = await initSB().from('jobs').select('*, customers(first_name, last_name, address, region), technicians(name)').order('scheduled_date', { ascending: true });
+    const { data } = await initSB().from('jobs').select('*, customers(first_name, last_name, address, town, parish), technicians(name)').order('scheduled_date', { ascending: true });
     allJobs = data || [];
     renderJobs();
     renderJobStats();
