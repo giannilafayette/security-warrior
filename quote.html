@@ -846,6 +846,34 @@
       <input type="text" id="address" placeholder="123 Main St, City, State"/>
     </div>
 
+    <div class="form-row">
+      <div class="form-group">
+        <label for="town">Town / City</label>
+        <input type="text" id="town" placeholder="Ocho Rios"/>
+      </div>
+      <div class="form-group">
+        <label for="parish">Parish *</label>
+        <select id="parish">
+          <option value="">Select parish…</option>
+          <option>Clarendon</option>
+          <option>Hanover</option>
+          <option>Kingston</option>
+          <option>Manchester</option>
+          <option>Portland</option>
+          <option>Saint Andrew</option>
+          <option>Saint Ann</option>
+          <option>Saint Catherine</option>
+          <option>Saint Elizabeth</option>
+          <option>Saint James</option>
+          <option>Saint Mary</option>
+          <option>Saint Thomas</option>
+          <option>Trelawny</option>
+          <option>Westmoreland</option>
+        </select>
+        <span class="field-error" id="parish-error">Please select a parish.</span>
+      </div>
+    </div>
+
     <div class="form-section-title" style="margin-top:.4rem;">Job Details</div>
 
     <div class="form-group">
@@ -1145,11 +1173,14 @@
       document.getElementById('service-error').classList.remove('visible');
     }
 
+    const parish = document.getElementById('parish').value;
+
     let valid = serviceValid;
     valid = setError('fname',       'fname-error',       !fname)               && valid;
     valid = setError('lname',       'lname-error',       !lname)               && valid;
     valid = setError('email',       'email-error',       !emailRe.test(email)) && valid;
     valid = setError('description', 'description-error', !description)         && valid;
+    valid = setError('parish',      'parish-error',      !parish)              && valid;
 
     if (!valid) {
       // scroll to first error
@@ -1165,8 +1196,9 @@
 
     const services  = Array.from(document.querySelectorAll('.service-row select')).map(s => s.value).filter(Boolean);
     const gateTypes = Array.from(document.querySelectorAll('.gate-type-option input:checked')).map(cb => cb.value);
-    const phone     = document.getElementById('phone')?.value.trim() || null;
-    const address   = document.getElementById('address')?.value.trim() || null;
+    const phone   = document.getElementById('phone')?.value.trim()   || null;
+    const address = document.getElementById('address')?.value.trim() || null;
+    const town    = document.getElementById('town')?.value.trim()    || null;
 
     supabase.from('quote_requests').insert({
       first_name:   fname,
@@ -1174,6 +1206,8 @@
       email,
       phone,
       address,
+      town,
+      parish,
       services,
       gate_types:   gateTypes.length ? gateTypes : null,
       description,
