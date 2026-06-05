@@ -525,7 +525,14 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="config.js"></script>
+<script>
+const CONFIG = {
+  supabase: {
+    url: 'https://saewxgsplkjkbhestvhu.supabase.co',
+    anonKey: 'sb_publishable_YX6L0HGB2ML1EsW0sr481g_w1d0d39L'
+  }
+};
+</script>
 <script>
   let sb, allCustomers = [], allJobs = [], allTechs = [];
 
