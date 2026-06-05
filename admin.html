@@ -559,13 +559,65 @@
     if (data.session && sessionExpired()) forceLogout(true);
   }, 60 * 1000);
 
+  /* ── LOGIN ATTEMPT LOCKOUT ── */
+  const MAX_ATTEMPTS  = 5;
+  const LOCKOUT_TTL   = 30 * 60 * 1000; // 30 minutes
+  const ATTEMPTS_KEY  = 'sw_login_attempts';
+  const LOCKOUT_KEY   = 'sw_lockout_time';
+
+  function isLockedOut() {
+    const t = localStorage.getItem(LOCKOUT_KEY);
+    if (!t) return false;
+    if (Date.now() - parseInt(t, 10) < LOCKOUT_TTL) return true;
+    localStorage.removeItem(LOCKOUT_KEY);
+    localStorage.removeItem(ATTEMPTS_KEY);
+    return false;
+  }
+
+  function lockoutMinutesLeft() {
+    const t = localStorage.getItem(LOCKOUT_KEY);
+    if (!t) return 0;
+    return Math.ceil((LOCKOUT_TTL - (Date.now() - parseInt(t, 10))) / 60000);
+  }
+
   async function doLogin() {
-    const email = document.getElementById('adminEmail').value.trim();
-    const pw = document.getElementById('adminPassword').value;
     const errEl = document.getElementById('loginError');
+    const btn   = document.querySelector('.login-btn');
     errEl.classList.remove('visible');
+
+    if (isLockedOut()) {
+      const m = lockoutMinutesLeft();
+      errEl.textContent = `Too many failed attempts. Try again in ${m} minute${m !== 1 ? 's' : ''}.`;
+      errEl.classList.add('visible');
+      return;
+    }
+
+    const email = document.getElementById('adminEmail').value.trim();
+    const pw    = document.getElementById('adminPassword').value;
+    btn.disabled = true;
+    btn.textContent = 'Signing in…';
+
     const { error } = await initSB().auth.signInWithPassword({ email, password: pw });
-    if (error) { errEl.classList.add('visible'); return; }
+
+    btn.disabled = false;
+    btn.textContent = 'Sign In';
+
+    if (error) {
+      const attempts = parseInt(localStorage.getItem(ATTEMPTS_KEY) || '0', 10) + 1;
+      localStorage.setItem(ATTEMPTS_KEY, attempts);
+      if (attempts >= MAX_ATTEMPTS) {
+        localStorage.setItem(LOCKOUT_KEY, Date.now());
+        errEl.textContent = 'Too many failed attempts. Account locked for 30 minutes.';
+      } else {
+        const left = MAX_ATTEMPTS - attempts;
+        errEl.textContent = `Invalid email or password. ${left} attempt${left !== 1 ? 's' : ''} remaining.`;
+      }
+      errEl.classList.add('visible');
+      return;
+    }
+
+    localStorage.removeItem(ATTEMPTS_KEY);
+    localStorage.removeItem(LOCKOUT_KEY);
     localStorage.setItem(LOGIN_KEY, Date.now());
     showDashboard();
   }
