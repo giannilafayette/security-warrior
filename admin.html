@@ -125,6 +125,7 @@
     .tag-service { background: var(--purple-pale); border: 1px solid #ddd6fe; color: var(--purple-mid); }
     .tag-status-active { background: var(--green-bg); border: 1px solid #bbf7d0; color: var(--green); }
     .tag-status-inactive { background: #f9fafb; border: 1px solid var(--border); color: var(--gray); }
+    .tag-status-pending { background: var(--yellow-bg); border: 1px solid #fde68a; color: var(--yellow); }
     .tag-job-scheduled { background: var(--yellow-bg); border: 1px solid #fde68a; color: var(--yellow); }
     .tag-job-inprogress { background: var(--blue-bg); border: 1px solid #bfdbfe; color: var(--blue); }
     .tag-job-completed { background: var(--green-bg); border: 1px solid #bbf7d0; color: var(--green); }
@@ -276,6 +277,7 @@
       <select class="filter-select" id="cust-status" onchange="renderCustomers()">
         <option value="">All Status</option>
         <option value="active">Active</option>
+        <option value="pending">Pending</option>
         <option value="inactive">Inactive</option>
       </select>
     </div>
@@ -428,6 +430,7 @@
         <label>Status</label>
         <select class="edit-input" id="ac-status">
           <option value="active">Active</option>
+          <option value="pending">Pending</option>
           <option value="inactive">Inactive</option>
         </select>
       </div>
@@ -735,9 +738,11 @@ const CONFIG = {
         ? (c.company_name || c.first_name || '(No Name)')
         : `${c.first_name || ''} ${c.last_name || ''}`.trim() || '(No Name)';
       const typeIcon = c.client_type === 'company' ? '🏢' : '👤';
-      const statusTag = (c.status === 'inactive')
+      const statusTag = c.status === 'inactive'
         ? `<span class="tag tag-status-inactive">Inactive</span>`
-        : `<span class="tag tag-status-active">Active</span>`;
+        : c.status === 'pending'
+          ? `<span class="tag tag-status-pending">Pending</span>`
+          : `<span class="tag tag-status-active">Active</span>`;
       const warrantyTag = c.warranty
         ? `<span class="tag tag-warranty">Warranty</span>`
         : `<span class="tag tag-no-warranty">No Warranty</span>`;
