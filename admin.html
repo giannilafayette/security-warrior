@@ -73,9 +73,10 @@
 
     /* ── TABS ── */
     .tab-bar { display: flex; gap: 0; border-bottom: 1px solid var(--border); background: var(--white); padding: 0 2rem; position: sticky; top: 57px; z-index: 99; }
-    .tab-btn { background: none; border: none; color: var(--gray); font-family: 'Space Mono', monospace; font-size: 0.72rem; letter-spacing: 1.5px; text-transform: uppercase; padding: .95rem 1.4rem; cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -1px; transition: color var(--t-fast) var(--ease-out), border-color var(--t-fast) var(--ease-out); }
+    .tab-btn { position: relative; background: none; border: none; color: var(--gray); font-family: 'Space Mono', monospace; font-size: 0.72rem; letter-spacing: 1.5px; text-transform: uppercase; padding: .95rem 1.4rem; cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -1px; transition: color var(--t-fast) var(--ease-out), border-color var(--t-fast) var(--ease-out); }
     .tab-btn:hover { color: var(--purple-mid); }
     .tab-btn.active { color: var(--purple-mid); border-bottom-color: var(--purple-mid); font-weight: 700; }
+    .notif-badge { position: absolute; top: 6px; right: 2px; background: #dc2626; color: #fff; border-radius: 99px; font-size: 0.55rem; font-weight: 700; min-width: 15px; height: 15px; display: flex; align-items: center; justify-content: center; padding: 0 3px; font-family: 'Space Mono', monospace; pointer-events: none; }
     .tab-content { display: none; flex: 1; padding: 1.5rem 2rem; }
     .tab-content.active { display: block; }
 
@@ -248,6 +249,7 @@
     <button class="tab-btn active" onclick="switchTab('customers')">Customers</button>
     <button class="tab-btn" onclick="switchTab('jobs')">Jobs / Schedule</button>
     <button class="tab-btn" onclick="switchTab('technicians')">Technicians</button>
+    <button class="tab-btn" onclick="switchTab('requests')">Requests<span class="notif-badge" id="requests-badge" style="display:none;">0</span></button>
   </div>
 
   <!-- ══ CUSTOMERS TAB ══ -->
@@ -382,6 +384,41 @@
         <tbody id="tech-list"><tr><td colspan="6" class="loading">Loading…</td></tr></tbody>
       </table>
     </div>
+  </div>
+</div>
+
+<!-- ══ REQUESTS TAB ══ -->
+<div class="tab-content" id="tab-requests">
+  <div class="stats-row" id="req-stats"></div>
+  <div class="section-header">
+    <div class="section-title">Quote Requests</div>
+  </div>
+  <div class="filter-bar">
+    <input class="search-input" id="req-search" placeholder="Search name, email…" oninput="renderRequests()"/>
+    <select class="filter-select" id="req-status-filter" onchange="renderRequests()">
+      <option value="">All Status</option>
+      <option value="new">New</option>
+      <option value="reviewed">Reviewed</option>
+      <option value="converted">Converted</option>
+      <option value="rejected">Rejected</option>
+    </select>
+  </div>
+  <div style="overflow-x:auto;border:1px solid var(--border);border-radius:10px;">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Contact</th>
+          <th>Services</th>
+          <th>Address</th>
+          <th>Description</th>
+          <th>Submitted</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="req-list"><tr><td colspan="8" class="loading">Loading…</td></tr></tbody>
+    </table>
   </div>
 </div>
 
@@ -659,14 +696,121 @@ const CONFIG = {
   }
 
   async function loadAll() {
-    await Promise.all([loadCustomers(), loadTechs()]);
+    await Promise.all([loadCustomers(), loadTechs(), loadRequests()]);
     await loadJobs();
   }
 
   /* ── TABS ── */
   function switchTab(name) {
-    document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', ['customers','jobs','technicians'][i] === name));
+    document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', ['customers','jobs','technicians','requests'][i] === name));
     document.querySelectorAll('.tab-content').forEach(t => t.classList.toggle('active', t.id === 'tab-' + name));
+  }
+
+  /* ── QUOTE REQUESTS ── */
+  let allRequests = [];
+
+  async function loadRequests() {
+    const { data } = await initSB().from('quote_requests').select('*').order('submitted_at', { ascending: false });
+    allRequests = data || [];
+    renderRequestStats();
+    renderRequests();
+    updateRequestsBadge();
+  }
+
+  function updateRequestsBadge() {
+    const count = allRequests.filter(r => r.status === 'new').length;
+    const badge = document.getElementById('requests-badge');
+    badge.textContent = count;
+    badge.style.display = count > 0 ? 'flex' : 'none';
+  }
+
+  function renderRequestStats() {
+    const total     = allRequests.length;
+    const newCount  = allRequests.filter(r => r.status === 'new').length;
+    const reviewed  = allRequests.filter(r => r.status === 'reviewed').length;
+    const converted = allRequests.filter(r => r.status === 'converted').length;
+    document.getElementById('req-stats').innerHTML = `
+      <div class="stat-card" style="border-top-color:#dc2626;"><div class="stat-label">Total</div><div class="stat-value">${total}</div></div>
+      <div class="stat-card" style="border-top-color:#f97316;"><div class="stat-label">New</div><div class="stat-value">${newCount}</div></div>
+      <div class="stat-card" style="border-top-color:var(--blue);"><div class="stat-label">Reviewed</div><div class="stat-value">${reviewed}</div></div>
+      <div class="stat-card" style="border-top-color:var(--green);"><div class="stat-label">Converted</div><div class="stat-value">${converted}</div></div>
+    `;
+  }
+
+  function renderRequests() {
+    const search = document.getElementById('req-search').value.toLowerCase();
+    const status = document.getElementById('req-status-filter').value;
+    const list   = document.getElementById('req-list');
+
+    const filtered = allRequests.filter(r => {
+      const nameStr = `${r.first_name || ''} ${r.last_name || ''}`.trim();
+      const matchSearch = !search || `${nameStr} ${r.email || ''} ${r.phone || ''} ${r.address || ''}`.toLowerCase().includes(search);
+      const matchStatus = !status || r.status === status;
+      return matchSearch && matchStatus;
+    });
+
+    if (!filtered.length) {
+      list.innerHTML = `<tr><td colspan="8" class="muted" style="text-align:center;padding:2rem;">No requests found</td></tr>`;
+      return;
+    }
+
+    const statusClass = { new: 'tag-status-pending', reviewed: 'tag-job-inprogress', converted: 'tag-status-active', rejected: 'tag-status-inactive' };
+
+    list.innerHTML = filtered.map(r => {
+      const name     = `${r.first_name || ''} ${r.last_name || ''}`.trim() || '(No Name)';
+      const services = (r.services || []).join(', ') || '—';
+      const desc     = r.description ? (r.description.length > 60 ? r.description.slice(0, 60) + '…' : r.description) : '—';
+      const submitted = r.submitted_at
+        ? new Date(r.submitted_at).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true })
+        : '—';
+      const statusTag = `<span class="tag ${statusClass[r.status] || ''}">${r.status || 'new'}</span>`;
+      let actions = '';
+      if (r.status === 'new') {
+        actions = `<button class="btn btn-outline btn-sm" onclick="markReviewed('${r.id}')">Review</button>
+                   <button class="btn btn-primary btn-sm" onclick="convertRequest('${r.id}')">Convert</button>
+                   <button class="btn btn-danger btn-sm" onclick="rejectRequest('${r.id}')">Reject</button>`;
+      } else if (r.status === 'reviewed') {
+        actions = `<button class="btn btn-primary btn-sm" onclick="convertRequest('${r.id}')">Convert</button>
+                   <button class="btn btn-danger btn-sm" onclick="rejectRequest('${r.id}')">Reject</button>`;
+      }
+      return `<tr>
+        <td><div class="td-name">👤 ${name}</div></td>
+        <td>${r.email ? `<div class="muted">${r.email}</div>` : ''}<div class="muted">${r.phone || '—'}</div></td>
+        <td class="wrap">${services}</td>
+        <td class="wrap muted">${r.address || '—'}</td>
+        <td class="wrap muted" style="max-width:200px;" title="${(r.description || '').replace(/"/g,'&quot;')}">${desc}</td>
+        <td class="muted" style="white-space:nowrap;">${submitted}</td>
+        <td>${statusTag}</td>
+        <td><div class="td-actions">${actions}</div></td>
+      </tr>`;
+    }).join('');
+  }
+
+  async function markReviewed(id) {
+    await initSB().from('quote_requests').update({ status: 'reviewed' }).eq('id', id);
+    await loadRequests();
+  }
+
+  async function convertRequest(id) {
+    const r = allRequests.find(x => x.id === id);
+    if (!r) return;
+    const name = `${r.first_name || ''} ${r.last_name || ''}`.trim();
+    if (!confirm(`Convert ${name}'s request into a customer record?`)) return;
+    const { error } = await initSB().from('customers').insert({
+      first_name: r.first_name, last_name: r.last_name,
+      email: r.email, phone: r.phone, address: r.address,
+      services: r.services, status: 'pending', warranty: false,
+    });
+    if (error) { alert('Error converting: ' + error.message); return; }
+    await initSB().from('quote_requests').update({ status: 'converted' }).eq('id', id);
+    await Promise.all([loadRequests(), loadCustomers()]);
+    alert(`${name} added as a Pending customer.`);
+  }
+
+  async function rejectRequest(id) {
+    if (!confirm('Mark this request as rejected?')) return;
+    await initSB().from('quote_requests').update({ status: 'rejected' }).eq('id', id);
+    await loadRequests();
   }
 
   /* ══════════════════════════════════════════

@@ -1168,15 +1168,17 @@
     const phone     = document.getElementById('phone')?.value.trim() || null;
     const address   = document.getElementById('address')?.value.trim() || null;
 
-    supabase.from('customers').insert({
-      first_name:  fname,
-      last_name:   lname,
+    supabase.from('quote_requests').insert({
+      first_name:   fname,
+      last_name:    lname,
       email,
       phone,
       address,
       services,
-      gate_types:  gateTypes.length ? gateTypes : null,
-      description
+      gate_types:   gateTypes.length ? gateTypes : null,
+      description,
+      status:       'new',
+      submitted_at: new Date().toISOString(),
     }).then(({ error }) => {
       if (error) {
         console.error('Supabase error:', error);
