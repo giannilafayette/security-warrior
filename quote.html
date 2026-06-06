@@ -1199,6 +1199,7 @@ const CONFIG = {
     btn.disabled = true;
     btn.textContent = 'Sending…';
 
+    try {
     const supabase = window.supabase.createClient(CONFIG.supabase.url, CONFIG.supabase.anonKey);
 
     const services  = Array.from(document.querySelectorAll('.service-row select')).map(s => s.value).filter(Boolean);
@@ -1224,8 +1225,8 @@ const CONFIG = {
       if (error) {
         console.error('Supabase error:', error);
         btn.disabled = false;
-        btn.textContent = 'Submit Request';
-        alert('Something went wrong submitting your request. Please try again or call us directly.');
+        btn.textContent = 'Submit Quote Request →';
+        alert('Something went wrong: ' + error.message + '\n\nPlease try again or call us directly.');
         return;
       }
       document.getElementById('formCard').style.display = 'none';
@@ -1234,6 +1235,12 @@ const CONFIG = {
       document.getElementById('successCard').classList.add('visible');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     });
+    } catch (err) {
+      console.error('Submit error:', err);
+      btn.disabled = false;
+      btn.textContent = 'Submit Quote Request →';
+      alert('Something went wrong. Please try again or call us directly.');
+    }
   }
 </script>
 </body>
