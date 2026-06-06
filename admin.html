@@ -179,6 +179,13 @@
     .modal-actions { display: flex; gap: .6rem; justify-content: flex-end; margin-top: 1.3rem; }
     .modal-error { color: var(--red); font-size: 0.8rem; margin-top: .5rem; display: none; }
     .modal-error.visible { display: block; }
+    .req-detail-field { display: flex; flex-direction: column; gap: 3px; }
+    .req-detail-field.full { grid-column: 1 / -1; }
+    .req-detail-label { font-size: 0.62rem; font-family: 'Space Mono', monospace; letter-spacing: 1px; text-transform: uppercase; color: var(--gray); }
+    .req-detail-value { font-size: 0.9rem; color: var(--dark); word-break: break-word; white-space: pre-wrap; }
+    .req-detail-value.empty { color: var(--gray); font-style: italic; }
+    .req-row { cursor: pointer; }
+    .req-row:hover td { background: #f5f0ff; }
 
     .empty-state { text-align: center; padding: 3.5rem 2rem; color: var(--gray); font-family: 'Space Mono', monospace; font-size: 0.75rem; letter-spacing: 1px; line-height: 2; }
     .loading { text-align: center; padding: 3rem; color: rgba(107,114,128,0.6); font-family: 'Space Mono', monospace; font-size: 0.72rem; letter-spacing: 1.5px; text-transform: uppercase; }
@@ -413,7 +420,6 @@
             <th>Description</th>
             <th>Submitted</th>
             <th>Status</th>
-            <th>Actions</th>
           </tr>
         </thead>
         <tbody id="req-list"><tr><td colspan="8" class="loading">Loading…</td></tr></tbody>
@@ -424,6 +430,18 @@
 </div>
 
 <!-- ══ MODALS ══ -->
+
+<!-- View Request -->
+<div class="modal-overlay" id="modal-viewRequest">
+  <div class="modal" style="max-width:640px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.3rem;">
+      <div class="modal-title" style="margin-bottom:0;">Quote Request</div>
+      <span id="req-modal-status-tag"></span>
+    </div>
+    <div class="modal-grid" id="req-modal-grid" style="gap:1rem;"></div>
+    <div class="modal-actions" id="req-modal-actions" style="flex-wrap:wrap;"></div>
+  </div>
+</div>
 
 <!-- Add/Edit Customer -->
 <div class="modal-overlay" id="modal-addCustomer">
@@ -760,29 +778,19 @@ const CONFIG = {
     list.innerHTML = filtered.map(r => {
       const name     = `${r.first_name || ''} ${r.last_name || ''}`.trim() || '(No Name)';
       const services = (r.services || []).join(', ') || '—';
-      const desc     = r.description ? (r.description.length > 60 ? r.description.slice(0, 60) + '…' : r.description) : '—';
+      const desc     = r.description ? (r.description.length > 55 ? r.description.slice(0, 55) + '…' : r.description) : '—';
       const submitted = r.submitted_at
         ? new Date(r.submitted_at).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true })
         : '—';
       const statusTag = `<span class="tag ${statusClass[r.status] || ''}">${r.status || 'new'}</span>`;
-      let actions = '';
-      if (r.status === 'new') {
-        actions = `<button class="btn btn-outline btn-sm" onclick="markReviewed('${r.id}')">Review</button>
-                   <button class="btn btn-primary btn-sm" onclick="convertRequest('${r.id}')">Convert</button>
-                   <button class="btn btn-danger btn-sm" onclick="rejectRequest('${r.id}')">Reject</button>`;
-      } else if (r.status === 'reviewed') {
-        actions = `<button class="btn btn-primary btn-sm" onclick="convertRequest('${r.id}')">Convert</button>
-                   <button class="btn btn-danger btn-sm" onclick="rejectRequest('${r.id}')">Reject</button>`;
-      }
-      return `<tr>
+      return `<tr class="req-row" onclick="openRequestModal('${r.id}')">
         <td><div class="td-name">👤 ${name}</div></td>
         <td>${r.email ? `<div class="muted">${r.email}</div>` : ''}<div class="muted">${r.phone || '—'}</div></td>
         <td class="wrap">${services}</td>
         <td class="wrap muted">${r.address || '—'}</td>
-        <td class="wrap muted" style="max-width:200px;" title="${(r.description || '').replace(/"/g,'&quot;')}">${desc}</td>
+        <td class="wrap muted" style="max-width:180px;">${desc}</td>
         <td class="muted" style="white-space:nowrap;">${submitted}</td>
         <td>${statusTag}</td>
-        <td><div class="td-actions">${actions}</div></td>
       </tr>`;
     }).join('');
   }
@@ -790,6 +798,7 @@ const CONFIG = {
   async function markReviewed(id) {
     await initSB().from('quote_requests').update({ status: 'reviewed' }).eq('id', id);
     await loadRequests();
+    openRequestModal(id);
   }
 
   async function convertRequest(id) {
@@ -811,7 +820,55 @@ const CONFIG = {
   async function rejectRequest(id) {
     if (!confirm('Mark this request as rejected?')) return;
     await initSB().from('quote_requests').update({ status: 'rejected' }).eq('id', id);
+    closeModal('viewRequest');
     await loadRequests();
+  }
+
+  function openRequestModal(id) {
+    const r = allRequests.find(x => x.id === id);
+    if (!r) return;
+
+    const statusClass = { new: 'tag-status-pending', reviewed: 'tag-job-inprogress', converted: 'tag-status-active', rejected: 'tag-status-inactive' };
+    document.getElementById('req-modal-status-tag').innerHTML =
+      `<span class="tag ${statusClass[r.status] || ''}">${r.status || 'new'}</span>`;
+
+    const f = (label, value, full) => `
+      <div class="req-detail-field${full ? ' full' : ''}">
+        <span class="req-detail-label">${label}</span>
+        <span class="req-detail-value${value ? '' : ' empty'}">${value || '—'}</span>
+      </div>`;
+
+    const name      = `${r.first_name || ''} ${r.last_name || ''}`.trim() || '(No Name)';
+    const services  = (r.services   || []).join(', ') || null;
+    const gateTypes = (r.gate_types || []).join(', ') || null;
+    const submitted = r.submitted_at
+      ? new Date(r.submitted_at).toLocaleString('en-US', { month: 'long', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true })
+      : null;
+
+    document.getElementById('req-modal-grid').innerHTML =
+      f('Name', name) +
+      f('Submitted', submitted) +
+      f('Email', r.email) +
+      f('Phone', r.phone) +
+      f('Address', r.address, true) +
+      f('Town / City', r.town) +
+      f('Parish', r.parish) +
+      f('Services', services, true) +
+      (gateTypes ? f('Gate Service Types', gateTypes, true) : '') +
+      f('Description', r.description, true);
+
+    let btns = `<button class="btn btn-ghost" onclick="closeModal('viewRequest')">Close</button>`;
+    if (r.status === 'new') {
+      btns += `<button class="btn btn-outline" onclick="markReviewed('${id}')">Mark Reviewed</button>
+               <button class="btn btn-primary" onclick="convertRequest('${id}')">Convert to Customer</button>
+               <button class="btn btn-danger"  onclick="rejectRequest('${id}')">Reject</button>`;
+    } else if (r.status === 'reviewed') {
+      btns += `<button class="btn btn-primary" onclick="convertRequest('${id}')">Convert to Customer</button>
+               <button class="btn btn-danger"  onclick="rejectRequest('${id}')">Reject</button>`;
+    }
+    document.getElementById('req-modal-actions').innerHTML = btns;
+
+    openModal('viewRequest');
   }
 
   /* ══════════════════════════════════════════
