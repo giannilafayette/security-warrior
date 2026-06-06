@@ -963,15 +963,22 @@
   <!-- SUCCESS -->
   <div class="success-card" id="successCard">
     <span class="success-icon">&#10003;</span>
-    <div class="success-title">Quote Request Sent!</div>
-    <p class="success-desc">Thanks! We've received your request and will follow up within 24 hours with a detailed estimate.</p>
+    <div class="success-title">Request Submitted!</div>
+    <p class="success-desc">Your request has been submitted and you will be contacted shortly.</p>
     <a href="index.html" class="btn-back">Back to Home</a>
   </div>
 
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="config.js"></script>
+<script>
+const CONFIG = {
+  supabase: {
+    url: 'https://saewxgsplkjkbhestvhu.supabase.co',
+    anonKey: 'sb_publishable_YX6L0HGB2ML1EsW0sr481g_w1d0d39L'
+  }
+};
+</script>
 <script>
   // ── Mobile menu ──
   const hamburger = document.getElementById('hamburger');
