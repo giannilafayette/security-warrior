@@ -385,41 +385,42 @@
       </table>
     </div>
   </div>
-</div>
 
-<!-- ══ REQUESTS TAB ══ -->
-<div class="tab-content" id="tab-requests">
-  <div class="stats-row" id="req-stats"></div>
-  <div class="section-header">
-    <div class="section-title">Quote Requests</div>
+  <!-- ══ REQUESTS TAB ══ -->
+  <div class="tab-content" id="tab-requests">
+    <div class="stats-row" id="req-stats"></div>
+    <div class="section-header">
+      <div class="section-title">Quote Requests</div>
+    </div>
+    <div class="filter-bar">
+      <input class="search-input" id="req-search" placeholder="Search name, email…" oninput="renderRequests()"/>
+      <select class="filter-select" id="req-status-filter" onchange="renderRequests()">
+        <option value="">All Status</option>
+        <option value="new">New</option>
+        <option value="reviewed">Reviewed</option>
+        <option value="converted">Converted</option>
+        <option value="rejected">Rejected</option>
+      </select>
+    </div>
+    <div style="overflow-x:auto;border:1px solid var(--border);border-radius:10px;">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Contact</th>
+            <th>Services</th>
+            <th>Address</th>
+            <th>Description</th>
+            <th>Submitted</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="req-list"><tr><td colspan="8" class="loading">Loading…</td></tr></tbody>
+      </table>
+    </div>
   </div>
-  <div class="filter-bar">
-    <input class="search-input" id="req-search" placeholder="Search name, email…" oninput="renderRequests()"/>
-    <select class="filter-select" id="req-status-filter" onchange="renderRequests()">
-      <option value="">All Status</option>
-      <option value="new">New</option>
-      <option value="reviewed">Reviewed</option>
-      <option value="converted">Converted</option>
-      <option value="rejected">Rejected</option>
-    </select>
-  </div>
-  <div style="overflow-x:auto;border:1px solid var(--border);border-radius:10px;">
-    <table class="data-table">
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Contact</th>
-          <th>Services</th>
-          <th>Address</th>
-          <th>Description</th>
-          <th>Submitted</th>
-          <th>Status</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody id="req-list"><tr><td colspan="8" class="loading">Loading…</td></tr></tbody>
-    </table>
-  </div>
+
 </div>
 
 <!-- ══ MODALS ══ -->
