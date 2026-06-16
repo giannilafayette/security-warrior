@@ -208,6 +208,7 @@
     .data-table tbody tr:hover { background: #f5f0ff; }
     .data-table td { padding: .8rem 1rem; color: var(--text); vertical-align: middle; white-space: nowrap; }
     .data-table td.wrap { white-space: normal; max-width: 160px; }
+    .data-table td.truncate { max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .data-table td.muted { color: var(--gray); font-size: 0.82rem; }
     .td-name { font-weight: 600; }
     .td-sub  { font-size: 0.78rem; color: var(--gray); margin-top: 2px; }
@@ -991,7 +992,7 @@ const CONFIG = {
         <td><div class="td-name">${typeIcon} ${name}</div>${c.account_no ? `<div class="td-sub">#${c.account_no}</div>` : ''}</td>
         <td>${c.phone || '<span class="muted">—</span>'}</td>
         <td class="muted">${c.phone2 || '—'}</td>
-        <td class="wrap">${c.email || '<span class="muted">—</span>'}</td>
+        <td class="truncate" title="${c.email || ''}">${c.email || '<span class="muted">—</span>'}</td>
         <td class="wrap">${c.address || '<span class="muted">—</span>'}</td>
         <td class="wrap">${town}</td>
         <td class="wrap">${parish}</td>
