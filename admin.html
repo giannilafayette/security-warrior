@@ -40,8 +40,12 @@
     .login-sub { font-size: 0.8rem; font-family: 'Space Mono', monospace; color: var(--gray); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 2rem; }
     .login-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 1rem; }
     .login-group label { font-size: 0.72rem; font-family: 'Space Mono', monospace; letter-spacing: 1px; text-transform: uppercase; color: var(--gray); }
-    .login-group input { background: var(--off-white); border: 1px solid var(--border); border-radius: 8px; padding: 11px 14px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.95rem; outline: none; transition: border-color .2s; }
+    .login-group input { background: var(--off-white); border: 1px solid var(--border); border-radius: 8px; padding: 11px 14px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.95rem; outline: none; transition: border-color .2s; width: 100%; }
     .login-group input:focus { border-color: var(--purple-mid); box-shadow: 0 0 0 3px rgba(123,63,181,0.1); }
+    .pw-wrap { position: relative; }
+    .pw-wrap input { padding-right: 42px; }
+    .pw-toggle { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--gray); padding: 2px; line-height: 1; font-size: 1rem; }
+    .pw-toggle:hover { color: var(--purple-mid); }
     .login-btn {
       width: 100%; background: var(--purple-mid); color: #fff; border: none; border-radius: 9px;
       padding: 13px; font-family: 'Space Mono', monospace; font-size: 0.85rem; letter-spacing: 1px;
@@ -235,7 +239,10 @@
     </div>
     <div class="login-group">
       <label>Password</label>
-      <input type="password" id="adminPassword" placeholder="••••••••" autocomplete="current-password"/>
+      <div class="pw-wrap">
+        <input type="password" id="adminPassword" placeholder="••••••••" autocomplete="current-password"/>
+        <button type="button" class="pw-toggle" onclick="togglePassword()" id="pwToggle" aria-label="Show password">👁</button>
+      </div>
     </div>
     <button class="login-btn" onclick="doLogin()">Sign In</button>
     <div class="login-error" id="loginError">Invalid email or password.</div>
@@ -640,6 +647,15 @@ const CONFIG = {
     const { data } = await initSB().auth.getSession();
     if (data.session && sessionExpired()) forceLogout(true);
   }, 60 * 1000);
+
+  function togglePassword() {
+    const input = document.getElementById('adminPassword');
+    const btn   = document.getElementById('pwToggle');
+    const show  = input.type === 'password';
+    input.type  = show ? 'text' : 'password';
+    btn.textContent   = show ? '🙈' : '👁';
+    btn.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+  }
 
   /* ── LOGIN ATTEMPT LOCKOUT ── */
   const MAX_ATTEMPTS  = 5;
