@@ -1,79 +1,153 @@
 # Security Warrior
 
-Professional security solutions website.
+Professional security services website and internal CRM system for a Jamaican security company. Handles public-facing marketing, customer quote intake, and backend management of customers, jobs, and technicians.
 
-## Setup
+**Live site:** https://giannilafayette.github.io/security-warrior/
+**Admin portal:** https://giannilafayette.github.io/security-warrior/admin.html
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Frontend | Plain HTML, CSS, JavaScript — no framework |
+| Backend / Database | Supabase (PostgreSQL + Auth) |
+| Hosting | GitHub Pages |
+| Version Control | Git (GitHub) |
+
+No build process, no bundler, no server. Every page is a self-contained `.html` file with embedded CSS and JavaScript.
+
+---
+
+## Hosting & Deployment
+
+Hosted on **GitHub Pages**. Two branches:
+
+- **`development`** — the live branch. Every push deploys publicly within ~1 minute.
+- **`main`** — production/stable. Nothing goes here unless explicitly requested.
+
+The Supabase config (URL + anon key) is inlined directly in each HTML file since GitHub Pages serves static files only — there is no server to inject environment variables.
+
+---
+
+## Pages
+
+### `index.html` — Landing Page
+Public-facing marketing site. Sections: Hero, Services, About, How It Works, Testimonials, Contact.
+
+Contact form features:
+- Live blur validation on all fields with inline error messages
+- Character counter on message field (max 500 chars)
+- 3-layer anti-spam: CSS honeypot field, 4-second time-on-page check, 5-minute localStorage rate limit
+
+### `quote.html` — Quote Request Form
+Customers fill this out to request a service quote.
+
+Fields: first name, last name, email, phone, property address, town/city, parish (required — all 14 Jamaican parishes), services needed (dynamic multi-select rows), gate service sub-options, job description, file upload (optional).
+
+On submit, writes a record to the `quote_requests` Supabase table with `status: 'new'`.
+
+### `admin.html` — CRM Admin Portal
+Password-protected internal tool for staff. Login security:
+- Supabase Auth (email + password)
+- 3-hour session timeout stored in localStorage
+- 5-attempt login lockout — locks for 30 minutes after 5 consecutive failures
+- Password reveal toggle on login screen
+
+**Four tabs:**
+
+| Tab | Description |
+|---|---|
+| Customers | Full customer list with search, parish filter, status filter, warranty filter. Stat cards (Total, Active, Warranty, No Warranty) are clickable filters. Add/edit customers with all fields including town/city and parish. Customer status: Active, Pending, Inactive. |
+| Jobs / Schedule | Job assignments linking customers to technicians. Filterable by status and technician. |
+| Technicians | Technician records with contact info, region, and availability status. |
+| Requests | Incoming quote submissions from the website. Red notification badge shows count of unreviewed requests. Click any row to open a detail modal with all submitted info and action buttons: Mark Reviewed, Convert to Customer, Reject. |
+
+### `terms.html` — Terms & Conditions
+Static page with the company's full Terms & Conditions (22 sections, governed by Jamaican law).
+
+---
+
+## Database (Supabase)
+
+### Tables
+
+**`customers`**
+`id, first_name, last_name, company_name, contact_person, client_type, phone, phone2, email, address, town, parish, account_no, services (text[]), warranty, status, description, created_at`
+
+**`jobs`**
+`id, customer_id, technician_id, service, scheduled_date, status, notes, created_at`
+
+**`technicians`**
+`id, name, phone, email, region, status, created_at`
+
+**`quote_requests`**
+`id, first_name, last_name, email, phone, address, town, parish, services (text[]), gate_types (text[]), description, status, submitted_at`
+
+### Row Level Security (RLS)
+
+All tables have RLS enabled. Run this in the Supabase SQL Editor to set up policies:
+
+```sql
+-- CUSTOMERS
+ALTER TABLE customers ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Auth can manage" ON customers FOR ALL TO authenticated USING (true);
+
+-- JOBS
+ALTER TABLE jobs ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Auth can manage" ON jobs FOR ALL TO authenticated USING (true);
+
+-- TECHNICIANS
+ALTER TABLE technicians ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Auth can manage" ON technicians FOR ALL TO authenticated USING (true);
+
+-- QUOTE REQUESTS
+ALTER TABLE quote_requests ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Anon can insert" ON quote_requests FOR INSERT TO anon WITH CHECK (true);
+CREATE POLICY "Auth can manage" ON quote_requests FOR ALL TO authenticated USING (true);
+```
+
+> **Why this matters:** Without RLS, anyone who finds your Supabase anon key can read, edit, or delete all records. The anon key is intentionally public (embedded in the HTML) — RLS is what keeps the data safe.
+
+---
+
+## Project Structure
+
+```
+Security Warrior/
+├── index.html          ← Public landing page
+├── quote.html          ← Customer quote request form
+├── admin.html          ← Staff CRM portal
+├── terms.html          ← Terms & Conditions
+├── config.js           ← Supabase keys (gitignored — never commit)
+├── config.example.js   ← Placeholder showing config structure
+└── .gitignore          ← Excludes config.js, .env, node_modules
+```
+
+---
+
+## Local Setup
 
 1. Clone the repo
 2. Copy `config.example.js` to `config.js`
-3. Fill in your real credentials in `config.js`
-4. Open `index.html` in a browser or deploy to GitHub Pages
+3. Fill in your Supabase URL and anon key in `config.js`
+4. Open any `.html` file directly in a browser — no server needed
 
-## Security
+> `config.js` is gitignored. The real keys are inlined directly in the HTML files for the live GitHub Pages deployment.
 
-### Never commit `config.js`
+---
 
-`config.js` is listed in `.gitignore` and must never be committed to version control.
-It contains live API keys and credentials. Only `config.example.js` (with placeholder
-values) belongs in the repo.
+## Security Notes
 
-If you accidentally commit `config.js`:
-1. Immediately rotate all exposed keys (Supabase, EmailJS, etc.)
-2. Remove the file from git history: `git filter-branch` or use BFG Repo Cleaner
-3. Force-push the cleaned history
-4. Treat the old keys as fully compromised — do not reuse them
+### config.js is gitignored
+`config.js` must never be committed. Only `config.example.js` (with placeholder values) belongs in the repo. The live site has the Supabase anon key inlined in each HTML file — this is safe because the anon key is a public publishable key, and RLS policies protect the actual data.
 
-### Rotating keys
+### If credentials are ever exposed
+1. Immediately rotate the Supabase anon key: Dashboard → Settings → API → regenerate
+2. Remove from git history using `git filter-branch` or BFG Repo Cleaner
+3. Force-push the cleaned history to all branches
+4. Treat the old key as fully compromised — do not reuse it
 
-- **Supabase**: Dashboard → Settings → API → regenerate `anon` key
-- **EmailJS**: Dashboard → Account → API Keys → create new key, delete old
-- **Admin password**: Change directly in `config.js` and redeploy
-
-### Supabase Row Level Security (RLS)
-
-Run the following in the Supabase SQL editor (Dashboard → SQL Editor):
-
-```sql
--- Enable RLS on the customers table
-ALTER TABLE customers ENABLE ROW LEVEL SECURITY;
-
--- Allow anyone to submit a quote (INSERT only)
-CREATE POLICY "Public can insert"
-  ON customers
-  FOR INSERT
-  TO anon
-  WITH CHECK (true);
-
--- Only authenticated users (admins) can read, update, or delete
-CREATE POLICY "Authenticated users can select"
-  ON customers
-  FOR SELECT
-  TO authenticated
-  USING (true);
-
-CREATE POLICY "Authenticated users can update"
-  ON customers
-  FOR UPDATE
-  TO authenticated
-  USING (true);
-
-CREATE POLICY "Authenticated users can delete"
-  ON customers
-  FOR DELETE
-  TO authenticated
-  USING (true);
-```
-
-**Why this matters:** Without RLS, anyone who finds your Supabase anon key can read,
-edit, or delete all customer records. These policies ensure the anon key can only be
-used to submit new records — not access existing ones.
-
-### Moving to production
-
-When ready to go fully production:
-
-- **Netlify**: Move all `CONFIG` values to Netlify environment variables
-  (Site Settings → Environment Variables) and use a build step to inject them.
-  This removes the need for `config.js` entirely.
-- **Supabase Auth**: Replace the admin password check with proper Supabase Auth
-  so admin sessions are JWT-based and auditable.
+### Admin accounts
+Admin user accounts are managed in Supabase: Dashboard → Authentication → Users. To add a new staff member, invite them from there. To reset a password, use the three-dot menu next to their account → Send password reset email.
