@@ -138,6 +138,35 @@ Security Warrior/
 
 ---
 
+## Keep-alive (preventing inactivity pause)
+
+Supabase free-tier projects pause after 7 days with no database activity. A GitHub Actions workflow runs daily at 12:00 UTC and issues a lightweight `SELECT` against a `keepalive` table to reset the inactivity timer.
+
+**Files:**
+- `.github/workflows/keepalive.yml` — the scheduled workflow
+- `supabase/keepalive.sql` — creates and secures the `keepalive` table
+
+### One-time setup (two manual steps)
+
+**Step 1 — Create the table in Supabase.**
+Open the Supabase SQL Editor for project `saewxgsplkjkbhestvhu` and run the contents of `supabase/keepalive.sql`. This creates a single-row `keepalive` table with RLS enabled and an anon-read policy so the workflow can query it without authentication.
+
+**Step 2 — Add two GitHub repository secrets.**
+Go to the repository on GitHub → **Settings → Secrets and variables → Actions → New repository secret** and add:
+
+| Secret name | Value |
+|---|---|
+| `SUPABASE_URL` | `https://saewxgsplkjkbhestvhu.supabase.co` |
+| `SUPABASE_ANON_KEY` | Your project's anon/public key — found in Supabase Dashboard → **Project Settings → API** |
+
+The anon key is never hardcoded in any committed file; the workflow reads it exclusively from GitHub Actions secrets.
+
+### Testing
+
+After both steps are complete, go to **Actions → Supabase Keep-Alive → Run workflow** and trigger a manual run. A green checkmark confirms the ping reached the database. The workflow also runs automatically every day at 12:00 UTC.
+
+---
+
 ## Security Notes
 
 ### config.js is gitignored
