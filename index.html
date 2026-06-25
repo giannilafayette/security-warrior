@@ -1132,6 +1132,10 @@
         <span class="field-error" id="phone-error">Please enter a valid phone number (max 20 characters).</span>
       </div>
       <div class="form-group">
+        <label for="address">Address <span style="font-weight:400;color:var(--gray);font-size:0.8em;">(optional)</span></label>
+        <input type="text" id="address" placeholder="123 Main St, Kingston" maxlength="200" autocapitalize="words" oninput="capitalizeWords(this)"/>
+      </div>
+      <div class="form-group">
         <label for="service">Service Needed</label>
         <select id="service">
           <option value="">Select a service...</option>
@@ -1363,7 +1367,7 @@ const CONFIG = {
     setTimeout(() => {
       document.getElementById('formSuccess').classList.add('visible');
       btn.style.display = 'none';
-      ['fname', 'lname', 'email', 'phone', 'message'].forEach(id => {
+      ['fname', 'lname', 'email', 'phone', 'address', 'message'].forEach(id => {
         document.getElementById(id).value = '';
       });
       document.getElementById('service').selectedIndex = 0;
