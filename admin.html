@@ -263,6 +263,7 @@
   <div class="tab-bar">
     <button class="tab-btn active" onclick="switchTab('customers')">Customers</button>
     <button class="tab-btn" onclick="switchTab('jobs')">Jobs / Schedule</button>
+    <button class="tab-btn" onclick="switchTab('today')">Today's Jobs<span class="notif-badge" id="today-badge" style="display:none;">0</span></button>
     <button class="tab-btn" onclick="switchTab('technicians')">Technicians</button>
     <button class="tab-btn" onclick="switchTab('requests')">Requests<span class="notif-badge" id="requests-badge" style="display:none;">0</span></button>
   </div>
@@ -364,6 +365,31 @@
           </tr>
         </thead>
         <tbody id="jobs-list"><tr><td colspan="8" class="loading">Loading…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══ TODAY'S JOBS TAB ══ -->
+  <div class="tab-content" id="tab-today">
+    <div class="section-header">
+      <div class="section-title" id="today-title">Today's Jobs</div>
+      <button class="btn btn-primary" onclick="openModal('addJob')">+ Schedule Job</button>
+    </div>
+    <div style="overflow-x:auto;border:1px solid var(--border);border-radius:10px;">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Time</th>
+            <th>Customer</th>
+            <th>Phone</th>
+            <th>Location</th>
+            <th>Service</th>
+            <th>Technician</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="today-list"><tr><td colspan="8" class="loading">Loading…</td></tr></tbody>
       </table>
     </div>
   </div>
@@ -738,7 +764,7 @@ const CONFIG = {
 
   /* ── TABS ── */
   function switchTab(name) {
-    document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', ['customers','jobs','technicians','requests'][i] === name));
+    document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', ['customers','jobs','today','technicians','requests'][i] === name));
     document.querySelectorAll('.tab-content').forEach(t => t.classList.toggle('active', t.id === 'tab-' + name));
   }
 
@@ -1278,10 +1304,65 @@ const CONFIG = {
      JOBS
   ══════════════════════════════════════════ */
   async function loadJobs() {
-    const { data } = await initSB().from('jobs').select('*, customers(first_name, last_name, address, town, parish), technicians(name)').order('scheduled_date', { ascending: true });
+    const { data } = await initSB().from('jobs').select('*, customers(first_name, last_name, phone, address, town, parish), technicians(name)').order('scheduled_date', { ascending: true });
     allJobs = data || [];
     renderJobs();
     renderJobStats();
+    renderTodayJobs();
+  }
+
+  function renderTodayJobs() {
+    const OFFSET = 5 * 60 * 60 * 1000; // Jamaica UTC-5
+    const nowJamaica = new Date(Date.now() - OFFSET);
+    const todayStr = nowJamaica.toISOString().split('T')[0];
+    const todayStart = new Date(todayStr + 'T05:00:00Z'); // midnight Jamaica = 5 AM UTC
+    const todayEnd   = new Date(todayStart.getTime() + 24 * 60 * 60 * 1000);
+
+    const todayJobs = allJobs
+      .filter(j => {
+        if (!j.scheduled_date || j.status === 'cancelled') return false;
+        const d = new Date(j.scheduled_date);
+        return d >= todayStart && d < todayEnd;
+      })
+      .sort((a, b) => (a.scheduled_date||'').localeCompare(b.scheduled_date||''));
+
+    const dateLabel = new Date(todayStr + 'T12:00:00Z').toLocaleDateString('en-JM', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+    const titleEl = document.getElementById('today-title');
+    if (titleEl) titleEl.textContent = `Today's Jobs — ${dateLabel}`;
+
+    const badge = document.getElementById('today-badge');
+    if (badge) { badge.textContent = todayJobs.length; badge.style.display = todayJobs.length ? 'flex' : 'none'; }
+
+    const list = document.getElementById('today-list');
+    if (!list) return;
+    if (!todayJobs.length) { list.innerHTML = '<tr><td colspan="8" class="empty-state">No jobs scheduled for today.</td></tr>'; return; }
+
+    list.innerHTML = todayJobs.map(j => {
+      const custName  = j.customers ? `${j.customers.first_name} ${j.customers.last_name||''}`.trim() : 'Unknown';
+      const custPhone = j.customers?.phone || '—';
+      const location  = [j.customers?.address, j.customers?.town, j.customers?.parish].filter(Boolean).join(', ') || '—';
+      const techName  = j.technicians?.name || '<span class="muted">Unassigned</span>';
+      const timeStr   = j.scheduled_date
+        ? new Date(j.scheduled_date).toLocaleString('en-US', { hour:'2-digit', minute:'2-digit', hour12:true })
+        : '<span class="muted">—</span>';
+      const statusKey = (j.status||'scheduled').replace('_','');
+      const statusTag = `<span class="tag tag-job-${statusKey==='inprogress'?'inprogress':j.status}">${(j.status||'scheduled').replace('_',' ')}</span>`;
+
+      return `<tr>
+        <td style="white-space:nowrap;"><strong>${timeStr}</strong></td>
+        <td><div class="td-name">${custName}</div></td>
+        <td class="muted">${custPhone}</td>
+        <td class="muted" style="max-width:200px;">${location}</td>
+        <td>${j.service_type||'<span class="muted">—</span>'}</td>
+        <td>${techName}</td>
+        <td>${statusTag}</td>
+        <td><div class="td-actions">
+          <button class="btn btn-outline btn-sm" onclick="editJob('${j.id}')">Edit</button>
+          ${j.status==='scheduled'   ? `<button class="btn btn-success btn-sm" onclick="updateJobStatus('${j.id}','in_progress')">Start</button>` : ''}
+          ${j.status==='in_progress' ? `<button class="btn btn-success btn-sm" onclick="updateJobStatus('${j.id}','completed')">Done</button>` : ''}
+        </div></td>
+      </tr>`;
+    }).join('');
   }
 
   function renderJobStats() {
