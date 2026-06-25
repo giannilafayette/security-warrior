@@ -1,0 +1,19 @@
+name: Send Appointment Reminders
+on:
+  schedule:
+    - cron: '0 18 * * *'    # 6:00 PM UTC = 1:00 PM Jamaica time
+  workflow_dispatch:
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger send-reminders edge function
+        run: |
+          curl --fail --silent --show-error \
+            -X POST \
+            "${SUPABASE_URL}/functions/v1/send-reminders" \
+            -H "Authorization: Bearer ${SUPABASE_SERVICE_ROLE_KEY}" \
+            -H "Content-Type: application/json"
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
