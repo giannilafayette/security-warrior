@@ -915,6 +915,10 @@
       <div class="file-list" id="fileList"></div>
     </div>
 
+    <div style="position:absolute;left:-9999px;top:-9999px;" aria-hidden="true">
+      <label for="website">Website</label>
+      <input type="text" id="website" name="website" tabindex="-1" autocomplete="off"/>
+    </div>
     <div class="form-footer">
       <span class="form-note">* Required fields</span>
       <button class="btn-submit" id="submitBtn" onclick="handleSubmit()">Submit Quote Request &#8594;</button>
@@ -1155,8 +1159,21 @@ const CONFIG = {
     });
   });
 
+  const formLoadTime = Date.now();
+
   // ── Submit ──
   function handleSubmit() {
+    // Honeypot — bots fill hidden fields, humans don't
+    if (document.getElementById('website').value) return;
+    // Time check — real users take more than 4 seconds
+    if (Date.now() - formLoadTime < 4000) return;
+    // Rate limit — one submission per 5 minutes
+    const RATE_KEY = 'sw_quote_last_submit';
+    const last = localStorage.getItem(RATE_KEY);
+    if (last && (Date.now() - parseInt(last, 10)) < 5 * 60 * 1000) {
+      alert('Please wait a few minutes before submitting again.');
+      return;
+    }
     const fname       = document.getElementById('fname').value.trim();
     const lname       = document.getElementById('lname').value.trim();
     const email       = document.getElementById('email').value.trim();
@@ -1229,6 +1246,7 @@ const CONFIG = {
         alert('Something went wrong: ' + error.message + '\n\nPlease try again or call us directly.');
         return;
       }
+      localStorage.setItem(RATE_KEY, Date.now());
       document.getElementById('formCard').style.display = 'none';
       document.getElementById('serviceBadge').style.display = 'none';
       document.querySelector('.page-header').style.display = 'none';
