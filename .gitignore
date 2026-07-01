@@ -2,3 +2,6 @@
 .env.local
 node_modules/
 .claude/
+config.js
+*.docx
+Security Warrior - Services Overview.md

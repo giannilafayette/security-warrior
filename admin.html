@@ -1,0 +1,1545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin | Security Warrior</title>
+  <link rel="icon" type="image/x-icon" href="favicon.ico"/>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg"/>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+      --t-fast: 140ms; --t-base: 220ms;
+    }
+    :root {
+      --purple: #5B2D8E; --purple-mid: #7B3FB5; --purple-light: #A96EDF;
+      --purple-pale: #F0EAFF; --white: #FFFFFF; --off-white: #F8FAFC;
+      --gray: #6B7280; --dark: #1C1040; --border: #E5E7EB;
+      --text: #111827; --text-sub: #6B7280;
+      --green: #16a34a; --yellow: #d97706; --red: #dc2626; --blue: #2563eb;
+      --green-bg: #f0fdf4; --yellow-bg: #fffbeb; --red-bg: #fef2f2; --blue-bg: #eff6ff;
+    }
+    body { font-family: 'DM Sans', sans-serif; background: var(--off-white); color: var(--text); min-height: 100vh; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+
+    /* ── LOGIN ── */
+    .login-wrap {
+      min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem;
+      background:
+        radial-gradient(ellipse 70% 60% at 25% 40%, rgba(91,45,142,0.1) 0%, transparent 70%),
+        radial-gradient(ellipse 60% 50% at 75% 60%, rgba(169,110,223,0.07) 0%, transparent 70%),
+        var(--off-white);
+    }
+    .login-card {
+      background: var(--white); border: 1px solid var(--border); border-radius: 18px;
+      padding: 2.8rem 2.4rem; width: 100%; max-width: 380px;
+      box-shadow: 0 8px 48px rgba(91,45,142,0.12), 0 1px 4px rgba(0,0,0,0.06);
+    }
+    .login-logo { font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; letter-spacing: 2px; color: var(--purple-mid); margin-bottom: .3rem; }
+    .login-sub { font-size: 0.8rem; font-family: 'Space Mono', monospace; color: var(--gray); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 2rem; }
+    .login-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 1rem; }
+    .login-group label { font-size: 0.72rem; font-family: 'Space Mono', monospace; letter-spacing: 1px; text-transform: uppercase; color: var(--gray); }
+    .login-group input { background: var(--off-white); border: 1px solid var(--border); border-radius: 8px; padding: 11px 14px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.95rem; outline: none; transition: border-color .2s; width: 100%; }
+    .login-group input:focus { border-color: var(--purple-mid); box-shadow: 0 0 0 3px rgba(123,63,181,0.1); }
+    .pw-wrap { position: relative; }
+    .pw-wrap input { padding-right: 42px; }
+    .pw-toggle { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--gray); padding: 2px; line-height: 1; font-size: 1rem; }
+    .pw-toggle:hover { color: var(--purple-mid); }
+    .login-btn {
+      width: 100%; background: var(--purple-mid); color: #fff; border: none; border-radius: 9px;
+      padding: 13px; font-family: 'Space Mono', monospace; font-size: 0.85rem; letter-spacing: 1px;
+      text-transform: uppercase; cursor: pointer; margin-top: .5rem;
+      transition: background var(--t-fast) var(--ease-out), transform var(--t-fast) var(--ease-out), box-shadow var(--t-fast) var(--ease-out);
+      box-shadow: 0 2px 12px rgba(123,63,181,0.3);
+    }
+    .login-btn:hover { background: var(--purple); transform: translateY(-1px); box-shadow: 0 4px 18px rgba(123,63,181,0.45); }
+    .login-btn:active { transform: translateY(0); }
+    .login-error { color: var(--red); font-size: 0.82rem; margin-top: .8rem; display: none; }
+    .login-error.visible { display: block; }
+
+    /* ── STAT CARD TOGGLE ── */
+    .stat-card { cursor: pointer; }
+    .stat-card.stat-selected {
+      border-color: var(--purple-mid);
+      box-shadow: 0 0 0 2px var(--purple-mid), 0 4px 16px rgba(123,63,181,0.18);
+      background: var(--purple-pale);
+    }
+    .stat-card.stat-selected .stat-label { color: var(--purple-mid); }
+    .stat-card.stat-selected .stat-value { color: var(--purple); }
+
+    /* ── DASHBOARD SHELL ── */
+    .dashboard { display: none; min-height: 100vh; }
+    .dashboard.visible { display: flex; flex-direction: column; }
+    .dash-header { background: var(--white); border-bottom: 1px solid var(--border); padding: .85rem 2rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .8rem; box-shadow: 0 2px 8px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
+    .dash-brand { font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; letter-spacing: 2px; color: var(--purple-mid); }
+    .header-right { display: flex; gap: .6rem; align-items: center; }
+
+    /* ── TABS ── */
+    .tab-bar { display: flex; gap: 0; border-bottom: 1px solid var(--border); background: var(--white); padding: 0 2rem; position: sticky; top: 57px; z-index: 99; }
+    .tab-btn { position: relative; background: none; border: none; color: var(--gray); font-family: 'Space Mono', monospace; font-size: 0.72rem; letter-spacing: 1.5px; text-transform: uppercase; padding: .95rem 1.4rem; cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -1px; transition: color var(--t-fast) var(--ease-out), border-color var(--t-fast) var(--ease-out); }
+    .tab-btn:hover { color: var(--purple-mid); }
+    .tab-btn.active { color: var(--purple-mid); border-bottom-color: var(--purple-mid); font-weight: 700; }
+    .notif-badge { position: absolute; top: 6px; right: 2px; background: #dc2626; color: #fff; border-radius: 99px; font-size: 0.55rem; font-weight: 700; min-width: 15px; height: 15px; display: flex; align-items: center; justify-content: center; padding: 0 3px; font-family: 'Space Mono', monospace; pointer-events: none; }
+    .tab-content { display: none; flex: 1; padding: 1.5rem 2rem; }
+    .tab-content.active { display: block; }
+
+    /* ── SHARED COMPONENTS ── */
+    .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.2rem; flex-wrap: wrap; gap: .8rem; }
+    .section-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.3rem; letter-spacing: 1.5px; color: var(--dark); }
+    .stats-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px,1fr)); gap: .8rem; margin-bottom: 1.5rem; }
+    .stat-card {
+      background: var(--white); border: 1px solid var(--border); border-radius: 12px;
+      padding: 1.1rem 1.3rem; box-shadow: 0 1px 6px rgba(0,0,0,0.04);
+      border-top: 3px solid var(--border);
+      transition: transform var(--t-fast) var(--ease-out), box-shadow var(--t-fast) var(--ease-out);
+    }
+    .stat-card:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+    .stats-row .stat-card:nth-child(1) { border-top-color: var(--purple-mid); }
+    .stats-row .stat-card:nth-child(2) { border-top-color: var(--green); }
+    .stats-row .stat-card:nth-child(3) { border-top-color: var(--blue); }
+    .stats-row .stat-card:nth-child(4) { border-top-color: var(--yellow); }
+    .stat-label { font-size: 0.62rem; font-family: 'Space Mono', monospace; letter-spacing: 1.5px; text-transform: uppercase; color: var(--gray); margin-bottom: .35rem; }
+    .stat-value { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; color: var(--dark); line-height: 1; }
+
+    /* filter bar */
+    .filter-bar { display: flex; gap: .5rem; flex-wrap: wrap; margin-bottom: 1.2rem; align-items: center; }
+    .filter-select, .search-input {
+      background: var(--white); border: 1px solid var(--border); border-radius: 8px;
+      padding: 8px 12px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.88rem;
+      outline: none; transition: border-color var(--t-fast) var(--ease-out), box-shadow var(--t-fast) var(--ease-out);
+    }
+    .filter-select:focus, .search-input:focus { border-color: var(--purple-mid); box-shadow: 0 0 0 3px rgba(123,63,181,0.1); }
+    .filter-select option { background: var(--white); color: var(--text); }
+    .search-input { min-width: 200px; }
+    .search-input::placeholder { color: rgba(107,114,128,0.6); }
+
+    /* cards list */
+    .card-list { display: flex; flex-direction: column; gap: .6rem; }
+    .rec-card { background: var(--white); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; transition: border-color .2s, box-shadow .2s; }
+    .rec-card:hover { border-color: var(--purple-light); box-shadow: 0 2px 12px rgba(91,45,142,0.08); }
+    .rec-card-header { display: flex; align-items: center; justify-content: space-between; padding: .9rem 1.2rem; cursor: pointer; gap: 1rem; flex-wrap: wrap; }
+    .rec-main { flex: 1; min-width: 0; }
+    .rec-name { font-weight: 600; font-size: .95rem; color: var(--text); }
+    .rec-sub { font-size: .78rem; color: var(--purple-mid); margin-top: 1px; }
+    .rec-tags { display: flex; flex-wrap: wrap; gap: .35rem; }
+    .tag { border-radius: 4px; padding: 2px 8px; font-size: 0.68rem; font-family: 'Space Mono', monospace; letter-spacing: .4px; font-weight: 500; }
+    .tag-region { background: var(--blue-bg); border: 1px solid #bfdbfe; color: var(--blue); }
+    .tag-warranty { background: var(--green-bg); border: 1px solid #bbf7d0; color: var(--green); }
+    .tag-no-warranty { background: var(--red-bg); border: 1px solid #fecaca; color: var(--red); }
+    .tag-service { background: var(--purple-pale); border: 1px solid #ddd6fe; color: var(--purple-mid); }
+    .tag-status-active { background: var(--green-bg); border: 1px solid #bbf7d0; color: var(--green); }
+    .tag-status-inactive { background: #f9fafb; border: 1px solid var(--border); color: var(--gray); }
+    .tag-status-pending { background: var(--yellow-bg); border: 1px solid #fde68a; color: var(--yellow); }
+    .tag-job-scheduled { background: var(--yellow-bg); border: 1px solid #fde68a; color: var(--yellow); }
+    .tag-job-inprogress { background: var(--blue-bg); border: 1px solid #bfdbfe; color: var(--blue); }
+    .tag-job-completed { background: var(--green-bg); border: 1px solid #bbf7d0; color: var(--green); }
+    .tag-job-cancelled { background: var(--red-bg); border: 1px solid #fecaca; color: var(--red); }
+    .tag-tech-available { background: var(--green-bg); border: 1px solid #bbf7d0; color: var(--green); }
+    .tag-tech-on_job { background: var(--yellow-bg); border: 1px solid #fde68a; color: var(--yellow); }
+    .tag-tech-off { background: #f9fafb; border: 1px solid var(--border); color: var(--gray); }
+    .chevron { color: var(--gray); font-size: 0.75rem; transition: transform .2s; flex-shrink: 0; }
+    .rec-card.open .chevron { transform: rotate(180deg); }
+    .rec-card-body { display: none; padding: 0 1.2rem 1.1rem; border-top: 1px solid var(--border); }
+    .rec-card.open .rec-card-body { display: block; }
+    .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .7rem 2rem; margin-top: .9rem; }
+    .detail-item .detail-label { font-size: 0.62rem; font-family: 'Space Mono', monospace; letter-spacing: 1px; text-transform: uppercase; color: var(--gray); margin-bottom: .2rem; }
+    .detail-item .detail-value { font-size: 0.88rem; color: var(--text); line-height: 1.5; }
+    .detail-item.full { grid-column: 1 / -1; }
+    .desc-box { background: var(--off-white); border: 1px solid var(--border); border-radius: 7px; padding: .7rem .9rem; font-size: 0.85rem; color: var(--gray); line-height: 1.6; }
+    .card-actions { display: flex; gap: .5rem; margin-top: .9rem; flex-wrap: wrap; }
+
+    /* edit mode inputs */
+    .edit-input { width: 100%; background: var(--off-white); border: 1px solid var(--border); border-radius: 8px; padding: 8px 11px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.86rem; outline: none; transition: border-color var(--t-fast) var(--ease-out), box-shadow var(--t-fast) var(--ease-out), background var(--t-fast) var(--ease-out); }
+    .edit-input:focus { border-color: var(--purple-mid); box-shadow: 0 0 0 3px rgba(123,63,181,0.1); background: var(--white); }
+    textarea.edit-input { resize: vertical; min-height: 70px; }
+    select.edit-input option { background: var(--white); color: var(--text); }
+
+    /* buttons */
+    .btn { border-radius: 7px; padding: 6px 14px; font-family: 'Space Mono', monospace; font-size: 0.68rem; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; transition: background var(--t-fast) var(--ease-out), color var(--t-fast) var(--ease-out), border-color var(--t-fast) var(--ease-out), transform var(--t-fast) var(--ease-out), box-shadow var(--t-fast) var(--ease-out); border: 1px solid transparent; }
+    .btn:hover { transform: translateY(-1px); }
+    .btn:active { transform: translateY(0); }
+    .btn-primary { background: var(--purple-mid); color: #fff; border-color: var(--purple-mid); box-shadow: 0 1px 6px rgba(123,63,181,0.25); }
+    .btn-primary:hover { background: var(--purple); border-color: var(--purple); box-shadow: 0 3px 12px rgba(123,63,181,0.4); }
+    .btn-outline { background: var(--white); border-color: #ddd6fe; color: var(--purple-mid); }
+    .btn-outline:hover { background: var(--purple-pale); border-color: var(--purple-light); }
+    .btn-ghost { background: var(--white); border-color: var(--border); color: var(--gray); }
+    .btn-ghost:hover { background: var(--off-white); color: var(--text); border-color: #d1d5db; }
+    .btn-danger { background: var(--white); border-color: #fecaca; color: var(--red); }
+    .btn-danger:hover { background: var(--red-bg); border-color: #fca5a5; }
+    .btn-sm { padding: 5px 10px; font-size: 0.63rem; }
+    .btn-success { background: var(--green-bg); border-color: #bbf7d0; color: var(--green); }
+    .btn-success:hover { background: #dcfce7; }
+
+    /* ── MODAL ── */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.35); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); z-index: 300; align-items: center; justify-content: center; padding: 1.5rem; }
+    .modal-overlay.visible { display: flex; }
+    .modal { background: var(--white); border: 1px solid var(--border); border-radius: 16px; padding: 2rem; width: 100%; max-width: 580px; max-height: 90vh; overflow-y: auto; box-shadow: 0 16px 60px rgba(0,0,0,0.16), 0 2px 8px rgba(0,0,0,0.08); }
+    .modal-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.3rem; letter-spacing: 2px; color: var(--purple-mid); margin-bottom: 1.3rem; }
+    .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .7rem; margin-bottom: .8rem; }
+    .modal-group { display: flex; flex-direction: column; gap: 5px; }
+    .modal-group.full { grid-column: 1 / -1; }
+    .modal-group label { font-size: 0.62rem; font-family: 'Space Mono', monospace; letter-spacing: 1px; text-transform: uppercase; color: var(--gray); }
+    .modal-actions { display: flex; gap: .6rem; justify-content: flex-end; margin-top: 1.3rem; }
+    .modal-error { color: var(--red); font-size: 0.8rem; margin-top: .5rem; display: none; }
+    .modal-error.visible { display: block; }
+    .req-detail-field { display: flex; flex-direction: column; gap: 3px; }
+    .req-detail-field.full { grid-column: 1 / -1; }
+    .req-detail-label { font-size: 0.62rem; font-family: 'Space Mono', monospace; letter-spacing: 1px; text-transform: uppercase; color: var(--gray); }
+    .req-detail-value { font-size: 0.9rem; color: var(--dark); word-break: break-word; white-space: pre-wrap; }
+    .req-detail-value.empty { color: var(--gray); font-style: italic; }
+    .req-row { cursor: pointer; }
+    .req-row:hover td { background: #f5f0ff; }
+
+    .empty-state { text-align: center; padding: 3.5rem 2rem; color: var(--gray); font-family: 'Space Mono', monospace; font-size: 0.75rem; letter-spacing: 1px; line-height: 2; }
+    .loading { text-align: center; padding: 3rem; color: rgba(107,114,128,0.6); font-family: 'Space Mono', monospace; font-size: 0.72rem; letter-spacing: 1.5px; text-transform: uppercase; }
+    .sort-col-btn { background: none; border: none; border-right: 1px solid var(--border); padding: .6rem .5rem; font-family: 'Space Mono', monospace; font-size: 0.65rem; letter-spacing: 1px; text-transform: uppercase; color: var(--gray); cursor: pointer; text-align: left; transition: color .2s, background .2s; }
+    .sort-col-btn:last-child { border-right: none; }
+    .sort-col-btn:hover { color: var(--purple-mid); background: var(--purple-pale); }
+
+    /* ── DATA TABLE ── */
+    .data-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+    .data-table thead tr { background: #fafafc; border-bottom: 2px solid var(--border); }
+    .data-table th { padding: .75rem 1rem; font-family: 'Space Mono', monospace; font-size: 0.6rem; letter-spacing: 1.2px; text-transform: uppercase; color: var(--gray); text-align: left; white-space: nowrap; cursor: pointer; user-select: none; transition: color var(--t-fast) var(--ease-out); }
+    .data-table th:hover { color: var(--purple-mid); }
+    .data-table th:last-child { cursor: default; }
+    .data-table tbody tr { border-bottom: 1px solid var(--border); transition: background var(--t-fast) var(--ease-out); }
+    .data-table tbody tr:last-child { border-bottom: none; }
+    .data-table tbody tr:hover { background: #f5f0ff; }
+    .data-table td { padding: .8rem 1rem; color: var(--text); vertical-align: middle; white-space: nowrap; }
+    .data-table td.wrap { white-space: normal; max-width: 160px; }
+    .data-table td.truncate { max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .data-table td.muted { color: var(--gray); font-size: 0.82rem; }
+    .td-name { font-weight: 600; }
+    .td-sub  { font-size: 0.78rem; color: var(--gray); margin-top: 2px; }
+    .td-actions { display: flex; gap: .35rem; }
+
+    /* ── REDUCED MOTION ── */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+    }
+
+    @media (max-width: 640px) {
+      .detail-grid, .modal-grid { grid-template-columns: 1fr; }
+      .tab-btn { padding: .7rem .8rem; font-size: 0.65rem; }
+      .dash-header, .tab-bar { padding: .8rem 1rem; }
+      .tab-content { padding: 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── LOGIN ── -->
+<div class="login-wrap" id="loginWrap">
+  <div class="login-card">
+    <div class="login-logo">Security Warrior</div>
+    <div class="login-sub">Admin Portal</div>
+    <div class="login-group">
+      <label>Email</label>
+      <input type="email" id="adminEmail" placeholder="admin@example.com" autocomplete="username"/>
+    </div>
+    <div class="login-group">
+      <label>Password</label>
+      <div class="pw-wrap">
+        <input type="password" id="adminPassword" placeholder="••••••••" autocomplete="current-password"/>
+        <button type="button" class="pw-toggle" onclick="togglePassword()" id="pwToggle" aria-label="Show password">👁</button>
+      </div>
+    </div>
+    <button class="login-btn" onclick="doLogin()">Sign In</button>
+    <div class="login-error" id="loginError">Invalid email or password.</div>
+  </div>
+</div>
+
+<!-- ── DASHBOARD ── -->
+<div class="dashboard" id="dashboard">
+  <div class="dash-header">
+    <div class="dash-brand">Security Warrior CRM</div>
+    <div class="header-right">
+      <a href="index.html" class="btn btn-ghost btn-sm" style="text-decoration:none;">&#127968; View Site</a>
+      <button class="btn btn-ghost btn-sm" onclick="doLogout()">Sign Out</button>
+    </div>
+  </div>
+
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('customers')">Customers</button>
+    <button class="tab-btn" onclick="switchTab('jobs')">Jobs / Schedule</button>
+    <button class="tab-btn" onclick="switchTab('today')">Today's Jobs<span class="notif-badge" id="today-badge" style="display:none;">0</span></button>
+    <button class="tab-btn" onclick="switchTab('technicians')">Technicians</button>
+    <button class="tab-btn" onclick="switchTab('requests')">Requests<span class="notif-badge" id="requests-badge" style="display:none;">0</span></button>
+  </div>
+
+  <!-- ══ CUSTOMERS TAB ══ -->
+  <div class="tab-content active" id="tab-customers">
+    <div class="stats-row" id="cust-stats"></div>
+    <div class="section-header">
+      <div class="section-title">Customers</div>
+      <button class="btn btn-primary" onclick="openModal('addCustomer')">+ Add Customer</button>
+    </div>
+    <div class="filter-bar">
+      <input class="search-input" id="cust-search" placeholder="Search name, address…" oninput="renderCustomers()"/>
+      <select class="filter-select" id="cust-parish" onchange="renderCustomers()">
+        <option value="">All Parishes</option>
+        <option>Clarendon</option>
+        <option>Hanover</option>
+        <option>Kingston</option>
+        <option>Manchester</option>
+        <option>Portland</option>
+        <option>Saint Andrew</option>
+        <option>Saint Ann</option>
+        <option>Saint Catherine</option>
+        <option>Saint Elizabeth</option>
+        <option>Saint James</option>
+        <option>Saint Mary</option>
+        <option>Saint Thomas</option>
+        <option>Trelawny</option>
+        <option>Westmoreland</option>
+      </select>
+      <select class="filter-select" id="cust-warranty" onchange="renderCustomers()">
+        <option value="">All</option>
+        <option value="true">Warranty</option>
+        <option value="false">No Warranty</option>
+      </select>
+      <select class="filter-select" id="cust-status" onchange="renderCustomers()">
+        <option value="">All Status</option>
+        <option value="active">Active</option>
+        <option value="pending">Pending</option>
+        <option value="inactive">Inactive</option>
+      </select>
+    </div>
+    <div style="overflow-x:auto;border:1px solid var(--border);border-radius:10px;">
+      <table class="data-table" id="cust-table">
+        <thead>
+          <tr>
+            <th onclick="sortCustomers('name')">Name <span id="sort-icon-name"></span></th>
+            <th onclick="sortCustomers('phone')">Phone 1</th>
+            <th>Phone 2</th>
+            <th onclick="sortCustomers('email')">Email</th>
+            <th onclick="sortCustomers('address')">Address</th>
+            <th onclick="sortCustomers('town')">Town / City <span id="sort-icon-town"></span></th>
+            <th onclick="sortCustomers('parish')">Parish <span id="sort-icon-parish"></span></th>
+            <th>Account No.</th>
+            <th>Services</th>
+            <th onclick="sortCustomers('status')">Status <span id="sort-icon-status"></span></th>
+            <th onclick="sortCustomers('warranty')">Warranty <span id="sort-icon-warranty"></span></th>
+            <th onclick="sortCustomers('created_at')">Date Added <span id="sort-icon-created_at"></span></th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="cust-list"><tr><td colspan="12" class="loading">Loading…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══ JOBS TAB ══ -->
+  <div class="tab-content" id="tab-jobs">
+    <div class="stats-row" id="jobs-stats"></div>
+    <div class="section-header">
+      <div class="section-title">Jobs &amp; Schedule</div>
+      <button class="btn btn-primary" onclick="openModal('addJob')">+ Schedule Job</button>
+    </div>
+    <div class="filter-bar">
+      <input class="search-input" id="jobs-search" placeholder="Search customer…" oninput="renderJobs()" style="min-width:180px;"/>
+      <select class="filter-select" id="jobs-status" onchange="renderJobs()">
+        <option value="">All Status</option>
+        <option value="scheduled">Scheduled</option>
+        <option value="in_progress">In Progress</option>
+        <option value="completed">Completed</option>
+        <option value="cancelled">Cancelled</option>
+      </select>
+      <select class="filter-select" id="jobs-tech" onchange="renderJobs()">
+        <option value="">All Technicians</option>
+      </select>
+    </div>
+    <div style="overflow-x:auto;border:1px solid var(--border);border-radius:10px;">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th onclick="sortJobs('customer')">Customer <span id="jsort-customer"></span></th>
+            <th>Phone</th>
+            <th onclick="sortJobs('service')">Service Type <span id="jsort-service"></span></th>
+            <th onclick="sortJobs('tech')">Technician <span id="jsort-tech"></span></th>
+            <th onclick="sortJobs('date')">Scheduled Date <span id="jsort-date">↑</span></th>
+            <th onclick="sortJobs('status')">Status <span id="jsort-status"></span></th>
+            <th>Notes</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="jobs-list"><tr><td colspan="8" class="loading">Loading…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══ TODAY'S JOBS TAB ══ -->
+  <div class="tab-content" id="tab-today">
+    <div class="section-header">
+      <div class="section-title" id="today-title">Today's Jobs</div>
+      <button class="btn btn-primary" onclick="openModal('addJob')">+ Schedule Job</button>
+    </div>
+    <div style="overflow-x:auto;border:1px solid var(--border);border-radius:10px;">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Time</th>
+            <th>Customer</th>
+            <th>Phone</th>
+            <th>Location</th>
+            <th>Service</th>
+            <th>Technician</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="today-list"><tr><td colspan="8" class="loading">Loading…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══ TECHNICIANS TAB ══ -->
+  <div class="tab-content" id="tab-technicians">
+    <div class="stats-row" id="tech-stats"></div>
+    <div class="section-header">
+      <div class="section-title">Technicians</div>
+      <button class="btn btn-primary" onclick="openModal('addTech')">+ Add Technician</button>
+    </div>
+    <div class="filter-bar">
+      <input class="search-input" id="tech-search" placeholder="Search name…" oninput="renderTechs()" style="min-width:180px;"/>
+      <select class="filter-select" id="tech-status-filter" onchange="renderTechs()">
+        <option value="">All Status</option>
+        <option value="available">Available</option>
+        <option value="on_job">On Job</option>
+        <option value="off">Off</option>
+      </select>
+    </div>
+    <div style="overflow-x:auto;border:1px solid var(--border);border-radius:10px;">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th onclick="sortTechs('name')">Name <span id="tsort-name">↑</span></th>
+            <th onclick="sortTechs('phone')">Phone <span id="tsort-phone"></span></th>
+            <th onclick="sortTechs('email')">Email <span id="tsort-email"></span></th>
+            <th onclick="sortTechs('region')">Region <span id="tsort-region"></span></th>
+            <th onclick="sortTechs('status')">Status <span id="tsort-status"></span></th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="tech-list"><tr><td colspan="6" class="loading">Loading…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══ REQUESTS TAB ══ -->
+  <div class="tab-content" id="tab-requests">
+    <div class="stats-row" id="req-stats"></div>
+    <div class="section-header">
+      <div class="section-title">Quote Requests</div>
+    </div>
+    <div class="filter-bar">
+      <input class="search-input" id="req-search" placeholder="Search name, email…" oninput="renderRequests()"/>
+      <select class="filter-select" id="req-status-filter" onchange="renderRequests()">
+        <option value="">All Status</option>
+        <option value="new">New</option>
+        <option value="reviewed">Reviewed</option>
+        <option value="converted">Converted</option>
+        <option value="rejected">Rejected</option>
+      </select>
+    </div>
+    <div style="overflow-x:auto;border:1px solid var(--border);border-radius:10px;">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Contact</th>
+            <th>Services</th>
+            <th>Address</th>
+            <th>Description</th>
+            <th>Submitted</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="req-list"><tr><td colspan="8" class="loading">Loading…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══ MODALS ══ -->
+
+<!-- View Request -->
+<div class="modal-overlay" id="modal-viewRequest">
+  <div class="modal" style="max-width:640px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.3rem;">
+      <div class="modal-title" style="margin-bottom:0;">Quote Request</div>
+      <span id="req-modal-status-tag"></span>
+    </div>
+    <div class="modal-grid" id="req-modal-grid" style="gap:1rem;"></div>
+    <div class="modal-actions" id="req-modal-actions" style="flex-wrap:wrap;"></div>
+  </div>
+</div>
+
+<!-- Add/Edit Customer -->
+<div class="modal-overlay" id="modal-addCustomer">
+  <div class="modal">
+    <div class="modal-title" id="addCustomer-title">Add Customer</div>
+    <input type="hidden" id="addCustomer-id"/>
+    <input type="hidden" id="ac-client-type" value="client"/>
+
+    <!-- Client / Company toggle -->
+    <div style="display:flex;border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:1.2rem;">
+      <button type="button" id="ac-tab-client" onclick="setClientType('client')"
+        style="flex:1;padding:9px;font-family:'Space Mono',monospace;font-size:0.72rem;letter-spacing:1px;text-transform:uppercase;cursor:pointer;border:none;background:var(--purple-mid);color:#fff;transition:background .2s;">
+        👤 Client
+      </button>
+      <button type="button" id="ac-tab-company" onclick="setClientType('company')"
+        style="flex:1;padding:9px;font-family:'Space Mono',monospace;font-size:0.72rem;letter-spacing:1px;text-transform:uppercase;cursor:pointer;border:none;background:var(--white);color:var(--gray);transition:background .2s;">
+        🏢 Company
+      </button>
+    </div>
+
+    <div class="modal-grid">
+      <!-- Client fields -->
+      <div class="modal-group" id="ac-fname-group"><label>First Name *</label><input class="edit-input" id="ac-fname" placeholder="John"/></div>
+      <div class="modal-group" id="ac-lname-group"><label>Last Name</label><input class="edit-input" id="ac-lname" placeholder="Doe"/></div>
+      <!-- Company fields (hidden by default) -->
+      <div class="modal-group full" id="ac-company-group" style="display:none;"><label>Company Name *</label><input class="edit-input" id="ac-company" placeholder="ABC Security Ltd."/></div>
+      <div class="modal-group full" id="ac-contact-group" style="display:none;"><label>Contact Person</label><input class="edit-input" id="ac-contact" placeholder="Jane Smith"/></div>
+
+      <div class="modal-group"><label>Phone 1 *</label><input class="edit-input" id="ac-phone" placeholder="(555) 000-0000"/></div>
+      <div class="modal-group"><label>Phone 2</label><input class="edit-input" id="ac-phone2" placeholder="(555) 000-0000"/></div>
+      <div class="modal-group full"><label>Email</label><input class="edit-input" id="ac-email" type="email" placeholder="john@example.com"/></div>
+      <div class="modal-group full"><label>Address</label><input class="edit-input" id="ac-address" placeholder="123 Main St"/></div>
+      <div class="modal-group"><label>Account No.</label><input class="edit-input" id="ac-account" placeholder="ACC-001"/></div>
+      <div class="modal-group"><label>Town / City</label><input class="edit-input" id="ac-town" placeholder="Ocho Rios"/></div>
+      <div class="modal-group">
+        <label>Parish</label>
+        <select class="edit-input" id="ac-parish">
+          <option value="">Select parish…</option>
+          <option>Clarendon</option>
+          <option>Hanover</option>
+          <option>Kingston</option>
+          <option>Manchester</option>
+          <option>Portland</option>
+          <option>Saint Andrew</option>
+          <option>Saint Ann</option>
+          <option>Saint Catherine</option>
+          <option>Saint Elizabeth</option>
+          <option>Saint James</option>
+          <option>Saint Mary</option>
+          <option>Saint Thomas</option>
+          <option>Trelawny</option>
+          <option>Westmoreland</option>
+        </select>
+      </div>
+      <div class="modal-group"><label>Services (comma separated)</label><input class="edit-input" id="ac-services" placeholder="CCTV, Alarm Systems"/></div>
+      <div class="modal-group"><label>Address Coordinate</label><input class="edit-input" id="ac-coord" placeholder="18.4762, -77.8939"/></div>
+      <div class="modal-group">
+        <label>Status</label>
+        <select class="edit-input" id="ac-status">
+          <option value="active">Active</option>
+          <option value="pending">Pending</option>
+          <option value="inactive">Inactive</option>
+        </select>
+      </div>
+      <div class="modal-group">
+        <label>Warranty</label>
+        <select class="edit-input" id="ac-warranty">
+          <option value="false">No Warranty</option>
+          <option value="true">Warranty</option>
+        </select>
+      </div>
+      <div class="modal-group full"><label>Notes / Description</label><textarea class="edit-input" id="ac-description" placeholder="Additional notes…"></textarea></div>
+    </div>
+    <div class="modal-error" id="addCustomer-error"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('addCustomer')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveCustomer()">Save Customer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add/Edit Job -->
+<div class="modal-overlay" id="modal-addJob">
+  <div class="modal">
+    <div class="modal-title" id="addJob-title">Schedule Job</div>
+    <input type="hidden" id="addJob-id"/>
+    <div class="modal-grid">
+      <div class="modal-group full" style="position:relative;">
+        <label>Customer *</label>
+        <input class="edit-input" id="aj-customer-search" placeholder="Type name to search…" autocomplete="off" oninput="filterCustomerSearch()"/>
+        <input type="hidden" id="aj-customer"/>
+        <div id="aj-customer-dropdown" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--white);border:1px solid var(--border);border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,0.12);max-height:200px;overflow-y:auto;z-index:100;margin-top:4px;"></div>
+      </div>
+      <div class="modal-group full">
+        <label>Technician</label>
+        <select class="edit-input" id="aj-tech"><option value="">Unassigned</option></select>
+      </div>
+      <div class="modal-group"><label>Service Type</label><input class="edit-input" id="aj-service" placeholder="CCTV Install, Gate Repair…"/></div>
+      <div class="modal-group"><label>Scheduled Date &amp; Time</label><input class="edit-input" id="aj-date" type="datetime-local"/></div>
+      <div class="modal-group">
+        <label>Status</label>
+        <select class="edit-input" id="aj-status">
+          <option value="scheduled">Scheduled</option>
+          <option value="in_progress">In Progress</option>
+          <option value="completed">Completed</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+      </div>
+      <div class="modal-group full"><label>Notes / Job Details</label><textarea class="edit-input" id="aj-notes" placeholder="Job details, access instructions, customer notes…" style="min-height:100px;"></textarea></div>
+    </div>
+    <div class="modal-error" id="addJob-error"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('addJob')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveJob()">Save Job</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add/Edit Technician -->
+<div class="modal-overlay" id="modal-addTech">
+  <div class="modal">
+    <div class="modal-title" id="addTech-title">Add Technician</div>
+    <input type="hidden" id="addTech-id"/>
+    <div class="modal-grid">
+      <div class="modal-group full"><label>Name *</label><input class="edit-input" id="at-name" placeholder="John Smith"/></div>
+      <div class="modal-group"><label>Phone *</label><input class="edit-input" id="at-phone" placeholder="(555) 000-0000"/></div>
+      <div class="modal-group"><label>Email</label><input class="edit-input" id="at-email" type="email" placeholder="tech@example.com"/></div>
+      <div class="modal-group">
+        <label>Region</label>
+        <select class="edit-input" id="at-region">
+          <option value="">All Regions</option>
+          <option>Region 1 (Ocho Rios to St. Ann's Bay)</option>
+          <option>Region 2 (Ocho Rios to Oracabessa)</option>
+          <option>Region 3 (Oracabessa to Port Maria)</option>
+          <option>Region 4 (St. Ann's Bay to Runaway Bay)</option>
+          <option>Region 5 (Runaway Bay to Duncan's)</option>
+          <option>Zone: Capital &amp; Southeast</option>
+          <option>Miscellaneous</option>
+        </select>
+      </div>
+      <div class="modal-group">
+        <label>Status</label>
+        <select class="edit-input" id="at-status">
+          <option value="available">Available</option>
+          <option value="on_job">On Job</option>
+          <option value="off">Off</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-error" id="addTech-error"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('addTech')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveTech()">Save Technician</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const CONFIG = {
+  supabase: {
+    url: 'https://saewxgsplkjkbhestvhu.supabase.co',
+    anonKey: 'sb_publishable_YX6L0HGB2ML1EsW0sr481g_w1d0d39L'
+  }
+};
+</script>
+<script>
+  let sb, allCustomers = [], allJobs = [], allTechs = [];
+
+  function initSB() {
+    if (!sb) sb = window.supabase.createClient(CONFIG.supabase.url, CONFIG.supabase.anonKey);
+    return sb;
+  }
+
+  /* ── AUTH ── */
+  /* ── SESSION TIMEOUT (3 hours) ── */
+  const SESSION_TTL = 3 * 60 * 60 * 1000; // 3 hrs in ms
+  const LOGIN_KEY   = 'sw_login_time';
+
+  function sessionExpired() {
+    const t = localStorage.getItem(LOGIN_KEY);
+    return !t || (Date.now() - parseInt(t, 10)) > SESSION_TTL;
+  }
+
+  async function forceLogout(notify) {
+    await initSB().auth.signOut();
+    localStorage.removeItem(LOGIN_KEY);
+    document.getElementById('dashboard').classList.remove('visible');
+    document.getElementById('loginWrap').style.display = 'flex';
+    document.getElementById('adminPassword').value = '';
+    if (notify) alert('Your session expired after 3 hours. Please sign in again.');
+  }
+
+  // Check every minute while the tab is open
+  setInterval(async () => {
+    const { data } = await initSB().auth.getSession();
+    if (data.session && sessionExpired()) forceLogout(true);
+  }, 60 * 1000);
+
+  function togglePassword() {
+    const input = document.getElementById('adminPassword');
+    const btn   = document.getElementById('pwToggle');
+    const show  = input.type === 'password';
+    input.type  = show ? 'text' : 'password';
+    btn.textContent   = show ? '🙈' : '👁';
+    btn.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+  }
+
+  /* ── LOGIN ATTEMPT LOCKOUT ── */
+  const MAX_ATTEMPTS  = 5;
+  const LOCKOUT_TTL   = 30 * 60 * 1000; // 30 minutes
+  const ATTEMPTS_KEY  = 'sw_login_attempts';
+  const LOCKOUT_KEY   = 'sw_lockout_time';
+
+  function isLockedOut() {
+    const t = localStorage.getItem(LOCKOUT_KEY);
+    if (!t) return false;
+    if (Date.now() - parseInt(t, 10) < LOCKOUT_TTL) return true;
+    localStorage.removeItem(LOCKOUT_KEY);
+    localStorage.removeItem(ATTEMPTS_KEY);
+    return false;
+  }
+
+  function lockoutMinutesLeft() {
+    const t = localStorage.getItem(LOCKOUT_KEY);
+    if (!t) return 0;
+    return Math.ceil((LOCKOUT_TTL - (Date.now() - parseInt(t, 10))) / 60000);
+  }
+
+  async function doLogin() {
+    const errEl = document.getElementById('loginError');
+    const btn   = document.querySelector('.login-btn');
+    errEl.classList.remove('visible');
+
+    if (isLockedOut()) {
+      const m = lockoutMinutesLeft();
+      errEl.textContent = `Too many failed attempts. Try again in ${m} minute${m !== 1 ? 's' : ''}.`;
+      errEl.classList.add('visible');
+      return;
+    }
+
+    const email = document.getElementById('adminEmail').value.trim();
+    const pw    = document.getElementById('adminPassword').value;
+    btn.disabled = true;
+    btn.textContent = 'Signing in…';
+
+    const { error } = await initSB().auth.signInWithPassword({ email, password: pw });
+
+    btn.disabled = false;
+    btn.textContent = 'Sign In';
+
+    if (error) {
+      const attempts = parseInt(localStorage.getItem(ATTEMPTS_KEY) || '0', 10) + 1;
+      localStorage.setItem(ATTEMPTS_KEY, attempts);
+      if (attempts >= MAX_ATTEMPTS) {
+        localStorage.setItem(LOCKOUT_KEY, Date.now());
+        errEl.textContent = 'Too many failed attempts. Account locked for 30 minutes.';
+      } else {
+        const left = MAX_ATTEMPTS - attempts;
+        errEl.textContent = `Invalid email or password. ${left} attempt${left !== 1 ? 's' : ''} remaining.`;
+      }
+      errEl.classList.add('visible');
+      return;
+    }
+
+    localStorage.removeItem(ATTEMPTS_KEY);
+    localStorage.removeItem(LOCKOUT_KEY);
+    localStorage.setItem(LOGIN_KEY, Date.now());
+    showDashboard();
+  }
+
+  async function doLogout() {
+    await forceLogout(false);
+  }
+
+  async function showDashboard() {
+    document.getElementById('loginWrap').style.display = 'none';
+    document.getElementById('dashboard').classList.add('visible');
+    await loadAll();
+  }
+
+  async function loadAll() {
+    await Promise.all([loadCustomers(), loadTechs(), loadRequests()]);
+    await loadJobs();
+  }
+
+  /* ── TABS ── */
+  function switchTab(name) {
+    document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', ['customers','jobs','today','technicians','requests'][i] === name));
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.toggle('active', t.id === 'tab-' + name));
+  }
+
+  /* ── QUOTE REQUESTS ── */
+  let allRequests = [];
+
+  async function loadRequests() {
+    const { data } = await initSB().from('quote_requests').select('*').order('submitted_at', { ascending: false });
+    allRequests = data || [];
+    renderRequestStats();
+    renderRequests();
+    updateRequestsBadge();
+  }
+
+  function updateRequestsBadge() {
+    const count = allRequests.filter(r => r.status === 'new').length;
+    const badge = document.getElementById('requests-badge');
+    badge.textContent = count;
+    badge.style.display = count > 0 ? 'flex' : 'none';
+  }
+
+  function renderRequestStats() {
+    const total     = allRequests.length;
+    const newCount  = allRequests.filter(r => r.status === 'new').length;
+    const reviewed  = allRequests.filter(r => r.status === 'reviewed').length;
+    const converted = allRequests.filter(r => r.status === 'converted').length;
+    document.getElementById('req-stats').innerHTML = `
+      <div class="stat-card" style="border-top-color:#dc2626;"><div class="stat-label">Total</div><div class="stat-value">${total}</div></div>
+      <div class="stat-card" style="border-top-color:#f97316;"><div class="stat-label">New</div><div class="stat-value">${newCount}</div></div>
+      <div class="stat-card" style="border-top-color:var(--blue);"><div class="stat-label">Reviewed</div><div class="stat-value">${reviewed}</div></div>
+      <div class="stat-card" style="border-top-color:var(--green);"><div class="stat-label">Converted</div><div class="stat-value">${converted}</div></div>
+    `;
+  }
+
+  function renderRequests() {
+    const search = document.getElementById('req-search').value.toLowerCase();
+    const status = document.getElementById('req-status-filter').value;
+    const list   = document.getElementById('req-list');
+
+    const filtered = allRequests.filter(r => {
+      const nameStr = `${r.first_name || ''} ${r.last_name || ''}`.trim();
+      const matchSearch = !search || `${nameStr} ${r.email || ''} ${r.phone || ''} ${r.address || ''}`.toLowerCase().includes(search);
+      const matchStatus = !status || r.status === status;
+      return matchSearch && matchStatus;
+    });
+
+    if (!filtered.length) {
+      list.innerHTML = `<tr><td colspan="8" class="muted" style="text-align:center;padding:2rem;">No requests found</td></tr>`;
+      return;
+    }
+
+    const statusClass = { new: 'tag-status-pending', reviewed: 'tag-job-inprogress', converted: 'tag-status-active', rejected: 'tag-status-inactive' };
+
+    list.innerHTML = filtered.map(r => {
+      const name     = `${r.first_name || ''} ${r.last_name || ''}`.trim() || '(No Name)';
+      const services = (r.services || []).join(', ') || '—';
+      const desc     = r.description ? (r.description.length > 55 ? r.description.slice(0, 55) + '…' : r.description) : '—';
+      const submitted = r.submitted_at
+        ? new Date(r.submitted_at).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true })
+        : '—';
+      const statusTag = `<span class="tag ${statusClass[r.status] || ''}">${r.status || 'new'}</span>`;
+      return `<tr class="req-row" onclick="openRequestModal('${r.id}')">
+        <td><div class="td-name">👤 ${name}</div></td>
+        <td>${r.email ? `<div class="muted">${r.email}</div>` : ''}<div class="muted">${r.phone || '—'}</div></td>
+        <td class="wrap">${services}</td>
+        <td class="wrap muted">${r.address || '—'}</td>
+        <td class="wrap muted" style="max-width:180px;">${desc}</td>
+        <td class="muted" style="white-space:nowrap;">${submitted}</td>
+        <td>${statusTag}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  async function markReviewed(id) {
+    await initSB().from('quote_requests').update({ status: 'reviewed' }).eq('id', id);
+    await loadRequests();
+    openRequestModal(id);
+  }
+
+  async function convertRequest(id) {
+    const r = allRequests.find(x => x.id === id);
+    if (!r) return;
+    const name = `${r.first_name || ''} ${r.last_name || ''}`.trim();
+    if (!confirm(`Convert ${name}'s request into a customer record?`)) return;
+    const { error } = await initSB().from('customers').insert({
+      first_name: r.first_name, last_name: r.last_name,
+      email: r.email, phone: r.phone, address: r.address,
+      services: r.services, status: 'pending', warranty: false,
+    });
+    if (error) { alert('Error converting: ' + error.message); return; }
+    await initSB().from('quote_requests').update({ status: 'converted' }).eq('id', id);
+    await Promise.all([loadRequests(), loadCustomers()]);
+    alert(`${name} added as a Pending customer.`);
+  }
+
+  async function rejectRequest(id) {
+    if (!confirm('Mark this request as rejected?')) return;
+    await initSB().from('quote_requests').update({ status: 'rejected' }).eq('id', id);
+    closeModal('viewRequest');
+    await loadRequests();
+  }
+
+  function openRequestModal(id) {
+    const r = allRequests.find(x => x.id === id);
+    if (!r) return;
+
+    const statusClass = { new: 'tag-status-pending', reviewed: 'tag-job-inprogress', converted: 'tag-status-active', rejected: 'tag-status-inactive' };
+    document.getElementById('req-modal-status-tag').innerHTML =
+      `<span class="tag ${statusClass[r.status] || ''}">${r.status || 'new'}</span>`;
+
+    const f = (label, value, full) => `
+      <div class="req-detail-field${full ? ' full' : ''}">
+        <span class="req-detail-label">${label}</span>
+        <span class="req-detail-value${value ? '' : ' empty'}">${value || '—'}</span>
+      </div>`;
+
+    const name      = `${r.first_name || ''} ${r.last_name || ''}`.trim() || '(No Name)';
+    const services  = (r.services   || []).join(', ') || null;
+    const gateTypes = (r.gate_types || []).join(', ') || null;
+    const submitted = r.submitted_at
+      ? new Date(r.submitted_at).toLocaleString('en-US', { month: 'long', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true })
+      : null;
+
+    document.getElementById('req-modal-grid').innerHTML =
+      f('Name', name) +
+      f('Submitted', submitted) +
+      f('Email', r.email) +
+      f('Phone', r.phone) +
+      f('Address', r.address, true) +
+      f('Town / City', r.town) +
+      f('Parish', r.parish) +
+      f('Services', services, true) +
+      (gateTypes ? f('Gate Service Types', gateTypes, true) : '') +
+      f('Description', r.description, true);
+
+    let btns = `<button class="btn btn-ghost" onclick="closeModal('viewRequest')">Close</button>`;
+    if (r.status === 'new') {
+      btns += `<button class="btn btn-outline" onclick="markReviewed('${id}')">Mark Reviewed</button>
+               <button class="btn btn-primary" onclick="convertRequest('${id}')">Convert to Customer</button>
+               <button class="btn btn-danger"  onclick="rejectRequest('${id}')">Reject</button>`;
+    } else if (r.status === 'reviewed') {
+      btns += `<button class="btn btn-primary" onclick="convertRequest('${id}')">Convert to Customer</button>
+               <button class="btn btn-danger"  onclick="rejectRequest('${id}')">Reject</button>`;
+    }
+    document.getElementById('req-modal-actions').innerHTML = btns;
+
+    openModal('viewRequest');
+  }
+
+  /* ══════════════════════════════════════════
+     CUSTOMERS
+  ══════════════════════════════════════════ */
+  async function loadCustomers() {
+    const { data, error } = await initSB().from('customers').select('*').order('created_at', { ascending: false });
+    if (error) { document.getElementById('cust-list').innerHTML = '<div class="empty-state">Error loading customers.</div>'; return; }
+    allCustomers = data || [];
+    renderCustomers();
+    renderCustStats();
+    populateCustomerDropdown();
+  }
+
+  function renderCustStats() {
+    const total = allCustomers.length;
+    const active = allCustomers.filter(c => c.status === 'active' || !c.status).length;
+    const warranty = allCustomers.filter(c => c.warranty).length;
+    const sel = k => custStatFilter === k ? ' stat-selected' : '';
+    document.getElementById('cust-stats').innerHTML = `
+      <div class="stat-card${sel('total')}"       onclick="toggleStatFilter('total')"><div class="stat-label">Total</div><div class="stat-value">${total}</div></div>
+      <div class="stat-card${sel('active')}"      onclick="toggleStatFilter('active')"><div class="stat-label">Active</div><div class="stat-value">${active}</div></div>
+      <div class="stat-card${sel('warranty')}"    onclick="toggleStatFilter('warranty')"><div class="stat-label">Warranty</div><div class="stat-value">${warranty}</div></div>
+      <div class="stat-card${sel('no-warranty')}" onclick="toggleStatFilter('no-warranty')"><div class="stat-label">No Warranty</div><div class="stat-value">${total - warranty}</div></div>
+    `;
+  }
+
+  let custSortCol = 'created_at', custSortDir = 'desc';
+  let custStatFilter = null; // null | 'total' | 'active' | 'warranty' | 'no-warranty'
+
+  function toggleStatFilter(key) {
+    custStatFilter = custStatFilter === key ? null : key;
+    renderCustStats();
+    renderCustomers();
+  }
+
+  function sortCustomers(col) {
+    if (custSortCol === col) { custSortDir = custSortDir === 'asc' ? 'desc' : 'asc'; }
+    else { custSortCol = col; custSortDir = 'asc'; }
+    // update icons
+    ['name','town','parish','status','warranty','created_at'].forEach(c => {
+      const el = document.getElementById('sort-icon-' + c);
+      if (el) el.textContent = '';
+    });
+    const icon = document.getElementById('sort-icon-' + col);
+    if (icon) icon.textContent = custSortDir === 'asc' ? '↑' : '↓';
+    renderCustomers();
+  }
+
+  function renderCustomers() {
+    const search  = document.getElementById('cust-search').value.toLowerCase();
+    const parish  = document.getElementById('cust-parish').value;
+    const warranty = document.getElementById('cust-warranty').value;
+    const status  = document.getElementById('cust-status').value;
+
+    let data = allCustomers.filter(c => {
+      const nameStr = c.client_type === 'company' ? (c.company_name || c.first_name || '') : `${c.first_name||''} ${c.last_name||''}`;
+      const matchSearch = !search || `${nameStr} ${c.address || ''} ${c.town || ''} ${c.parish || ''} ${c.account_no || ''}`.toLowerCase().includes(search);
+      const matchRegion = !parish || c.parish === parish;
+      const matchWarranty = warranty === '' || String(c.warranty) === warranty;
+      const matchStatus = !status || (c.status || 'active') === status;
+      let matchStat = true;
+      if      (custStatFilter === 'active')     matchStat = c.status === 'active' || !c.status;
+      else if (custStatFilter === 'warranty')   matchStat = c.warranty === true;
+      else if (custStatFilter === 'no-warranty') matchStat = !c.warranty;
+      // 'total' and null both show everything
+      return matchSearch && matchRegion && matchWarranty && matchStatus && matchStat;
+    });
+
+    data.sort((a, b) => {
+      let av, bv;
+      if (custSortCol === 'name') {
+        av = a.client_type === 'company' ? (a.company_name||a.first_name||'') : `${a.first_name||''} ${a.last_name||''}`;
+        bv = b.client_type === 'company' ? (b.company_name||b.first_name||'') : `${b.first_name||''} ${b.last_name||''}`;
+      } else if (custSortCol === 'warranty') { av = String(a.warranty); bv = String(b.warranty); }
+      else { av = a[custSortCol] || ''; bv = b[custSortCol] || ''; }
+      return custSortDir === 'asc' ? av.toString().localeCompare(bv.toString()) : bv.toString().localeCompare(av.toString());
+    });
+
+    const list = document.getElementById('cust-list');
+    if (!data.length) { list.innerHTML = '<tr><td colspan="12" class="empty-state">No customers found.</td></tr>'; return; }
+
+    list.innerHTML = data.map(c => {
+      const name = c.client_type === 'company'
+        ? (c.company_name || c.first_name || '(No Name)')
+        : `${c.first_name || ''} ${c.last_name || ''}`.trim() || '(No Name)';
+      const typeIcon = c.client_type === 'company' ? '🏢' : '👤';
+      const statusTag = c.status === 'inactive'
+        ? `<span class="tag tag-status-inactive">Inactive</span>`
+        : c.status === 'pending'
+          ? `<span class="tag tag-status-pending">Pending</span>`
+          : `<span class="tag tag-status-active">Active</span>`;
+      const warrantyTag = c.warranty
+        ? `<span class="tag tag-warranty">Warranty</span>`
+        : `<span class="tag tag-no-warranty">No Warranty</span>`;
+      const dateStr = c.created_at
+        ? new Date(c.created_at).toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit',hour12:true})
+        : '—';
+      const services = (c.services||[]).join(', ') || '—';
+      const town    = c.town   || '<span class="muted">—</span>';
+      const parish  = c.parish || '<span class="muted">—</span>';
+
+      return `<tr>
+        <td><div class="td-name">${typeIcon} ${name}</div>${c.account_no ? `<div class="td-sub">#${c.account_no}</div>` : ''}</td>
+        <td>${c.phone || '<span class="muted">—</span>'}</td>
+        <td class="muted">${c.phone2 || '—'}</td>
+        <td class="truncate" title="${c.email || ''}">${c.email || '<span class="muted">—</span>'}</td>
+        <td class="wrap">${c.address || '<span class="muted">—</span>'}</td>
+        <td class="wrap">${town}</td>
+        <td class="wrap">${parish}</td>
+        <td class="muted">${c.account_no || '—'}</td>
+        <td class="wrap">${services}</td>
+        <td>${statusTag}</td>
+        <td>${warrantyTag}</td>
+        <td class="muted" style="white-space:nowrap;">${dateStr}</td>
+        <td><div class="td-actions">
+          <button class="btn btn-outline btn-sm" onclick="editCustomer('${c.id}')">Edit</button>
+          <button class="btn btn-primary btn-sm" onclick="scheduleForCustomer('${c.id}')">Job</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteCustomer('${c.id}')">Del</button>
+        </div></td>
+      </tr>`;
+    }).join('');
+  }
+
+  function editCustomer(id) {
+    const c = allCustomers.find(x => x.id === id);
+    if (!c) return;
+    document.getElementById('addCustomer-title').textContent = 'Edit Customer';
+    document.getElementById('addCustomer-id').value = id;
+    setClientType(c.client_type || 'client');
+    document.getElementById('ac-fname').value = c.first_name || '';
+    document.getElementById('ac-lname').value = c.last_name || '';
+    document.getElementById('ac-company').value = c.company_name || '';
+    document.getElementById('ac-contact').value = c.description?.startsWith('Contact:') ? c.description.replace('Contact:','').trim() : '';
+    document.getElementById('ac-phone').value = c.phone || '';
+    document.getElementById('ac-phone2').value = c.phone2 || '';
+    document.getElementById('ac-email').value = c.email || '';
+    document.getElementById('ac-address').value = c.address || '';
+    document.getElementById('ac-account').value = c.account_no || '';
+    document.getElementById('ac-town').value   = c.town   || '';
+    document.getElementById('ac-parish').value = c.parish || '';
+    document.getElementById('ac-services').value = (c.services || []).join(', ');
+    document.getElementById('ac-coord').value = c.address_coordinate || '';
+    document.getElementById('ac-status').value = c.status || 'active';
+    document.getElementById('ac-warranty').value = String(c.warranty || false);
+    document.getElementById('ac-description').value = c.description || '';
+    openModal('addCustomer');
+  }
+
+  async function saveCustomer() {
+    const id = document.getElementById('addCustomer-id').value;
+    const clientType = document.getElementById('ac-client-type').value;
+    const isCompany = clientType === 'company';
+    const errEl = document.getElementById('addCustomer-error');
+    errEl.classList.remove('visible');
+
+    const phone = document.getElementById('ac-phone').value.trim();
+    const fname = isCompany ? document.getElementById('ac-company').value.trim() : document.getElementById('ac-fname').value.trim();
+
+    if (!fname || !phone) {
+      errEl.textContent = isCompany ? 'Company name and phone are required.' : 'First name and phone number are required.';
+      errEl.classList.add('visible'); return;
+    }
+
+    const payload = {
+      client_type: clientType,
+      first_name: isCompany ? fname : fname,
+      last_name: isCompany ? null : document.getElementById('ac-lname').value.trim() || null,
+      company_name: isCompany ? fname : null,
+      email: document.getElementById('ac-email').value.trim() || null,
+      phone,
+      phone2: document.getElementById('ac-phone2').value.trim() || null,
+      address:    document.getElementById('ac-address').value.trim() || null,
+      account_no: document.getElementById('ac-account').value.trim() || null,
+      town:       document.getElementById('ac-town').value.trim()   || null,
+      parish:     document.getElementById('ac-parish').value        || null,
+      services: document.getElementById('ac-services').value.split(',').map(s=>s.trim()).filter(Boolean),
+      address_coordinate: document.getElementById('ac-coord').value.trim() || null,
+      status: document.getElementById('ac-status').value,
+      warranty: document.getElementById('ac-warranty').value === 'true',
+      description: document.getElementById('ac-description').value.trim() || null,
+    };
+
+    const { error } = id
+      ? await initSB().from('customers').update(payload).eq('id', id)
+      : await initSB().from('customers').insert(payload);
+
+    if (error) { errEl.textContent = 'Error: ' + error.message; errEl.classList.add('visible'); return; }
+    closeModal('addCustomer');
+    await loadCustomers();
+  }
+
+  async function deleteCustomer(id) {
+    if (!confirm('Delete this customer? This will also remove linked jobs.')) return;
+    await initSB().from('customers').delete().eq('id', id);
+    await loadCustomers();
+    await loadJobs();
+  }
+
+  function scheduleForCustomer(customerId) {
+    switchTab('jobs');
+    openModal('addJob');
+    setTimeout(() => {
+      document.getElementById('aj-customer').value = customerId;
+      const cust = allCustomers.find(c => c.id === customerId);
+      if (cust) {
+        const custName = cust.client_type === 'company' ? (cust.company_name || cust.first_name) : `${cust.first_name} ${cust.last_name||''}`;
+        document.getElementById('aj-customer-search').value = custName.trim();
+        // Pull in customer notes as a starting point for job notes
+        if (cust.description) {
+          document.getElementById('aj-notes').value = cust.description;
+        }
+      }
+    }, 50);
+  }
+
+  function filterCustomerSearch() {
+    const q = document.getElementById('aj-customer-search').value.toLowerCase();
+    const dd = document.getElementById('aj-customer-dropdown');
+    if (!q) { dd.style.display = 'none'; return; }
+    const matches = allCustomers.filter(c => `${c.first_name} ${c.last_name||''}`.toLowerCase().includes(q)).slice(0, 8);
+    if (!matches.length) { dd.style.display = 'none'; return; }
+    dd.style.display = 'block';
+    dd.innerHTML = matches.map(c =>
+      `<div onclick="selectJobCustomer('${c.id}','${c.first_name} ${c.last_name||''}')"
+        style="padding:9px 14px;cursor:pointer;font-size:.88rem;color:var(--text);border-bottom:1px solid var(--border);"
+        onmouseover="this.style.background='#f5f0ff'" onmouseout="this.style.background=''"
+       >${c.first_name} ${c.last_name||''} ${c.phone ? '<span style="color:var(--gray);font-size:.8rem"> · '+c.phone+'</span>' : ''}</div>`
+    ).join('');
+  }
+
+  function selectJobCustomer(id, name) {
+    document.getElementById('aj-customer').value = id;
+    document.getElementById('aj-customer-search').value = name;
+    document.getElementById('aj-customer-dropdown').style.display = 'none';
+  }
+
+  function setClientType(type) {
+    document.getElementById('ac-client-type').value = type;
+    const isCompany = type === 'company';
+    // toggle tab styles
+    document.getElementById('ac-tab-client').style.background  = isCompany ? 'var(--white)'      : 'var(--purple-mid)';
+    document.getElementById('ac-tab-client').style.color       = isCompany ? 'var(--gray)'        : '#fff';
+    document.getElementById('ac-tab-company').style.background = isCompany ? 'var(--purple-mid)'  : 'var(--white)';
+    document.getElementById('ac-tab-company').style.color      = isCompany ? '#fff'               : 'var(--gray)';
+    // show/hide fields
+    document.getElementById('ac-fname-group').style.display    = isCompany ? 'none' : '';
+    document.getElementById('ac-lname-group').style.display    = isCompany ? 'none' : '';
+    document.getElementById('ac-company-group').style.display  = isCompany ? '' : 'none';
+    document.getElementById('ac-contact-group').style.display  = isCompany ? '' : 'none';
+  }
+
+  function populateCustomerDropdown() {
+    // kept for compatibility — search field now handles this
+    if (cur) sel.value = cur;
+  }
+
+  /* ══════════════════════════════════════════
+     TECHNICIANS
+  ══════════════════════════════════════════ */
+  async function loadTechs() {
+    const { data } = await initSB().from('technicians').select('*').order('name');
+    allTechs = data || [];
+    renderTechs();
+    renderTechStats();
+    populateTechDropdowns();
+  }
+
+  function renderTechStats() {
+    const total = allTechs.length;
+    const avail = allTechs.filter(t => t.status === 'available').length;
+    const onJob = allTechs.filter(t => t.status === 'on_job').length;
+    const tsel = k => techStatFilter === k ? ' stat-selected' : '';
+    document.getElementById('tech-stats').innerHTML = `
+      <div class="stat-card${tsel('total')}"     onclick="toggleTechStatFilter('total')"><div class="stat-label">Total</div><div class="stat-value">${total}</div></div>
+      <div class="stat-card${tsel('available')}" onclick="toggleTechStatFilter('available')"><div class="stat-label">Available</div><div class="stat-value">${avail}</div></div>
+      <div class="stat-card${tsel('on_job')}"    onclick="toggleTechStatFilter('on_job')"><div class="stat-label">On Job</div><div class="stat-value">${onJob}</div></div>
+    `;
+  }
+
+  let techSortCol = 'name', techSortDir = 'asc';
+  let techStatFilter = null; // null | 'total' | 'available' | 'on_job'
+
+  function toggleTechStatFilter(key) {
+    techStatFilter = techStatFilter === key ? null : key;
+    renderTechStats();
+    renderTechs();
+  }
+
+  function sortTechs(col) {
+    techSortDir = techSortCol === col ? (techSortDir === 'asc' ? 'desc' : 'asc') : 'asc';
+    techSortCol = col;
+    ['name','phone','email','region','status'].forEach(c => { const el = document.getElementById('tsort-'+c); if(el) el.textContent=''; });
+    const el = document.getElementById('tsort-'+col); if(el) el.textContent = techSortDir==='asc'?'↑':'↓';
+    renderTechs();
+  }
+
+  function renderTechs() {
+    const search = (document.getElementById('tech-search')?.value||'').toLowerCase();
+    const statusF = document.getElementById('tech-status-filter')?.value||'';
+    const list = document.getElementById('tech-list');
+
+    let data = allTechs.filter(t => {
+      const matchSearch = !search || `${t.name} ${t.phone||''} ${t.email||''}`.toLowerCase().includes(search);
+      const matchStatus = !statusF || (t.status||'available') === statusF;
+      const matchStat   = !techStatFilter || techStatFilter === 'total' || (t.status||'available') === techStatFilter;
+      return matchSearch && matchStatus && matchStat;
+    });
+
+    data.sort((a,b) => {
+      const av = a[techSortCol]||'', bv = b[techSortCol]||'';
+      return techSortDir==='asc' ? av.localeCompare(bv) : bv.localeCompare(av);
+    });
+
+    if (!data.length) { list.innerHTML = '<tr><td colspan="6" class="empty-state">No technicians found.</td></tr>'; return; }
+
+    list.innerHTML = data.map(t => {
+      const statusTag = `<span class="tag tag-tech-${t.status||'available'}">${(t.status||'available').replace('_',' ')}</span>`;
+      const region = t.region ? t.region.replace(/Region \d+ \(([^)]+)\)/,'$1') : '—';
+      return `<tr>
+        <td><div class="td-name">🔧 ${t.name}</div></td>
+        <td>${t.phone||'<span class="muted">—</span>'}</td>
+        <td class="muted">${t.email||'—'}</td>
+        <td class="wrap muted">${region}</td>
+        <td>${statusTag}</td>
+        <td><div class="td-actions">
+          <button class="btn btn-outline btn-sm" onclick="editTech('${t.id}')">Edit</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteTech('${t.id}')">Delete</button>
+        </div></td>
+      </tr>`;
+    }).join('');
+  }
+
+  function editTech(id) {
+    const t = allTechs.find(x => x.id === id);
+    if (!t) return;
+    document.getElementById('addTech-title').textContent = 'Edit Technician';
+    document.getElementById('addTech-id').value = id;
+    document.getElementById('at-name').value = t.name || '';
+    document.getElementById('at-phone').value = t.phone || '';
+    document.getElementById('at-email').value = t.email || '';
+    document.getElementById('at-region').value = t.region || '';
+    document.getElementById('at-status').value = t.status || 'available';
+    openModal('addTech');
+  }
+
+  async function saveTech() {
+    const id = document.getElementById('addTech-id').value;
+    const name = document.getElementById('at-name').value.trim();
+    const errEl = document.getElementById('addTech-error');
+    errEl.classList.remove('visible');
+    const phone = document.getElementById('at-phone').value.trim();
+    if (!name || !phone) { errEl.textContent = 'Name and phone are required.'; errEl.classList.add('visible'); return; }
+
+    const payload = {
+      name,
+      phone,
+      email: document.getElementById('at-email').value.trim() || null,
+      region: document.getElementById('at-region').value || null,
+      status: document.getElementById('at-status').value,
+    };
+
+    const { error } = id
+      ? await initSB().from('technicians').update(payload).eq('id', id)
+      : await initSB().from('technicians').insert(payload);
+
+    if (error) { errEl.textContent = 'Error: ' + error.message; errEl.classList.add('visible'); return; }
+    closeModal('addTech');
+    await loadTechs();
+    await loadJobs();
+  }
+
+  async function deleteTech(id) {
+    if (!confirm('Delete this technician?')) return;
+    await initSB().from('technicians').delete().eq('id', id);
+    await loadTechs();
+  }
+
+  function populateTechDropdowns() {
+    ['aj-tech', 'jobs-tech'].forEach(selId => {
+      const sel = document.getElementById(selId);
+      const cur = sel.value;
+      const placeholder = selId === 'jobs-tech' ? '<option value="">All Technicians</option>' : '<option value="">Unassigned</option>';
+      sel.innerHTML = placeholder + allTechs.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+      if (cur) sel.value = cur;
+    });
+  }
+
+  /* ══════════════════════════════════════════
+     JOBS
+  ══════════════════════════════════════════ */
+  async function loadJobs() {
+    const { data } = await initSB().from('jobs').select('*, customers(first_name, last_name, phone, address, town, parish), technicians(name)').order('scheduled_date', { ascending: true });
+    allJobs = data || [];
+    renderJobs();
+    renderJobStats();
+    renderTodayJobs();
+  }
+
+  function renderTodayJobs() {
+    const OFFSET = 5 * 60 * 60 * 1000; // Jamaica UTC-5
+    const nowJamaica = new Date(Date.now() - OFFSET);
+    const todayStr = nowJamaica.toISOString().split('T')[0];
+    const todayStart = new Date(todayStr + 'T05:00:00Z'); // midnight Jamaica = 5 AM UTC
+    const todayEnd   = new Date(todayStart.getTime() + 24 * 60 * 60 * 1000);
+
+    const todayJobs = allJobs
+      .filter(j => {
+        if (!j.scheduled_date || j.status === 'cancelled') return false;
+        const d = new Date(j.scheduled_date);
+        return d >= todayStart && d < todayEnd;
+      })
+      .sort((a, b) => (a.scheduled_date||'').localeCompare(b.scheduled_date||''));
+
+    const dateLabel = new Date(todayStr + 'T12:00:00Z').toLocaleDateString('en-JM', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+    const titleEl = document.getElementById('today-title');
+    if (titleEl) titleEl.textContent = `Today's Jobs — ${dateLabel}`;
+
+    const badge = document.getElementById('today-badge');
+    if (badge) { badge.textContent = todayJobs.length; badge.style.display = todayJobs.length ? 'flex' : 'none'; }
+
+    const list = document.getElementById('today-list');
+    if (!list) return;
+    if (!todayJobs.length) { list.innerHTML = '<tr><td colspan="8" class="empty-state">No jobs scheduled for today.</td></tr>'; return; }
+
+    list.innerHTML = todayJobs.map(j => {
+      const custName  = j.customers ? `${j.customers.first_name} ${j.customers.last_name||''}`.trim() : 'Unknown';
+      const custPhone = j.customers?.phone || '—';
+      const location  = [j.customers?.address, j.customers?.town, j.customers?.parish].filter(Boolean).join(', ') || '—';
+      const techName  = j.technicians?.name || '<span class="muted">Unassigned</span>';
+      const timeStr   = j.scheduled_date
+        ? new Date(j.scheduled_date).toLocaleString('en-US', { hour:'2-digit', minute:'2-digit', hour12:true })
+        : '<span class="muted">—</span>';
+      const statusKey = (j.status||'scheduled').replace('_','');
+      const statusTag = `<span class="tag tag-job-${statusKey==='inprogress'?'inprogress':j.status}">${(j.status||'scheduled').replace('_',' ')}</span>`;
+
+      return `<tr>
+        <td style="white-space:nowrap;"><strong>${timeStr}</strong></td>
+        <td><div class="td-name">${custName}</div></td>
+        <td class="muted">${custPhone}</td>
+        <td class="muted" style="max-width:200px;">${location}</td>
+        <td>${j.service_type||'<span class="muted">—</span>'}</td>
+        <td>${techName}</td>
+        <td>${statusTag}</td>
+        <td><div class="td-actions">
+          <button class="btn btn-outline btn-sm" onclick="editJob('${j.id}')">Edit</button>
+          ${j.status==='scheduled'   ? `<button class="btn btn-success btn-sm" onclick="updateJobStatus('${j.id}','in_progress')">Start</button>` : ''}
+          ${j.status==='in_progress' ? `<button class="btn btn-success btn-sm" onclick="updateJobStatus('${j.id}','completed')">Done</button>` : ''}
+        </div></td>
+      </tr>`;
+    }).join('');
+  }
+
+  function renderJobStats() {
+    const total = allJobs.length;
+    const scheduled = allJobs.filter(j => j.status === 'scheduled').length;
+    const inProgress = allJobs.filter(j => j.status === 'in_progress').length;
+    const completed = allJobs.filter(j => j.status === 'completed').length;
+    const jsel = k => jobStatFilter === k ? ' stat-selected' : '';
+    document.getElementById('jobs-stats').innerHTML = `
+      <div class="stat-card${jsel('total')}"       onclick="toggleJobStatFilter('total')"><div class="stat-label">Total</div><div class="stat-value">${total}</div></div>
+      <div class="stat-card${jsel('scheduled')}"   onclick="toggleJobStatFilter('scheduled')"><div class="stat-label">Scheduled</div><div class="stat-value">${scheduled}</div></div>
+      <div class="stat-card${jsel('in_progress')}" onclick="toggleJobStatFilter('in_progress')"><div class="stat-label">In Progress</div><div class="stat-value">${inProgress}</div></div>
+      <div class="stat-card${jsel('completed')}"   onclick="toggleJobStatFilter('completed')"><div class="stat-label">Completed</div><div class="stat-value">${completed}</div></div>
+    `;
+  }
+
+  let jobSortCol = 'date', jobSortDir = 'asc';
+  let jobStatFilter = null; // null | 'total' | 'scheduled' | 'in_progress' | 'completed'
+
+  function toggleJobStatFilter(key) {
+    jobStatFilter = jobStatFilter === key ? null : key;
+    renderJobStats();
+    renderJobs();
+  }
+
+  function sortJobs(col) {
+    jobSortDir = jobSortCol === col ? (jobSortDir === 'asc' ? 'desc' : 'asc') : 'asc';
+    jobSortCol = col;
+    ['customer','service','tech','date','status'].forEach(c => { const el = document.getElementById('jsort-'+c); if(el) el.textContent=''; });
+    const el = document.getElementById('jsort-'+col); if(el) el.textContent = jobSortDir==='asc'?'↑':'↓';
+    renderJobs();
+  }
+
+  function renderJobs() {
+    const statusFilter = document.getElementById('jobs-status').value;
+    const techFilter   = document.getElementById('jobs-tech').value;
+    const searchVal    = (document.getElementById('jobs-search')?.value||'').toLowerCase();
+
+    let data = allJobs.filter(j => {
+      const matchStatus = !statusFilter || j.status === statusFilter;
+      const matchTech   = !techFilter || j.technician_id === techFilter;
+      const custName    = j.customers ? `${j.customers.first_name} ${j.customers.last_name||''}`.toLowerCase() : '';
+      const matchSearch = !searchVal || custName.includes(searchVal);
+      const matchStat   = !jobStatFilter || jobStatFilter === 'total' || j.status === jobStatFilter;
+      return matchStatus && matchTech && matchSearch && matchStat;
+    });
+
+    data.sort((a, b) => {
+      let av, bv;
+      if (jobSortCol === 'customer') { av = `${a.customers?.first_name||''}`; bv = `${b.customers?.first_name||''}`; }
+      else if (jobSortCol === 'tech')    { av = a.technicians?.name||''; bv = b.technicians?.name||''; }
+      else if (jobSortCol === 'service') { av = a.service_type||''; bv = b.service_type||''; }
+      else if (jobSortCol === 'status')  { av = a.status||''; bv = b.status||''; }
+      else { av = a.scheduled_date||''; bv = b.scheduled_date||''; }
+      return jobSortDir==='asc' ? av.localeCompare(bv) : bv.localeCompare(av);
+    });
+
+    const list = document.getElementById('jobs-list');
+    if (!data.length) { list.innerHTML = '<tr><td colspan="8" class="empty-state">No jobs found.</td></tr>'; return; }
+
+    list.innerHTML = data.map(j => {
+      const custName = j.customers ? `${j.customers.first_name} ${j.customers.last_name||''}`.trim() : 'Unknown';
+      const custPhone = j.customers?.phone || '—';
+      const techName = j.technicians?.name || '<span class="muted">Unassigned</span>';
+      const dateStr = j.scheduled_date
+        ? new Date(j.scheduled_date).toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit',hour12:true})
+        : '<span class="muted">Not set</span>';
+      const statusKey = (j.status||'scheduled').replace('_','');
+      const statusTag = `<span class="tag tag-job-${statusKey==='inprogress'?'inprogress':j.status}">${(j.status||'scheduled').replace('_',' ')}</span>`;
+      const notes = j.notes ? (j.notes.length > 50 ? j.notes.slice(0,50)+'…' : j.notes) : '<span class="muted">—</span>';
+
+      return `<tr>
+        <td><div class="td-name">${custName}</div></td>
+        <td class="muted">${custPhone}</td>
+        <td>${j.service_type||'<span class="muted">—</span>'}</td>
+        <td>${techName}</td>
+        <td style="white-space:nowrap;">${dateStr}</td>
+        <td>${statusTag}</td>
+        <td class="wrap muted" style="max-width:180px;">${notes}</td>
+        <td><div class="td-actions">
+          <button class="btn btn-outline btn-sm" onclick="editJob('${j.id}')">Edit</button>
+          ${j.status==='scheduled' ? `<button class="btn btn-success btn-sm" onclick="updateJobStatus('${j.id}','in_progress')">In Progress</button>` : ''}
+          ${j.status==='in_progress' ? `<button class="btn btn-success btn-sm" onclick="updateJobStatus('${j.id}','completed')">Complete</button>` : ''}
+          <button class="btn btn-danger btn-sm" onclick="deleteJob('${j.id}')">Del</button>
+        </div></td>
+      </tr>`;
+    }).join('');
+  }
+
+  function editJob(id) {
+    const j = allJobs.find(x => x.id === id);
+    if (!j) return;
+    document.getElementById('addJob-title').textContent = 'Edit Job';
+    document.getElementById('addJob-id').value = id;
+    document.getElementById('aj-customer').value = j.customer_id || '';
+    const cust = allCustomers.find(c => c.id === j.customer_id);
+    document.getElementById('aj-customer-search').value = cust ? `${cust.first_name} ${cust.last_name||''}` : '';
+    document.getElementById('aj-tech').value = j.technician_id || '';
+    document.getElementById('aj-service').value = j.service_type || '';
+    document.getElementById('aj-date').value = j.scheduled_date ? j.scheduled_date.slice(0,16) : '';
+    document.getElementById('aj-status').value = j.status || 'scheduled';
+    document.getElementById('aj-notes').value = j.notes || '';
+    openModal('addJob');
+  }
+
+  async function saveJob() {
+    const id = document.getElementById('addJob-id').value;
+    const customerId = document.getElementById('aj-customer').value;
+    const errEl = document.getElementById('addJob-error');
+    errEl.classList.remove('visible');
+    if (!customerId) { errEl.textContent = 'Please select a customer.'; errEl.classList.add('visible'); return; }
+
+    const techId = document.getElementById('aj-tech').value;
+    const dateVal = document.getElementById('aj-date').value;
+
+    const payload = {
+      customer_id: customerId,
+      technician_id: techId || null,
+      service_type: document.getElementById('aj-service').value.trim() || null,
+      scheduled_date: dateVal ? new Date(dateVal).toISOString() : null,
+      status: document.getElementById('aj-status').value,
+      notes: document.getElementById('aj-notes').value.trim() || null,
+    };
+
+    const { error } = id
+      ? await initSB().from('jobs').update(payload).eq('id', id)
+      : await initSB().from('jobs').insert(payload);
+
+    if (error) { errEl.textContent = 'Error: ' + error.message; errEl.classList.add('visible'); return; }
+    closeModal('addJob');
+    await loadJobs();
+  }
+
+  async function updateJobStatus(id, status) {
+    await initSB().from('jobs').update({ status }).eq('id', id);
+    await loadJobs();
+  }
+
+  async function deleteJob(id) {
+    if (!confirm('Delete this job?')) return;
+    await initSB().from('jobs').delete().eq('id', id);
+    await loadJobs();
+  }
+
+  /* ── SHARED HELPERS ── */
+  function toggleCard(id) { document.getElementById(id).classList.toggle('open'); }
+
+  function openModal(name) {
+    const errEl = document.getElementById(name + '-error');
+    if (errEl) errEl.classList.remove('visible');
+    document.getElementById('modal-' + name).classList.add('visible');
+  }
+
+  function closeModal(name) {
+    document.getElementById('modal-' + name).classList.remove('visible');
+    const idEl = document.getElementById(name + '-id');
+    if (idEl) idEl.value = '';
+    const titleEl = document.getElementById(name + '-title');
+    if (titleEl) {
+      const defaults = { addCustomer: 'Add Customer', addJob: 'Schedule Job', addTech: 'Add Technician' };
+      titleEl.textContent = defaults[name] || '';
+    }
+  }
+
+  document.querySelectorAll('.modal-overlay').forEach(el => {
+    el.addEventListener('click', e => { if (e.target === el) closeModal(el.id.replace('modal-','')); });
+  });
+
+  document.getElementById('adminPassword').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+
+  initSB().auth.getSession().then(async ({ data }) => {
+    if (data.session && !sessionExpired()) {
+      showDashboard(); // valid session within 3-hour window
+    } else if (data.session) {
+      forceLogout(false); // session exists but expired — clear it silently
+    }
+  });
+</script>
+</body>
+</html>
