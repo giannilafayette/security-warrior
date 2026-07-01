@@ -11,7 +11,7 @@ jobs:
         run: |
           curl --fail --silent --show-error \
             -X POST \
-            "${SUPABASE_URL}/functions/v1/send-reminders" \
+            "${SUPABASE_URL}/functions/v1/send-reminder" \
             -H "Authorization: Bearer ${SUPABASE_SERVICE_ROLE_KEY}" \
             -H "Content-Type: application/json"
         env:
