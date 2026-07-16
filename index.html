@@ -1101,7 +1101,7 @@
         </div>
         <div class="contact-item reveal">
           <div class="contact-item-icon">&#9993;</div>
-          <div class="contact-item-text"><strong>Email</strong><a href="mailto:info@securitywarrior.com">info@securitywarrior.com</a></div>
+          <div class="contact-item-text"><strong>Email</strong><a href="mailto:info@securitywarrior.net">info@securitywarrior.net</a></div>
         </div>
         <div class="contact-item reveal">
           <div class="contact-item-icon">&#128336;</div>
@@ -1365,7 +1365,25 @@ const CONFIG = {
     btn.textContent = 'Sending…';
     localStorage.setItem(RATE_KEY, Date.now());
 
-    setTimeout(() => {
+    const supabase = window.supabase.createClient(CONFIG.supabase.url, CONFIG.supabase.anonKey);
+    const payload = {
+      fname: document.getElementById('fname').value.trim(),
+      lname: document.getElementById('lname').value.trim(),
+      email: document.getElementById('email').value.trim(),
+      phone: document.getElementById('phone').value.trim(),
+      address: document.getElementById('address').value.trim(),
+      service: document.getElementById('service').value,
+      message: document.getElementById('message').value.trim(),
+    };
+
+    fetch(`${CONFIG.supabase.url}/functions/v1/contact-notify`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${CONFIG.supabase.anonKey}`,
+      },
+      body: JSON.stringify(payload),
+    }).finally(() => {
       document.getElementById('formSuccess').classList.add('visible');
       btn.style.display = 'none';
       ['fname', 'lname', 'email', 'phone', 'address', 'message'].forEach(id => {
@@ -1374,7 +1392,7 @@ const CONFIG = {
       document.getElementById('service').selectedIndex = 0;
       counterEl.textContent = '0 / ' + MSG_MAX;
       counterEl.className = 'char-counter';
-    }, 800);
+    });
   }
 </script>
 </body>
