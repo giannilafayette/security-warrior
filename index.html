@@ -1367,7 +1367,6 @@ const CONFIG = {
     btn.disabled = true;
     btn.textContent = 'Sending…';
 
-    const supabase = window.supabase.createClient(CONFIG.supabase.url, CONFIG.supabase.anonKey);
     const payload = {
       fname: document.getElementById('fname').value.trim(),
       lname: document.getElementById('lname').value.trim(),
@@ -1378,14 +1377,7 @@ const CONFIG = {
       message: document.getElementById('message').value.trim(),
     };
 
-    fetch(`${CONFIG.supabase.url}/functions/v1/contact-notify`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${CONFIG.supabase.anonKey}`,
-      },
-      body: JSON.stringify(payload),
-    }).finally(() => {
+    function showSuccess() {
       document.getElementById('formSuccess').classList.add('visible');
       btn.style.display = 'none';
       ['fname', 'lname', 'email', 'phone', 'address', 'message'].forEach(id => {
@@ -1394,6 +1386,20 @@ const CONFIG = {
       document.getElementById('service').selectedIndex = 0;
       counterEl.textContent = '0 / ' + MSG_MAX;
       counterEl.className = 'char-counter';
+    }
+
+    const timer = setTimeout(showSuccess, 8000);
+
+    fetch(`${CONFIG.supabase.url}/functions/v1/contact-notify`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${CONFIG.supabase.anonKey}`,
+      },
+      body: JSON.stringify(payload),
+    }).finally(() => {
+      clearTimeout(timer);
+      showSuccess();
     });
   }
 </script>
