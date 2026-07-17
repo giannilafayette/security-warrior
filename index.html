@@ -1341,13 +1341,16 @@ const CONFIG = {
 
     if (Date.now() - formLoadTime < 4000) return;
 
-    const RATE_KEY = 'sw_last_submit';
-    const RATE_TTL = 5 * 60 * 1000;
-    const last = localStorage.getItem(RATE_KEY);
-    if (last && (Date.now() - parseInt(last, 10)) < RATE_TTL) {
+    const RATE_KEY = 'sw_submits';
+    const RATE_TTL = 10 * 60 * 1000;
+    const now = Date.now();
+    const history = JSON.parse(localStorage.getItem(RATE_KEY) || '[]').filter(t => now - t < RATE_TTL);
+    if (history.length >= 2) {
       alert('Please wait a few minutes before submitting again.');
       return;
     }
+    history.push(now);
+    localStorage.setItem(RATE_KEY, JSON.stringify(history));
 
     let valid = true;
     ['fname', 'lname', 'email', 'phone', 'message'].forEach(id => {
@@ -1363,7 +1366,6 @@ const CONFIG = {
     const btn = document.getElementById('submitBtn');
     btn.disabled = true;
     btn.textContent = 'Sending…';
-    localStorage.setItem(RATE_KEY, Date.now());
 
     const supabase = window.supabase.createClient(CONFIG.supabase.url, CONFIG.supabase.anonKey);
     const payload = {
