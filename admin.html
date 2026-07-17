@@ -266,6 +266,7 @@
     <button class="tab-btn" onclick="switchTab('today')">Today's Jobs<span class="notif-badge" id="today-badge" style="display:none;">0</span></button>
     <button class="tab-btn" onclick="switchTab('technicians')">Technicians</button>
     <button class="tab-btn" onclick="switchTab('requests')">Requests<span class="notif-badge" id="requests-badge" style="display:none;">0</span></button>
+    <button class="tab-btn" onclick="switchTab('contacts')">Contacts<span class="notif-badge" id="contacts-badge" style="display:none;">0</span></button>
   </div>
 
   <!-- ══ CUSTOMERS TAB ══ -->
@@ -461,9 +462,53 @@
     </div>
   </div>
 
+  <!-- ══ CONTACTS TAB ══ -->
+  <div class="tab-content" id="tab-contacts">
+    <div class="stats-row" id="contacts-stats"></div>
+    <div class="section-header">
+      <div class="section-title">Contact Messages</div>
+    </div>
+    <div class="filter-bar">
+      <input class="search-input" id="contacts-search" placeholder="Search name, email, message…" oninput="renderContacts()"/>
+      <select class="filter-select" id="contacts-status-filter" onchange="renderContacts()">
+        <option value="">All Status</option>
+        <option value="new">New</option>
+        <option value="reviewed">Reviewed</option>
+        <option value="archived">Archived</option>
+      </select>
+    </div>
+    <div style="overflow-x:auto;border:1px solid var(--border);border-radius:10px;">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Contact</th>
+            <th>Service</th>
+            <th>Message</th>
+            <th>Submitted</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="contacts-list"><tr><td colspan="6" class="loading">Loading…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
 </div>
 
 <!-- ══ MODALS ══ -->
+
+<!-- View Contact Submission -->
+<div class="modal-overlay" id="modal-viewContact">
+  <div class="modal" style="max-width:640px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.3rem;">
+      <div class="modal-title" style="margin-bottom:0;">Contact Message</div>
+      <span id="contact-modal-status-tag"></span>
+    </div>
+    <div class="modal-grid" id="contact-modal-grid" style="gap:1rem;"></div>
+    <div class="modal-actions" id="contact-modal-actions" style="flex-wrap:wrap;"></div>
+  </div>
+</div>
 
 <!-- View Request -->
 <div class="modal-overlay" id="modal-viewRequest">
@@ -643,7 +688,7 @@ const CONFIG = {
 };
 </script>
 <script>
-  let sb, allCustomers = [], allJobs = [], allTechs = [];
+  let sb, allCustomers = [], allJobs = [], allTechs = [], allContacts = [];
 
   function initSB() {
     if (!sb) sb = window.supabase.createClient(CONFIG.supabase.url, CONFIG.supabase.anonKey);
@@ -758,13 +803,13 @@ const CONFIG = {
   }
 
   async function loadAll() {
-    await Promise.all([loadCustomers(), loadTechs(), loadRequests()]);
+    await Promise.all([loadCustomers(), loadTechs(), loadRequests(), loadContacts()]);
     await loadJobs();
   }
 
   /* ── TABS ── */
   function switchTab(name) {
-    document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', ['customers','jobs','today','technicians','requests'][i] === name));
+    document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', ['customers','jobs','today','technicians','requests','contacts'][i] === name));
     document.querySelectorAll('.tab-content').forEach(t => t.classList.toggle('active', t.id === 'tab-' + name));
   }
 
@@ -1505,6 +1550,121 @@ const CONFIG = {
     if (!confirm('Delete this job?')) return;
     await initSB().from('jobs').delete().eq('id', id);
     await loadJobs();
+  }
+
+  /* ── CONTACTS ── */
+  async function loadContacts() {
+    const { data } = await initSB().from('contact_submissions').select('*').order('submitted_at', { ascending: false });
+    allContacts = data || [];
+    renderContactStats();
+    renderContacts();
+    updateContactsBadge();
+  }
+
+  function updateContactsBadge() {
+    const count = allContacts.filter(c => (c.status || 'new') === 'new').length;
+    const badge = document.getElementById('contacts-badge');
+    badge.textContent = count;
+    badge.style.display = count > 0 ? 'flex' : 'none';
+  }
+
+  function renderContactStats() {
+    const total    = allContacts.length;
+    const newCount = allContacts.filter(c => (c.status || 'new') === 'new').length;
+    const reviewed = allContacts.filter(c => c.status === 'reviewed').length;
+    document.getElementById('contacts-stats').innerHTML = `
+      <div class="stat-card" style="border-top-color:#dc2626;"><div class="stat-label">Total</div><div class="stat-value">${total}</div></div>
+      <div class="stat-card" style="border-top-color:#f97316;"><div class="stat-label">New</div><div class="stat-value">${newCount}</div></div>
+      <div class="stat-card" style="border-top-color:var(--blue);"><div class="stat-label">Reviewed</div><div class="stat-value">${reviewed}</div></div>
+    `;
+  }
+
+  function renderContacts() {
+    const search = document.getElementById('contacts-search').value.toLowerCase();
+    const status = document.getElementById('contacts-status-filter').value;
+    const list   = document.getElementById('contacts-list');
+
+    const filtered = allContacts.filter(c => {
+      const name = `${c.first_name || ''} ${c.last_name || ''}`.trim();
+      const matchSearch = !search || `${name} ${c.email || ''} ${c.phone || ''} ${c.message || ''}`.toLowerCase().includes(search);
+      const matchStatus = !status || (c.status || 'new') === status;
+      return matchSearch && matchStatus;
+    });
+
+    if (!filtered.length) {
+      list.innerHTML = `<tr><td colspan="6" class="muted" style="text-align:center;padding:2rem;">No messages found</td></tr>`;
+      return;
+    }
+
+    const statusClass = { new: 'tag-status-pending', reviewed: 'tag-job-inprogress', archived: 'tag-status-inactive' };
+
+    list.innerHTML = filtered.map(c => {
+      const name      = `${c.first_name || ''} ${c.last_name || ''}`.trim() || '(No Name)';
+      const msg       = c.message ? (c.message.length > 60 ? c.message.slice(0, 60) + '…' : c.message) : '—';
+      const submitted = c.submitted_at
+        ? new Date(c.submitted_at).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true })
+        : '—';
+      const st = c.status || 'new';
+      const statusTag = `<span class="tag ${statusClass[st] || 'tag-status-pending'}">${st}</span>`;
+      return `<tr class="req-row" onclick="openContactModal('${c.id}')">
+        <td><div class="td-name">&#9993; ${name}</div></td>
+        <td>${c.email ? `<div class="muted">${c.email}</div>` : ''}<div class="muted">${c.phone || '—'}</div></td>
+        <td class="muted">${c.service || '—'}</td>
+        <td class="wrap muted" style="max-width:200px;">${msg}</td>
+        <td class="muted" style="white-space:nowrap;">${submitted}</td>
+        <td>${statusTag}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  function openContactModal(id) {
+    const c = allContacts.find(x => x.id === id);
+    if (!c) return;
+
+    const statusClass = { new: 'tag-status-pending', reviewed: 'tag-job-inprogress', archived: 'tag-status-inactive' };
+    const st = c.status || 'new';
+    document.getElementById('contact-modal-status-tag').innerHTML =
+      `<span class="tag ${statusClass[st] || ''}">${st}</span>`;
+
+    const f = (label, value, full) => `
+      <div class="req-detail-field${full ? ' full' : ''}">
+        <span class="req-detail-label">${label}</span>
+        <span class="req-detail-value${value ? '' : ' empty'}">${value || '—'}</span>
+      </div>`;
+
+    const name      = `${c.first_name || ''} ${c.last_name || ''}`.trim() || '(No Name)';
+    const submitted = c.submitted_at
+      ? new Date(c.submitted_at).toLocaleString('en-US', { month: 'long', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true })
+      : null;
+
+    document.getElementById('contact-modal-grid').innerHTML =
+      f('Name', name) +
+      f('Submitted', submitted) +
+      f('Email', c.email ? `<a href="mailto:${c.email}" style="color:var(--purple-mid)">${c.email}</a>` : null) +
+      f('Phone', c.phone) +
+      (c.address ? f('Address', c.address, true) : '') +
+      (c.service ? f('Service Interest', c.service) : '') +
+      f('Message', c.message, true);
+
+    let btns = `<button class="btn btn-ghost" onclick="closeModal('viewContact')">Close</button>`;
+    if (st === 'new') btns += `<button class="btn btn-outline" onclick="markContactReviewed('${id}')">Mark Reviewed</button>`;
+    if (st !== 'archived') btns += `<button class="btn btn-danger" onclick="archiveContact('${id}')">Archive</button>`;
+    document.getElementById('contact-modal-actions').innerHTML = btns;
+
+    openModal('viewContact');
+  }
+
+  async function markContactReviewed(id) {
+    await initSB().from('contact_submissions').update({ status: 'reviewed' }).eq('id', id);
+    await loadContacts();
+    openContactModal(id);
+  }
+
+  async function archiveContact(id) {
+    if (!confirm('Archive this message?')) return;
+    await initSB().from('contact_submissions').update({ status: 'archived' }).eq('id', id);
+    closeModal('viewContact');
+    await loadContacts();
   }
 
   /* ── SHARED HELPERS ── */
