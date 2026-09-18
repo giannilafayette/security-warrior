@@ -3,6 +3,8 @@ on:
   schedule:
     - cron: '0 12 * * *'    # every day at 12:00 UTC
   workflow_dispatch:
+permissions:
+  actions: write
 jobs:
   ping:
     runs-on: ubuntu-latest
@@ -16,3 +18,12 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+
+      # GitHub disables scheduled workflows after 60 days without repo activity.
+      # Re-enabling via the API counts as activity and resets that timer.
+      - name: Keep scheduled workflows enabled
+        run: |
+          gh api -X PUT "repos/${GITHUB_REPOSITORY}/actions/workflows/keepalive.yml/enable"
+          gh api -X PUT "repos/${GITHUB_REPOSITORY}/actions/workflows/send-reminders.yml/enable"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
